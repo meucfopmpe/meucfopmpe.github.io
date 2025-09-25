@@ -1,0 +1,175 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap');
+
+:root {
+    --primary-color: #00ffff;
+    --background-color: #0d1117;
+    --panel-background: #161b22;
+    --border-color: #3036d;
+    --text-color: #c9d1d9;
+    --danger-color: #ff4d4d;
+    --success-color: #3fb950;
+    --warning-color: #ffc107;
+    --disabled-color: #5f6a75;
+}
+
+body { font-family: 'Roboto', sans-serif; background-color: var(--background-color); color: var(--text-color); padding: 20px; font-size: 14px; }
+.hidden { display: none !important; }
+.helper-text { font-size: 0.8em; color: var(--disabled-color); margin: 5px 0 10px; }
+
+/* Modals */
+#login-modal, .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+#login-content, #setup-content, #stats-detail-content, #event-detail-content { width: 90%; max-width: 500px; }
+#login-form, #setup-form { display: flex; flex-direction: column; gap: 15px; }
+#login-form label, #setup-form label { font-weight: bold; }
+#login-form input, #setup-form input { background: var(--border-color); border: 1px solid var(--text-color); color: #fff; padding: 10px; border-radius: 4px; }
+#login-form button, #setup-form button, #stats-detail-close-button, #event-detail-close-button { font-family: 'Orbitron', sans-serif; background-color: var(--primary-color); color: var(--background-color); border: none; padding: 12px; font-size: 16px; cursor: pointer; border-radius: 5px; margin-top: 10px; }
+
+/* Grade de Detalhes dos Status */
+#stats-detail-grid { display: grid; grid-template-columns: 1fr; gap: 15px; text-align: left; }
+.stat-detail-item { background-color: var(--border-color); padding: 10px; border-radius: 5px; }
+.stat-detail-item h4 { margin: 0 0 10px; color: var(--primary-color); font-family: 'Orbitron', sans-serif; }
+.stat-detail-progress { width: 100%; background-color: var(--background-color); border-radius: 5px; overflow: hidden; height: 8px; }
+.stat-detail-bar { height: 100%; background-color: var(--success-color); }
+.stat-detail-text { font-size: 0.9em; margin-top: 5px; }
+
+#game-container { display: grid; grid-template-columns: 300px 1fr 350px; gap: 15px; width: 100%; max-width: 1500px; margin: 0 auto; }
+#left-column, #main-column, #right-column { display: flex; flex-direction: column; gap: 15px; }
+.panel { background-color: var(--panel-background); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; box-shadow: 0 0 15px rgba(0, 255, 255, 0.05); }
+.panel-title { font-family: 'Orbitron', sans-serif; color: var(--primary-color); margin: 0 0 15px 0; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); text-align: center; font-size: 1.2em; }
+
+/* Coluna da Esquerda */
+#profile-panel { text-align: center; }
+#profile-pic-container { position: relative; width: 120px; height: 120px; margin: 0 auto 15px; }
+#profile-pic { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--primary-color); object-fit: cover; }
+#upload-pic-button { position: absolute; bottom: 0; right: 0; background-color: var(--background-color); color: var(--primary-color); border: 1px solid var(--primary-color); border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 18px; line-height: 35px; }
+#player-info #player-name { font-family: 'Orbitron', sans-serif; font-size: 1.5em; color: #fff; margin-bottom: 5px; }
+#player-info #level { font-family: 'Orbitron', sans-serif; font-size: 1.2em; color: var(--primary-color); margin-bottom: 5px; }
+.progress-bar-container { width: 100%; height: 10px; background-color: var(--border-color); border-radius: 5px; overflow: hidden; margin: 10px 0 5px; }
+#exp-bar { width: 0%; height: 100%; background-color: var(--primary-color); transition: width 0.5s ease; }
+#exp-text { font-size: 12px; }
+#stats-panel canvas { cursor: pointer; }
+.chart-helper-text { font-size: 0.8em; color: var(--disabled-color); text-align: center; margin-top: 10px; }
+
+/* Coluna Central */
+#time-and-action-panel { display: flex; justify-content: space-between; align-items: stretch; gap: 15px; }
+.main-progress-display { text-align: center; display: flex; flex-direction: column; justify-content: center; background-color: var(--border-color); padding: 10px; border-radius: 5px; flex-shrink: 0; }
+#course-percentage-large { font-family: 'Orbitron', sans-serif; font-size: 2.5em; color: var(--primary-color); line-height: 1; }
+#course-day-display { font-size: 0.8em; color: var(--text-color); }
+#course-days-remaining { font-size: 0.9em; color: var(--warning-color); font-weight: bold; }
+.action-and-goal-section { flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+.goal-display { background-color: var(--border-color); padding: 8px; border-radius: 5px; margin-bottom: 10px; }
+#countdown-display-container { text-align: center; }
+#countdown-display-container .goal-header { font-size: 0.8em; color: var(--disabled-color); }
+#countdown-display-container .countdown-text { font-family: 'Orbitron', sans-serif; font-size: 1.1em; color: var(--warning-color); }
+#goal-list { font-size: 0.8em; margin-top: 5px; max-height: 40px; overflow-y: auto; padding-right: 5px; }
+#goal-list div { display:flex; justify-content: space-between; align-items: center; }
+#goal-list span { color: var(--text-color); }
+#goal-list button { background: none; border: none; color: var(--danger-color); cursor: pointer; }
+.goal-setter { display: flex; gap: 5px; margin-top: 5px; }
+.goal-setter input { flex-grow: 1; background-color: var(--background-color); border: 1px solid var(--text-color); color: #fff; padding: 3px; font-size: 0.8em; border-radius: 3px; }
+.goal-setter button { background-color: var(--primary-color); color: var(--background-color); border: none; border-radius: 3px; }
+.action-controls { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.daily-task label { display: flex; align-items: center; }
+#pass-day-button { font-family: 'Orbitron', sans-serif; background-color: var(--success-color); color: #fff; border: none; padding: 10px 20px; font-size: 1em; cursor: pointer; border-radius: 5px; transition: all 0.3s; flex-grow: 1; }
+
+.tab-buttons { display: flex; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; }
+.tab-button { background: none; border: none; color: var(--text-color); padding: 10px 15px; cursor: pointer; font-size: 1em; }
+.tab-button.active { color: var(--primary-color); border-bottom: 2px solid var(--primary-color); }
+.tab-content .tab { display: none; padding: 15px 5px; }
+.tab-content .tab.active { display: block; }
+.forecast-category { border: 1px solid var(--border-color); border-radius: 5px; padding: 10px; margin-bottom: 10px; }
+.forecast-category h4 { margin: 0 0 10px; color: var(--primary-color); }
+.forecast-category li { color: var(--text-color); list-style: none; padding-left: 0; }
+.forecast-category li span { color: var(--disabled-color); font-size: 0.9em; }
+.forecast-category label.completed span { text-decoration: line-through; color: var(--disabled-color); }
+.reminder-item, #scheduled-missions-list li { display: flex; justify-content: space-between; align-items: center; padding: 5px; border-bottom: 1px solid var(--border-color); }
+.reminder-item label { display: flex; align-items: center; cursor: pointer; flex-grow: 1; }
+.reminder-item span.completed, #scheduled-missions-list li.completed { text-decoration: line-through; color: var(--disabled-color); }
+.reminder-item button, #scheduled-missions-list button { background: var(--danger-color); border: none; color: #fff; cursor: pointer; border-radius: 3px; min-width: 25px; }
+.reminder-input-group { display: flex; margin-top: 10px; }
+#reminder-input { flex-grow: 1; background: var(--border-color); border: 1px solid var(--text-color); color: #fff; padding: 5px; }
+#add-reminder-button { background: var(--primary-color); border: none; color: var(--background-color); font-weight: bold; padding: 5px 10px; }
+#achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
+.achievement { text-align: center; }
+.achievement-icon { font-size: 40px; filter: grayscale(100%); opacity: 0.4; transition: all 0.3s; }
+.achievement-icon.unlocked { filter: none; opacity: 1; }
+.achievement-title { font-size: 12px; }
+#add-mission-form { display: flex; flex-direction: column; gap: 10px; }
+#add-mission-form input { background: var(--border-color); border: 1px solid var(--text-color); color: #fff; padding: 8px; border-radius: 4px; }
+#add-mission-form button { background: var(--warning-color); color: var(--background-color); border: none; padding: 10px; cursor: pointer; font-weight: bold; border-radius: 4px; }
+
+/* Aba de QTS */
+#qts-schedule-container { display: grid; grid-template-columns: 80px repeat(5, 1fr); gap: 2px; background-color: var(--border-color); padding: 2px; }
+.qts-cell { background-color: var(--panel-background); padding: 5px; font-size: 0.8em; min-height: 40px; display: flex; align-items: center; justify-content: center; text-align: center; }
+.qts-header { font-weight: bold; color: var(--primary-color); }
+.qts-time { font-size: 0.7em; }
+.qts-input { background: transparent; border: 1px dashed var(--disabled-color); color: var(--text-color); width: 100%; height: 100%; text-align: center; font-size: 1em; padding: 5px; }
+.qts-input:focus { outline: 1px solid var(--primary-color); background-color: var(--background-color); }
+
+/* Aba de Notas */
+.grades-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+#grades-average { font-family: 'Orbitron', sans-serif; color: var(--success-color); font-size: 1.2em; }
+#grades-container { max-height: 500px; overflow-y: auto; display: grid; grid-template-columns: 1fr; gap: 10px; padding-right: 5px; }
+.grade-item { display: grid; grid-template-columns: 1fr 80px; align-items: center; background-color: var(--border-color); padding: 8px; border-radius: 4px; }
+.grade-item-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.grade-item-input { width: 60px; text-align: center; background-color: var(--background-color); color: var(--text-color); border: 1px solid var(--primary-color); border-radius: 3px; }
+
+/* Aba de Links/SEI */
+#add-link-form { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 10px; margin-bottom: 20px; align-items: center; }
+#add-link-form input, #add-link-form select, #add-link-form button { background: var(--border-color); border: 1px solid var(--text-color); color: #fff; padding: 8px; border-radius: 4px; font-size: 1em; }
+#add-link-form button { background-color: var(--primary-color); color: var(--background-color); font-weight: bold; cursor: pointer; }
+#links-list { display: flex; flex-direction: column; gap: 10px; }
+.link-item { display: flex; justify-content: space-between; align-items: center; background-color: var(--border-color); padding: 10px; border-radius: 5px; }
+.link-item-info a { color: var(--primary-color); text-decoration: none; font-weight: bold; }
+.link-item-info a:hover { text-decoration: underline; }
+.link-item-info span { font-size: 0.9em; display: block; color: var(--disabled-color); }
+.link-item button { background: var(--danger-color); border: none; color: #fff; cursor: pointer; border-radius: 3px; min-width: 25px; }
+
+/* Coluna da Direita */
+#log-panel { flex-grow: 1; }
+#log-content { height: 95%; overflow-y: auto; font-size: 13px; }
+#log-content p { margin: 0 0 8px 0; border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; }
+.log-levelup, .log-statup, .log-mission { font-weight: bold; }
+.log-levelup { color: var(--success-color); }
+.log-statup { color: var(--primary-color); }
+.log-mission { color: var(--warning-color); }
+
+/* Estilos do FullCalendar */
+#calendar { min-height: 600px; }
+.fc { color: var(--text-color); }
+.fc .fc-toolbar-title { color: var(--primary-color); font-family: 'Orbitron', sans-serif; }
+.fc .fc-button-primary { background-color: var(--primary-color); border-color: var(--primary-color); color: var(--background-color); font-weight: bold; }
+.fc .fc-button-primary:hover { background-color: #fff; border-color: #fff; }
+.fc .fc-daygrid-day-frame { border: 1px solid var(--border-color); position: relative; }
+.fc .fc-day-today .fc-daygrid-day-frame { border: 1px solid var(--primary-color); }
+.fc .fc-daygrid-day.day-completed .fc-daygrid-day-frame { background-color: #F9BB78; opacity: 0.3; }
+.fc .fc-daygrid-day-number { color: var(--text-color); position: relative; z-index: 2; }
+.fc .fc-col-header-cell-cushion { color: var(--primary-color); }
+.fc .fc-event { cursor: pointer; border-width: 2px !important; }
+
+/* Media Queries for Responsiveness */
+@media (max-width: 1200px) {
+    #game-container {
+        grid-template-columns: 300px 1fr;
+        grid-template-areas: 
+            "left main"
+            "right right";
+    }
+}
+
+@media (max-width: 768px) {
+    body { padding: 10px; }
+    #game-container {
+        grid-template-columns: 1fr;
+        grid-template-areas: 
+            "left"
+            "main"
+            "right";
+    }
+    .tab-buttons { justify-content: center; }
+    #time-and-action-panel { flex-direction: column; }
+    .main-progress-display { margin-bottom: 15px; width: 100%; box-sizing: border-box; }
+    .action-and-goal-section { width: 100%; }
+    #add-link-form { grid-template-columns: 1fr; }
+    #stats-panel canvas { max-width: 280px; max-height: 280px; margin: 0 auto; }
+}
