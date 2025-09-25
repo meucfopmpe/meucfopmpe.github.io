@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solo Leveling: Academia PMPE [v17.0]</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="login-modal">
+        <div id="login-content" class="panel"><h2 class="panel-title">Identificação do Combatente</h2><form id="login-form"><label for="login-guerra-input">Digite seu Nome de Guerra para carregar ou criar um perfil:</label><input type="text" id="login-guerra-input" required><button type="submit">Acessar Sistema</button></form></div>
+    </div>
+    <div id="setup-modal" class="hidden">
+        <div id="setup-content" class="panel"><h2 class="panel-title">Configuração Inicial do Combatente</h2><p>Preencha seus dados para criar seu perfil.</p><form id="setup-form"><label for="guerra-input">Seu Nome de Guerra:</label><input type="text" id="guerra-input" readonly><label for="start-date-input">Data de Início do CFO:</label><input type="date" id="start-date-input" required><label for="today-date-input">Data de Hoje:</label><input type="date" id="today-date-input" required><button type="submit">Iniciar Sistema</button></form></div>
+    </div>
+    <div id="stats-detail-modal" class="modal hidden">
+        <div id="stats-detail-content" class="panel"><h2 class="panel-title">Relatório Detalhado de Habilidades</h2><div id="stats-detail-grid"></div><button id="stats-detail-close-button">Fechar</button></div>
+    </div>
+    <div id="event-detail-modal" class="modal hidden">
+        <div id="event-detail-content" class="panel"><h2 id="event-detail-title" class="panel-title"></h2><p id="event-detail-body"></p><button id="event-detail-close-button">Fechar</button></div>
+    </div>
+    
+    <div id="game-container" class="hidden">
+        <div id="left-column">
+            <div id="profile-panel" class="panel"><div id="profile-pic-container"><img id="profile-pic" src="https://i.imgur.com/K3wY2mn.png" alt="Foto do Perfil"><input type="file" id="upload-pic-input" accept="image/*" class="hidden"><button id="upload-pic-button" title="Trocar Foto de Perfil">📷</button></div><div id="player-info"><div id="player-name">Aluno Oficial</div><div id="level">NÍVEL 1</div><div><strong>Título:</strong> <span id="player-title"></span></div></div><div class="progress-bar-container"><div id="exp-bar"></div></div><div id="exp-text">EXP: 0 / 100</div></div>
+            <div id="stats-panel" class="panel"><h2 class="panel-title">HABILIDADES</h2><canvas id="stats-chart"></canvas><p class="chart-helper-text">Clique no gráfico para ver detalhes</p></div>
+        </div>
+
+        <div id="main-column">
+            <div id="time-and-action-panel" class="panel"><div class="main-progress-display"><div id="course-percentage-large">0.0%</div><div id="course-day-display">Dia 0 de 365<br><span id="course-days-remaining"></span></div></div><div class="action-and-goal-section"><div class="goal-display"><div id="countdown-display-container"></div><div id="goal-list"></div><div class="goal-setter"><input type="text" id="goal-name-input" placeholder="Nome do Objetivo"><input type="date" id="goal-date-input"><button id="add-goal-button">+</button></div></div><div class="action-controls"><div class="daily-task"><label id="daily-quest-label"><input type="checkbox" id="daily-quest-checkbox"> Missão Diária Principal</label></div><button id="pass-day-button">AVANÇAR DIA</button></div></div></div>
+            <div id="tabs-panel" class="panel">
+                <div class="tab-buttons">
+                    <button class="tab-button active" data-tab="tab-main">Principal</button>
+                    <button class="tab-button" data-tab="tab-calendario">Calendário</button>
+                    <button class="tab-button" data-tab="tab-qts">QTS</button>
+                    <button class="tab-button" data-tab="tab-notas">Notas</button>
+                    <button class="tab-button" data-tab="tab-links">Links/SEI</button>
+                    <button class="tab-button" data-tab="tab-lembretes">Lembretes</button>
+                    <button class="tab-button" data-tab="tab-conquistas">Conquistas</button>
+                    <button class="tab-button" data-tab="tab-escalas">Escalas</button>
+                </div>
+                <div class="tab-content">
+                    <div id="tab-main" class="tab active">
+                        <div id="quick-quests-container"></div>
+                        <div id="mission-forecast-container"></div>
+                    </div>
+                    <div id="tab-calendario" class="tab"><div id="calendar"></div></div>
+                    <div id="tab-qts" class="tab">
+                        <h3>Quadro de Trabalho Semanal (Editável)</h3>
+                        <p class="helper-text">Clique em uma célula para digitar a sigla da matéria. As alterações são salvas automaticamente.</p>
+                        <div id="qts-schedule-container"></div>
+                    </div>
+                    <div id="tab-notas" class="tab"><div class="grades-header"><h3>Controle de Notas</h3><div id="grades-average">Média Geral: N/A</div></div><div id="grades-container"></div></div>
+                    <div id="tab-links" class="tab"><h3>Links e Processos Importantes</h3><form id="add-link-form"><input type="text" id="link-title-input" placeholder="Título (Ex: Diário Oficial)" required><input type="text" id="link-value-input" placeholder="Link ou Nº SEI" required><select id="link-type-input"><option value="link">Link</option><option value="sei">Processo SEI</option></select><button type="submit">Adicionar</button></form><div id="links-list"></div></div>
+                    <div id="tab-lembretes" class="tab"><h3>Lembretes da Semana</h3><div id="reminders-list"></div><div class="reminder-input-group"><input type="text" id="reminder-input" placeholder="Novo lembrete..."><button id="add-reminder-button">+</button></div></div>
+                    <div id="tab-conquistas" class="tab"><h3>Quadro de Conquistas</h3><div id="achievements-grid"></div></div>
+                    <div id="tab-escalas" class="tab"><h3>Adicionar Serviço/Plantão</h3><form id="add-mission-form"><input type="text" id="mission-name-input" placeholder="Ex: Plantão, Auxiliar, Escala de Pia..." required><input type="date" id="mission-date-input" required><button type="submit">Agendar Missão Difícil</button></form><h4>Serviços Agendados:</h4><ul id="scheduled-missions-list"></ul></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="right-column">
+            <div id="log-panel" class="panel"><h2 class="panel-title">REGISTRO DE ATIVIDADES</h2><div id="log-content"></div></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
