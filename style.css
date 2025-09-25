@@ -16,12 +16,16 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 .hidden { display: none !important; }
 .helper-text { font-size: 0.8em; color: var(--disabled-color); margin: 5px 0 10px; }
 
-/* AUTH CONTAINER */
-#auth-container { display: flex; gap: 20px; width: 100%; max-width: 800px; flex-wrap: wrap; justify-content: center; }
-.auth-panel { background-color: var(--panel-background); border: 1px solid var(--border-color); border-radius: 8px; padding: 25px; flex: 1; min-width: 300px; }
+/* AUTH CONTAINER REDESIGN */
+#auth-container { width: 100%; max-width: 450px; }
+.auth-panel { background-color: var(--panel-background); border: 1px solid var(--border-color); border-radius: 8px; padding: 25px; }
+.auth-logo { max-width: 150px; margin-bottom: 20px; }
+.auth-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
+.auth-tab-btn { background: none; border: none; color: var(--disabled-color); padding: 10px 20px; cursor: pointer; font-size: 1.1em; flex-grow: 1; }
+.auth-tab-btn.active { color: var(--primary-color); border-bottom: 2px solid var(--primary-color); }
 .auth-panel form { display: flex; flex-direction: column; gap: 15px; }
-.auth-panel label { font-weight: bold; }
-.auth-panel input { background: var(--border-color); border: 1px solid var(--text-color); color: #fff; padding: 10px; border-radius: 4px; }
+.auth-panel label { font-weight: bold; text-align: left; }
+.auth-panel input { background: var(--border-color); border: 1px solid var(--text-color); color: #fff; padding: 12px; border-radius: 4px; font-size: 1em; }
 .auth-panel button { font-family: 'Orbitron', sans-serif; background-color: var(--primary-color); color: var(--background-color); border: none; padding: 12px; font-size: 16px; cursor: pointer; border-radius: 5px; margin-top: 10px; }
 .error-message { color: var(--danger-color); font-size: 0.9em; text-align: center; min-height: 1em; }
 
@@ -131,7 +135,7 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 .link-item button { background: var(--danger-color); border: none; color: #fff; cursor: pointer; border-radius: 3px; min-width: 25px; }
 
 /* Aba de Ranking */
-#ranking-list { display: flex; flex-direction: column; gap: 10px; }
+#ranking-list { display: flex; flex-direction: column; gap: 10px; max-height: 500px; overflow-y: auto; padding-right: 5px; }
 .ranking-item { display: flex; align-items: center; background-color: var(--border-color); padding: 10px; border-radius: 5px; }
 .ranking-pos { font-family: 'Orbitron', sans-serif; font-size: 1.5em; color: var(--primary-color); width: 40px; flex-shrink: 0; }
 .ranking-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 15px; }
@@ -165,7 +169,7 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 /* Media Queries for Responsiveness */
 @media (max-width: 1200px) {
     #game-container { grid-template-columns: 300px 1fr; grid-template-areas: "left main" "right right"; }
-    #auth-container { flex-direction: column; }
+    #add-link-form { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {
@@ -175,6 +179,5 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
     #time-and-action-panel { flex-direction: column; }
     .main-progress-display { margin-bottom: 15px; width: 100%; box-sizing: border-box; }
     .action-and-goal-section { width: 100%; }
-    #add-link-form { grid-template-columns: 1fr; }
     #stats-panel canvas { max-width: 280px; max-height: 280px; margin: 0 auto; }
 }
