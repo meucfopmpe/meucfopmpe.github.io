@@ -78,9 +78,158 @@ document.addEventListener('DOMContentLoaded', () => {
         rankingList: document.getElementById('ranking-list')
     };
     
+    // --- LÓGICA DE LOGIN E SETUP ---
     // --- LÓGICA DE AUTENTICAÇÃO E SETUP ---
-    // (O restante do seu código JavaScript vai aqui, exatamente como na versão 19, pois a estrutura do banco de dados e as interações não mudam)
-    
+
+// Função chamada quando o formulário de LOGIN é enviado
+async function handleLogin(e) {
+    e.preventDefault();
+    ui.loginError.textContent = ''; // Limpa mensagens de erro antigas
+    const numerica = ui.loginNumericaInput.value;
+    const password = ui.loginPasswordInput.value;
+    // Geramos o email falso a partir da numérica para autenticar
+    const email = `${numerica}@cfo.pmpe.br`;
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+        ui.loginError.textContent = `Erro: Numérica ou senha inválidos.`;
+        return;
+    }
+    if (data.user) {
+        await loadGameAndStart(data.user);
+    }
+}
+
+// Função chamada quando o formulário de CRIAR CONTA é enviado
+async function handleSignUp(e) {
+    e.preventDefault();
+    ui.signupError.textContent = ''; // Limpa mensagens de erro antigas
+    const nomeDeGuerra = ui.signupGuerraInput.value.trim().toUpperCase();
+    const pelotao = ui.signupPelotaoInput.value.trim();
+    const numerica = ui.signupNumericaInput.value;
+    const password = ui.signupPasswordInput.value;
+    // Geramos o email falso a partir da numérica para o sistema de autenticação
+    const email = `${numerica}@cfo.pmpe.br`;
+
+    // 1. Cria o usuário no sistema de autenticação do Supabase
+    const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
+    if (authError) {
+        ui.signupError.textContent = `Erro: ${authError.message}`;
+        return;
+    }
+
+    if (authData.user) {
+        // 2. Se a autenticação foi criada com sucesso, criamos o perfil no nosso banco de dados
+        const startDate = new Date('2025-05-26T00:00:00');
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+
+        // Prepara o objeto de dados do perfil inicial
+        const initialProfileData = {
+            id: authData.user.id, // A chave primária DEVE ser o ID do usuário autenticado
+            nome_de_guerra: nomeDeGuerra,
+            pelotao: pelotao,
+            numerica: parseInt(numerica, 10),
+            level: 1, // Começa sempre no nível 1
+            title: "Aluno Novinho 🌱",
+            profile_pic: null,
+            grades_average: 0,
+            full_data: createNewGameDataObject(nomeDeGuerra, pelotao, numerica) // Cria o objeto de jogo completo
+        };
+
+        // Insere o perfil na tabela 'profiles'
+        const { error: profileError } = await supabase.from('profiles').insert([initialProfileData]);
+
+        if (profileError) {
+            ui.signupError.textContent = `Erro ao criar perfil no banco de dados: ${profileError.message}`;
+            return;
+        }
+
+        // Carrega o jogo que acabamos de criar e inicia a aplicação
+        await loadGameAndStart(authData.user);
+    }
+}
+
+// Função para criar o objeto de jogo inicial
+function createNewGameDataObject(nomeDeGuerra, pelotao, numerica) {
+    const startDate = new Date('2025-05-26T00:00:00');
+    const currentDate = new Date();
+    currentDate.setHours(0,0,0,0);
+
+    let newGame = { 
+        player: { 
+            nomeDeGuerra, pelotao, numerica, level: 1, exp: 0, title: "Aluno Novinho 🌱", 
+            dailiesCompleted: 0, profilePic: null, 
+            stats: { for: { level: 1, exp: 0 }, agi: { level: 1, exp: 0 }, vig: { level: 1, exp: 0 }, int: { level: 1, exp: 0 }, per: { level: 1, exp: 0 }, lid: { level: 1, exp: 0 } }, 
+            achievements: [] 
+        }, 
+        time: { startDate: startDate.toISOString(), currentDate: currentDate.toISOString(), goals: [] }, 
+        missions: { custom: [], activeMain: null, nextMainIn: 15, quickQuestsToday: [] }, 
+        reminders: [], 
+        grades: {}, 
+        links: [], 
+        qts_schedule: null 
+    };
+    subjectList.forEach(subject => { newGame.grades[subject] = { nota: 0 }; });
+    return newGame;
+}
+
+
+// --- FUNÇÕES DE APOIO E PONTO DE ENTRADA ---
+
+// Função auxiliar para carregar os dados e iniciar o jogo
+async function loadGameAndStart(user) {
+    await loadGame(user.id);
+    if (game && game.player) {
+        startGame(user);
+    } else {
+        // Isso pode acontecer se o usuário foi criado na autenticação, mas a criação do perfil no DB falhou
+        console.error("Usuário autenticado, mas perfil não encontrado no banco de dados.");
+        ui.loginError.textContent = "Erro ao carregar perfil. Tente novamente ou crie uma nova conta.";
+        await supabase.auth.signOut(); // Desloga para evitar um loop de erros
+    }
+}
+
+// Função para esconder a tela de login e iniciar a interface principal do jogo
+function startGame(user) {
+    ui.authContainer.classList.add('hidden');
+    ui.gameContainer.classList.remove('hidden');
+    initGameUI(user);
+}
+
+// O PONTO DE ENTRADA PRINCIPAL da aplicação. É chamado quando a página carrega.
+async function main() {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (session) {
+        // Se o usuário já está logado (sessão ativa), carrega o jogo dele
+        await loadGameAndStart(session.user);
+    } else {
+        // Se não há ninguém logado, mostra a tela de autenticação
+        ui.authContainer.classList.remove('hidden');
+
+        // Adiciona os listeners para alternar entre os formulários de login e cadastro
+        ui.showLoginBtn.addEventListener('click', () => {
+            ui.showLoginBtn.classList.add('active');
+            ui.showSignupBtn.classList.remove('active');
+            ui.loginForm.classList.remove('hidden');
+            ui.signupForm.classList.add('hidden');
+        });
+        ui.showSignupBtn.addEventListener('click', () => {
+            ui.showSignupBtn.classList.add('active');
+            ui.showLoginBtn.classList.remove('active');
+            ui.signupForm.classList.remove('hidden');
+            ui.loginForm.classList.add('hidden');
+        });
+
+        // Adiciona os listeners para os botões de submit de cada formulário
+        ui.loginForm.addEventListener('submit', handleLogin);
+        ui.signupForm.addEventListener('submit', handleSignUp);
+    }
+}
+
+// Chama a função principal para iniciar todo o fluxo
+main();
     // --- PONTO DE ENTRADA ---
     // ...
 });
