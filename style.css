@@ -4,7 +4,7 @@
     --primary-color: #00ffff;
     --background-color: #0d1117;
     --panel-background: #161b22;
-    --border-color: #30363d;
+    --border-color: #3036d;
     --text-color: #c9d1d9;
     --danger-color: #ff4d4d;
     --success-color: #3fb950;
@@ -37,16 +37,13 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 .stat-detail-progress { width: 100%; background-color: var(--background-color); border-radius: 5px; overflow: hidden; height: 8px; }
 .stat-detail-bar { height: 100%; background-color: var(--success-color); }
 .stat-detail-text { font-size: 0.9em; margin-top: 5px; }
-
-/* Profile Card Modal */
 #profile-card-content img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid var(--primary-color); }
 #profile-card-details p { margin: 5px 0; font-size: 1em; }
 #profile-card-details strong { color: var(--primary-color); }
 .profile-card-actions { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
 #profile-card-like-button { background-color: var(--success-color); color: #fff; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
 
-#game-container, #admin-container { width: 100%; max-width: 1500px; }
-#game-container { display: grid; grid-template-columns: 300px 1fr 350px; gap: 15px; }
+#game-container { display: grid; grid-template-columns: 300px 1fr 350px; gap: 15px; width: 100%; max-width: 1500px; }
 #left-column, #main-column, #right-column { display: flex; flex-direction: column; gap: 15px; }
 .panel { background-color: var(--panel-background); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; box-shadow: 0 0 15px rgba(0, 255, 255, 0.05); }
 .panel-title { font-family: 'Orbitron', sans-serif; color: var(--primary-color); margin: 0 0 15px 0; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); text-align: center; font-size: 1.2em; }
@@ -142,6 +139,7 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 #links-list { display: flex; flex-direction: column; gap: 10px; }
 .link-item { display: flex; justify-content: space-between; align-items: center; background-color: var(--border-color); padding: 10px; border-radius: 5px; }
 .link-item-info a { color: var(--primary-color); text-decoration: none; font-weight: bold; }
+.link-item-info a:hover { text-decoration: underline; }
 .link-item-info span { font-size: 0.9em; display: block; color: var(--disabled-color); }
 .link-item button { background: var(--danger-color); border: none; color: #fff; cursor: pointer; border-radius: 3px; min-width: 25px; }
 
@@ -151,7 +149,8 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 .ranking-pos { font-family: 'Orbitron', sans-serif; font-size: 1.5em; color: var(--primary-color); width: 40px; flex-shrink: 0; }
 .ranking-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 15px; }
 .ranking-info { flex-grow: 1; }
-.ranking-name { font-weight: bold; }
+.ranking-name { font-weight: bold; cursor: pointer; }
+.ranking-name:hover { color: var(--primary-color); }
 .ranking-details { font-size: 0.9em; color: var(--disabled-color); }
 .ranking-avg { font-family: 'Orbitron', sans-serif; font-size: 1.2em; color: var(--success-color); }
 
@@ -177,9 +176,10 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 .mural-message { background-color: var(--border-color); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
 .mural-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .mural-header img { width: 30px; height: 30px; border-radius: 50%; }
-.mural-header .author { font-weight: bold; }
+.mural-header .author { font-weight: bold; cursor: pointer; }
+.mural-header .author:hover { color: var(--primary-color); }
 .mural-header .timestamp { font-size: 0.8em; color: var(--disabled-color); margin-left: auto; }
-.mural-content { padding-left: 40px; }
+.mural-content { padding-left: 40px; white-space: pre-wrap; }
 .mural-actions { padding-left: 40px; margin-top: 8px; display: flex; align-items: center; gap: 15px; font-size: 0.9em; }
 .mural-actions button { background: none; border: none; color: var(--disabled-color); cursor: pointer; display: flex; align-items: center; gap: 5px; }
 .mural-actions button.liked { color: var(--primary-color); }
@@ -198,6 +198,7 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 
 /* Estilos do FullCalendar */
 #calendar { min-height: 600px; }
+.fc { color: var(--text-color); }
 .fc .fc-toolbar-title { color: var(--primary-color); font-family: 'Orbitron', sans-serif; }
 .fc .fc-button-primary { background-color: var(--primary-color); border-color: var(--primary-color); color: var(--background-color); font-weight: bold; }
 .fc .fc-button-primary:hover { background-color: #fff; border-color: #fff; }
