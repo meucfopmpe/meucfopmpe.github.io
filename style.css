@@ -57,7 +57,6 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 #settings-button { background-color: var(--disabled-color); color: var(--text-color); }
 #logout-button { background-color: var(--danger-color); color: #fff; }
 
-
 /* Coluna Central */
 #time-and-action-panel { display: flex; justify-content: space-between; align-items: stretch; gap: 15px; }
 .main-progress-display { text-align: center; display: flex; flex-direction: column; justify-content: center; background-color: var(--border-color); padding: 10px; border-radius: 5px; flex-shrink: 0; }
@@ -143,11 +142,11 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 .ranking-details { font-size: 0.9em; color: var(--disabled-color); }
 .ranking-avg { font-family: 'Orbitron', sans-serif; font-size: 1.2em; color: var(--success-color); }
 
-/* Aba de Configurações */
+/* Aba de Configurações e Admin */
 .settings-section { margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
 .settings-section h4 { color: var(--primary-color); margin-top: 0; }
 .settings-section label { display: block; margin-bottom: 5px; }
-.settings-section input { width: 100%; box-sizing: border-box; background-color: var(--border-color); color: var(--text-color); border: 1px solid var(--text-color); border-radius: 4px; padding: 8px; margin-bottom: 10px; }
+.settings-section input, .settings-section textarea { width: 100%; box-sizing: border-box; background-color: var(--border-color); color: var(--text-color); border: 1px solid var(--text-color); border-radius: 4px; padding: 8px; margin-bottom: 10px; }
 .settings-section button { background-color: var(--success-color); color: #fff; border: none; padding: 10px; border-radius: 4px; cursor: pointer; }
 #elogios-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
 .elogio-item { display: flex; align-items: center; gap: 10px; }
@@ -183,8 +182,6 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 
 @media (max-width: 768px) {
     body { padding: 10px; }
-    #auth-container { padding: 10px; }
-    .auth-panel { padding: 15px; }
     #game-container { grid-template-columns: 1fr; grid-template-areas: "left" "main" "right"; }
     .tab-buttons { justify-content: center; }
     #time-and-action-panel { flex-direction: column; }
