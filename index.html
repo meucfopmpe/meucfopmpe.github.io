@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solo Leveling: Academia PMPE [v25.4 - Final]</title>
+    <title>Solo Leveling: Academia PMPE [v25.5 - Final]</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -14,11 +14,7 @@
 
     <div id="auth-container">
         <div class="auth-panel">
-            <div class="auth-tabs">
-                <button id="show-login-btn" class="auth-tab-btn active">Login</button>
-                <button id="show-signup-btn" class="auth-tab-btn">Criar Conta</button>
-            </div>
-
+            <h2 class="panel-title">Login</h2>
             <form id="login-form">
                 <label for="login-numerica">Sua Numérica:</label>
                 <input type="number" id="login-numerica" placeholder="Digite sua numérica..." required>
@@ -27,8 +23,10 @@
                 <button type="submit">Entrar</button>
                 <p id="login-error" class="error-message"></p>
             </form>
-
-            <form id="signup-form" class="hidden">
+        </div>
+        <div class="auth-panel">
+            <h2 class="panel-title">Criar Conta</h2>
+            <form id="signup-form">
                 <label for="signup-guerra">Nome de Guerra:</label>
                 <input type="text" id="signup-guerra" required>
                 <label for="signup-numerica">Numérica:</label>
