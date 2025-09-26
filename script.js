@@ -1,5 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // --- CONEXÃO COM O SUPABASE ---
+// --- CONEXÃO COM O SUPABASE ---
     const supabaseUrl = 'https://svijubigtigsrpfqzcgf.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2aWp1YmlndGlnc3JwZnF6Y2dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MjMwMDAsImV4cCI6MjA3NDM5OTAwMH0.Ar58k3Hfe25v2xqkhpdffQXMJkQXTTOnMkyMJiH8e9k';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -60,20 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- SELETORES DE UI ---
     const ui = {
-        loginModal: document.getElementById('login-modal'),
-        signupModal: document.getElementById('signup-modal'),
-        loginForm: document.getElementById('login-form'), 
-        loginNumericaInput: document.getElementById('login-numerica'), 
-        loginPasswordInput: document.getElementById('login-password'), 
-        loginError: document.getElementById('login-error'),
-        signupForm: document.getElementById('signup-form'), 
-        signupPasswordInput: document.getElementById('signup-password'), 
-        signupGuerraInput: document.getElementById('signup-guerra'), 
-        signupPelotaoInput: document.getElementById('signup-pelotao'), 
-        signupNumericaInput: document.getElementById('signup-numerica'), 
-        signupError: document.getElementById('signup-error'),
-        switchToSignupBtn: document.getElementById('switch-to-signup'), // CORREÇÃO: Adicionado
-        switchToLoginBtn: document.getElementById('switch-to-login'),   // CORREÇÃO: Adicionado
+        loginForm: document.getElementById('login-form'), loginNumericaInput: document.getElementById('login-numerica'), loginPasswordInput: document.getElementById('login-password'), loginError: document.getElementById('login-error'),
+        signupForm: document.getElementById('signup-form'), signupPasswordInput: document.getElementById('signup-password'), signupGuerraInput: document.getElementById('signup-guerra'), signupPelotaoInput: document.getElementById('signup-pelotao'), signupNumericaInput: document.getElementById('signup-numerica'), signupError: document.getElementById('signup-error'),
+        authContainer: document.getElementById('auth-container'),
         eventDetailModal: document.getElementById('event-detail-modal'), eventDetailTitle: document.getElementById('event-detail-title'), eventDetailBody: document.getElementById('event-detail-body'), eventDetailCloseButton: document.getElementById('event-detail-close-button'),
         calendarContainer: document.getElementById('calendar'), gradesContainer: document.getElementById('grades-container'), gradesAverage: document.getElementById('grades-average'),
         statsDetailModal: document.getElementById('stats-detail-modal'), statsDetailGrid: document.getElementById('stats-detail-grid'), statsDetailCloseButton: document.getElementById('stats-detail-close-button'),
@@ -94,7 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
         settingsButton: document.getElementById('settings-button'),
         instagramInput: document.getElementById('instagram-input'), saveProfileButton: document.getElementById('save-profile-button'),
         newPasswordInput: document.getElementById('new-password-input'), updatePasswordButton: document.getElementById('update-password-button'),
-        elogiosList: document.getElementById('elogios-list')
+        elogiosList: document.getElementById('elogios-list'),
+        adminContainer: document.getElementById('admin-container'), adminTabButton: document.getElementById('admin-tab-button'),
+        announcementInput: document.getElementById('announcement-input'), publishAnnouncementButton: document.getElementById('publish-announcement-button'),
+        adminUserList: document.getElementById('admin-user-list'), adminLogoutButton: document.getElementById('admin-logout-button'),
+        muralFeed: document.getElementById('mural-feed'), muralPostForm: document.getElementById('mural-post-form'), muralInput: document.getElementById('mural-input')
     };
     
     // --- LÓGICA DE AUTENTICAÇÃO E SETUP ---
@@ -259,3 +251,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     main();
 });
+
