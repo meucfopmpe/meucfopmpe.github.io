@@ -13,15 +13,33 @@
 <body>
 
     <div id="auth-container">
-        <div id="login-panel" class="auth-panel">
-            <h2 class="panel-title">Login</h2>
-            <form id="login-form"><label for="login-numerica">Sua Numérica:</label><input type="number" id="login-numerica" placeholder="Digite sua numérica..." required><label for="login-password">Sua Senha:</label><input type="password" id="login-password" placeholder="Digite sua senha..." required><button type="submit">Entrar</button><p id="login-error" class="error-message"></p></form>
-            <p class="auth-switcher">Não tem uma conta? <button id="switch-to-signup">Crie uma</button></p>
-        </div>
-        <div id="signup-panel" class="auth-panel hidden">
-            <h2 class="panel-title">Criar Conta</h2>
-            <form id="signup-form"><label for="signup-guerra">Nome de Guerra:</label><input type="text" id="signup-guerra" required><label for="signup-numerica">Numérica:</label><input type="number" id="signup-numerica" required><label for="signup-pelotao">Pelotão (somente o número):</label><input type="text" id="signup-pelotao" required><label for="signup-password">Crie uma Senha (mín. 6 caracteres):</label><input type="password" id="signup-password" required><button type="submit">Criar Conta</button><p id="signup-error" class="error-message"></p></form>
-            <p class="auth-switcher">Já tem uma conta? <button id="switch-to-login">Faça Login</button></p>
+        <div class="auth-panel">
+            <div class="auth-tabs">
+                <button id="show-login-btn" class="auth-tab-btn active">Login</button>
+                <button id="show-signup-btn" class="auth-tab-btn">Criar Conta</button>
+            </div>
+
+            <form id="login-form">
+                <label for="login-numerica">Sua Numérica:</label>
+                <input type="number" id="login-numerica" placeholder="Digite sua numérica..." required>
+                <label for="login-password">Sua Senha:</label>
+                <input type="password" id="login-password" placeholder="Digite sua senha..." required>
+                <button type="submit">Entrar</button>
+                <p id="login-error" class="error-message"></p>
+            </form>
+
+            <form id="signup-form" class="hidden">
+                <label for="signup-guerra">Nome de Guerra:</label>
+                <input type="text" id="signup-guerra" required>
+                <label for="signup-numerica">Numérica:</label>
+                <input type="number" id="signup-numerica" required>
+                <label for="signup-pelotao">Pelotão (somente o número):</label>
+                <input type="text" id="signup-pelotao" required>
+                <label for="signup-password">Crie uma Senha (mín. 6 caracteres):</label>
+                <input type="password" id="signup-password" required>
+                <button type="submit">Criar Conta</button>
+                <p id="signup-error" class="error-message"></p>
+            </form>
         </div>
     </div>
 
