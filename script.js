@@ -60,10 +60,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- SELETORES DE UI ---
     const ui = {
-        authContainer: document.getElementById('auth-container'),
         loginPanel: document.getElementById('login-panel'), signupPanel: document.getElementById('signup-panel'),
         loginForm: document.getElementById('login-form'), loginNumericaInput: document.getElementById('login-numerica'), loginPasswordInput: document.getElementById('login-password'), loginError: document.getElementById('login-error'),
         signupForm: document.getElementById('signup-form'), signupPasswordInput: document.getElementById('signup-password'), signupGuerraInput: document.getElementById('signup-guerra'), signupPelotaoInput: document.getElementById('signup-pelotao'), signupNumericaInput: document.getElementById('signup-numerica'), signupError: document.getElementById('signup-error'),
+        authContainer: document.getElementById('auth-container'),
         eventDetailModal: document.getElementById('event-detail-modal'), eventDetailTitle: document.getElementById('event-detail-title'), eventDetailBody: document.getElementById('event-detail-body'), eventDetailCloseButton: document.getElementById('event-detail-close-button'),
         calendarContainer: document.getElementById('calendar'), gradesContainer: document.getElementById('grades-container'), gradesAverage: document.getElementById('grades-average'),
         statsDetailModal: document.getElementById('stats-detail-modal'), statsDetailGrid: document.getElementById('stats-detail-grid'), statsDetailCloseButton: document.getElementById('stats-detail-close-button'),
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- LÓGICA DE LOGIN E SETUP ---
     async function handleLogin(e) { e.preventDefault(); ui.loginError.textContent = ''; const numerica = ui.loginNumericaInput.value; const password = ui.loginPasswordInput.value; const email = `${numerica}@cfo.pmpe.br`; const { data, error } = await supabase.auth.signInWithPassword({ email, password }); if (error) { ui.loginError.textContent = `Erro: Numérica ou senha inválidos.`; return; } if (data.user) { await loadGameAndStart(data.user); } }
-    async function handleSignUp(e) { e.preventDefault(); ui.signupError.textContent = ''; const nomeDeGuerra = ui.signupGuerraInput.value.trim().toUpperCase(); const pelotao = ui.signupPelotaoInput.value.trim(); const numerica = ui.signupNumericaInput.value; const password = ui.signupPasswordInput.value; const email = `${numerica}@cfo.pmpe.br`; const { data: authData, error: authError } = await supabase.auth.signUp({ email, password }); if (authError) { ui.signupError.textContent = `Erro: ${authError.message}`; return; } if (authData.user) { const gameData = createNewGameDataObject(nomeDeGuerra, pelotao, numerica); calculateInitialState(gameData); checkTitleUnlocks(gameData); generateQuickQuestsForToday(gameData); const profileToInsert = { id: authData.user.id, nome_de_guerra: nomeDeGuerra, pelotao: pelotao, numerica: parseInt(numerica, 10), level: gameData.player.level, title: gameData.player.title, profile_pic: gameData.player.profilePic, grades_average: 0, role: 'aluno', instagram: '' }; const { error: profileError } = await supabase.from('profiles').insert(profileToInsert); if (profileError) { ui.signupError.textContent = `Erro ao criar perfil no banco de dados: ${profileError.message}`; return; } game = gameData; game.time.startDate = new Date(game.time.startDate); game.time.currentDate = new Date(game.time.currentDate); game.player.id = authData.user.id; startGame(authData.user); } }
+    async function handleSignUp(e) { e.preventDefault(); ui.signupError.textContent = ''; const nomeDeGuerra = ui.signupGuerraInput.value.trim().toUpperCase(); const pelotao = ui.signupPelotaoInput.value.trim(); const numerica = ui.signupNumericaInput.value; const password = ui.signupPasswordInput.value; if (password.length < 6) { ui.signupError.textContent = 'Erro: A senha precisa ter no mínimo 6 caracteres.'; return; } const email = `${numerica}@cfo.pmpe.br`; const { data: authData, error: authError } = await supabase.auth.signUp({ email, password }); if (authError) { ui.signupError.textContent = `Erro: ${authError.message}`; return; } if (authData.user) { const gameData = createNewGameDataObject(nomeDeGuerra, pelotao, numerica); calculateInitialState(gameData); checkTitleUnlocks(gameData); generateQuickQuestsForToday(gameData); const profileToInsert = { id: authData.user.id, nome_de_guerra: nomeDeGuerra, pelotao: pelotao, numerica: parseInt(numerica, 10), level: gameData.player.level, title: gameData.player.title, profile_pic: gameData.player.profilePic, grades_average: 0, role: 'aluno', instagram: '' }; const { error: profileError } = await supabase.from('profiles').insert(profileToInsert); if (profileError) { ui.signupError.textContent = `Erro ao criar perfil no banco de dados: ${profileError.message}`; return; } game = gameData; game.time.startDate = new Date(game.time.startDate); game.time.currentDate = new Date(game.time.currentDate); game.player.id = authData.user.id; startGame(authData.user); } }
     async function handleLogout() { await supabase.auth.signOut(); location.reload(); }
     function createNewGameDataObject(nomeDeGuerra, pelotao, numerica) { const startDate = new Date(config.COURSE_START_DATE); const currentDate = new Date(); currentDate.setHours(0,0,0,0); let newGame = { player: { nomeDeGuerra, pelotao, numerica, level: 1, exp: 0, title: "Aluno Novinho 🌱", dailiesCompleted: 0, profilePic: null, role: 'aluno', instagram: '', stats: { for: { level: 1, exp: 0 }, agi: { level: 1, exp: 0 }, vig: { level: 1, exp: 0 }, int: { level: 1, exp: 0 }, per: { level: 1, exp: 0 }, lid: { level: 1, exp: 0 } }, achievements: [] }, time: { startDate: startDate.toISOString(), currentDate: currentDate.toISOString(), goals: [] }, missions: { custom: [], activeMain: null, nextMainIn: 15, quickQuestsToday: [] }, reminders: [], grades: {}, links: [], qts_schedule: null }; subjectList.forEach(subject => { newGame.grades[subject] = { nota: 0 }; }); return newGame; }
 
@@ -147,11 +147,11 @@ document.addEventListener('DOMContentLoaded', () => {
     async function updateUserPassword() { const newPassword = ui.newPasswordInput.value; if(newPassword.length < 6) { alert('A nova senha precisa ter no mínimo 6 caracteres.'); return; } const { error } = await supabase.auth.updateUser({ password: newPassword }); if(error){ alert('Erro ao atualizar a senha: ' + error.message); } else { alert('Senha atualizada com sucesso!'); ui.newPasswordInput.value = ''; } }
     async function renderAdminPanel() { ui.adminUserList.innerHTML = 'Carregando usuários...'; const { data, error } = await supabase.from('profiles').select('*'); if(error){ ui.adminUserList.innerHTML = 'Erro ao carregar usuários.'; return; } let tableHTML = '<table><thead><tr><th>Nome de Guerra</th><th>Numérica</th><th>Pelotão</th><th>Nível</th><th>Média</th><th>Cargo</th></tr></thead><tbody>'; data.forEach(user => { tableHTML += `<tr><td>${user.nome_de_guerra}</td><td>${user.numerica}</td><td>${user.pelotao}</td><td>${user.level}</td><td>${user.grades_average.toFixed(2)}</td><td>${user.role}</td></tr>`; }); tableHTML += '</tbody></table>'; ui.adminUserList.innerHTML = tableHTML; }
     async function addAnnouncement() { const content = ui.announcementInput.value.trim(); if(!content) return; const { error } = await supabase.from('announcements').insert({ content, author_name: game.player.nomeDeGuerra }); if(error) { alert('Erro ao publicar aviso.'); console.error(error); } else { alert('Aviso publicado com sucesso!'); ui.announcementInput.value = ''; } }
-    async function fetchAnnouncements() { const { data, error } = await supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(3); if (error || !data) return; ui.globalAnnouncementsContainer.innerHTML = '<h4>📢 Avisos Globais</h4>'; data.forEach(ann => { const item = document.createElement('div'); item.className = 'announcement-item'; item.innerHTML = `<p>${ann.content}</p><div class="author">- ${ann.author_name}</div>`; ui.globalAnnouncementsContainer.appendChild(item); }); }
+    async function fetchAnnouncements() { ui.globalAnnouncementsContainer.innerHTML = ''; const { data, error } = await supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(3); if (error || !data || data.length === 0) return; ui.globalAnnouncementsContainer.innerHTML = '<h4>📢 Avisos Globais</h4>'; data.forEach(ann => { const item = document.createElement('div'); item.className = 'announcement-item'; item.innerHTML = `<p>${ann.content}</p><div class="author">- ${ann.author_name}</div>`; ui.globalAnnouncementsContainer.appendChild(item); }); }
     async function initMural() { fetchAndRenderMural(); supabase.channel('mural_channel').on('postgres_changes', { event: '*', schema: 'public', table: 'mural_messages' }, () => { fetchAndRenderMural(); }).subscribe(); }
-    async function fetchAndRenderMural() { const { data, error } = await supabase.from('mural_messages').select('*, mural_likes(user_id)').order('created_at', { ascending: false }).limit(50); if (error) return; ui.muralFeed.innerHTML = ''; data.forEach(msg => { const msgDiv = document.createElement('div'); msgDiv.className = 'mural-message'; const userLiked = msg.mural_likes.some(like => like.user_id === game.player.id); msgDiv.innerHTML = `<div class="mural-header"><img src="${msg.author_profile_pic || 'https://i.imgur.com/K3wY2mn.png'}" alt="avatar"><span class="author">${msg.author_name}</span><span class="timestamp">${new Date(msg.created_at).toLocaleString('pt-BR')}</span></div><div class="mural-content"><p>${msg.content}</p></div><div class="mural-actions"><button class="like-btn ${userLiked ? 'liked' : ''}" data-message-id="${msg.id}">👍 Elogiar (${msg.mural_likes.length})</button></div>`; ui.muralFeed.appendChild(msgDiv); }); }
+    async function fetchAndRenderMural() { const { data, error } = await supabase.from('mural_messages').select('*, mural_likes(user_id)').order('created_at', { ascending: false }).limit(50); if (error) { console.error('Erro ao buscar mural:', error); return; } ui.muralFeed.innerHTML = ''; data.forEach(msg => { const msgDiv = document.createElement('div'); msgDiv.className = 'mural-message'; const userLiked = msg.mural_likes.some(like => like.user_id === game.player.id); msgDiv.innerHTML = `<div class="mural-header"><img src="${msg.author_profile_pic || 'https://i.imgur.com/K3wY2mn.png'}" alt="avatar"><span class="author">${msg.author_name}</span><span class="timestamp">${new Date(msg.created_at).toLocaleString('pt-BR')}</span></div><div class="mural-content"><p>${msg.content}</p></div><div class="mural-actions"><button class="like-btn ${userLiked ? 'liked' : ''}" data-message-id="${msg.id}">👍 Elogiar (${msg.mural_likes.length})</button></div>`; ui.muralFeed.appendChild(msgDiv); }); }
     async function handleNewMuralMessage(e) { e.preventDefault(); const content = ui.muralInput.value.trim(); if(!content) return; ui.muralInput.value = ""; const { error } = await supabase.from('mural_messages').insert({ content, author_id: game.player.id, author_name: game.player.nomeDeGuerra, author_profile_pic: game.player.profilePic }); if(error) console.error("Erro ao postar mensagem", error); }
-    async function handleMuralLike(e) { if(!e.target.classList.contains('like-btn')) return; const messageId = e.target.dataset.messageId; const { data } = await supabase.from('mural_likes').select('id').eq('user_id', game.player.id).eq('message_id', messageId); if(data.length > 0) { await supabase.from('mural_likes').delete().eq('id', data[0].id); } else { await supabase.from('mural_likes').insert({ user_id: game.player.id, message_id: messageId }); } }
+    async function handleMuralLike(e) { if(!e.target.classList.contains('like-btn')) return; const messageId = e.target.dataset.messageId; const { data } = await supabase.from('mural_likes').select('id').eq('user_id', game.player.id).eq('message_id', messageId); if(data && data.length > 0) { await supabase.from('mural_likes').delete().eq('id', data[0].id); } else { await supabase.from('mural_likes').insert({ user_id: game.player.id, message_id: messageId }); } }
 
     async function loadGameAndStart(user) {
         const success = await loadGame(user.id);
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function startGame(user) {
-        if(game.player.role === 'admin' && game.player.numerica === 999) {
+        if(game.player.role === 'admin') {
             ui.authContainer.classList.add('hidden');
             ui.adminContainer.classList.remove('hidden');
             initAdminUI();
@@ -174,13 +174,13 @@ document.addEventListener('DOMContentLoaded', () => {
             initGameUI(user);
         }
     }
-    
+
     function initAdminUI() {
         renderAdminPanel();
         ui.adminLogoutButton.addEventListener('click', handleLogout);
         ui.publishAnnouncementButton.addEventListener('click', addAnnouncement);
     }
-
+    
     function initGameUI(user) {
         if(!game || !game.player) { location.reload(); return; }
         game.player.id = user.id;
@@ -189,6 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupAchievements();
         try { initChart(); } catch (error) { console.error("Falha ao iniciar o gráfico:", error); }
         fetchAnnouncements();
+        initMural();
         renderGrades();
         renderReminders();
         renderScheduledMissions();
@@ -233,14 +234,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 await handleLogout();
             }
         } else {
-            ui.authContainer.classList.remove('hidden');
+            document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
             ui.loginPanel.classList.remove('hidden');
-            ui.signupPanel.classList.add('hidden');
-            document.getElementById('switch-to-signup').addEventListener('click', () => {
+            ui.switchToSignupBtn.addEventListener('click', () => {
                 ui.loginPanel.classList.add('hidden');
                 ui.signupPanel.classList.remove('hidden');
             });
-            document.getElementById('switch-to-login').addEventListener('click', () => {
+            ui.switchToLoginBtn.addEventListener('click', () => {
                 ui.signupPanel.classList.add('hidden');
                 ui.loginPanel.classList.remove('hidden');
             });
