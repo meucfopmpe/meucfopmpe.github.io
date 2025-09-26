@@ -12,7 +12,7 @@
     --disabled-color: #5f6a75;
 }
 
-body { font-family: 'Roboto', sans-serif; background-color: var(--background-color); color: var(--text-color); padding: 20px; font-size: 14px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+body { font-family: 'Roboto', sans-serif; background-color: var(--background-color); color: var(--text-color); padding: 20px; font-size: 14px; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
 .hidden { display: none !important; }
 .helper-text { font-size: 0.8em; color: var(--disabled-color); margin: 5px 0 10px; }
 
@@ -23,6 +23,8 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 .auth-panel label { font-weight: bold; text-align: left; }
 .auth-panel input { background: var(--border-color); border: 1px solid var(--text-color); color: #fff; padding: 12px; border-radius: 4px; font-size: 1em; }
 .auth-panel button { font-family: 'Orbitron', sans-serif; background-color: var(--primary-color); color: var(--background-color); border: none; padding: 12px; font-size: 16px; cursor: pointer; border-radius: 5px; margin-top: 10px; }
+.auth-switcher { text-align: center; margin-top: 15px; font-size: 0.9em; }
+.auth-switcher button { background: none; border: none; color: var(--primary-color); cursor: pointer; text-decoration: underline; padding: 0; }
 .error-message { color: var(--danger-color); font-size: 0.9em; text-align: center; min-height: 1em; }
 
 /* Modals */
