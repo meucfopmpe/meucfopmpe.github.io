@@ -64,6 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm: document.getElementById('login-form'), loginNumericaInput: document.getElementById('login-numerica'), loginPasswordInput: document.getElementById('login-password'), loginError: document.getElementById('login-error'),
         signupForm: document.getElementById('signup-form'), signupPasswordInput: document.getElementById('signup-password'), signupGuerraInput: document.getElementById('signup-guerra'), signupPelotaoInput: document.getElementById('signup-pelotao'), signupNumericaInput: document.getElementById('signup-numerica'), signupError: document.getElementById('signup-error'),
         authContainer: document.getElementById('auth-container'),
+        switchToSignupBtn: document.getElementById('switch-to-signup'),
+        switchToLoginBtn: document.getElementById('switch-to-login'),
         eventDetailModal: document.getElementById('event-detail-modal'), eventDetailTitle: document.getElementById('event-detail-title'), eventDetailBody: document.getElementById('event-detail-body'), eventDetailCloseButton: document.getElementById('event-detail-close-button'),
         calendarContainer: document.getElementById('calendar'), gradesContainer: document.getElementById('grades-container'), gradesAverage: document.getElementById('grades-average'),
         statsDetailModal: document.getElementById('stats-detail-modal'), statsDetailGrid: document.getElementById('stats-detail-grid'), statsDetailCloseButton: document.getElementById('stats-detail-close-button'),
@@ -252,5 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     main();
 });
+
 
 
