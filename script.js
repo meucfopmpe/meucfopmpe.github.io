@@ -32,16 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: "Preparação para Desfile", duration: 7, reward: { main_exp: 200, stats_exp: { agi: 50, lid: 50 } }, description: "Treine ordem unida para uma apresentação impecável." }
     ];
     const titleUnlocks = [
-        { level: 50, title: "Lenda da Academia 💀" },
-        { level: 40, title: "Cadete de Brigada 🦅" },
-        { level: 30, title: "Veterano 🎖️" },
-        { level: 25, title: "Cadete Antigo ⚔️" },
-        { level: 20, title: "Cadete Raso ⭐⭐" },
-        { level: 15, title: "Cadete Moderno I ⭐" },
-        { level: 10, title: "Cadete Moderno II" },
-        { level: 7, title: "Bizurado 🧠" },
-        { level: 4, title: "Aluno Dedicado 🔰" },
-        { level: 1,  title: "Aluno Novinho 🌱" }
+        { level: 50, title: "Lenda da Academia 💀" }, { level: 40, title: "Cadete de Brigada 🦅" },
+        { level: 30, title: "Veterano 🎖️" }, { level: 25, title: "Cadete Antigo ⚔️" },
+        { level: 20, title: "Cadete Raso ⭐⭐" }, { level: 15, title: "Cadete Moderno I ⭐" },
+        { level: 10, title: "Cadete Moderno II" }, { level: 7, title: "Bizurado 🧠" },
+        { level: 4, title: "Aluno Dedicado 🔰" }, { level: 1,  title: "Aluno Novinho 🌱" }
     ];
     const achievementsData = {
         LEVEL_5: { name: "Recruta", icon: "🔰", description: "Alcance o Nível 5.", condition: () => game.player.level >= 5 },
@@ -88,7 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
         settingsButton: document.getElementById('settings-button'),
         instagramInput: document.getElementById('instagram-input'), saveProfileButton: document.getElementById('save-profile-button'),
         newPasswordInput: document.getElementById('new-password-input'), updatePasswordButton: document.getElementById('update-password-button'),
-        elogiosList: document.getElementById('elogios-list')
+        elogiosList: document.getElementById('elogios-list'),
+        adminTabButton: document.getElementById('admin-tab-button'),
+        announcementInput: document.getElementById('announcement-input'), publishAnnouncementButton: document.getElementById('publish-announcement-button'),
+        adminUserList: document.getElementById('admin-user-list'),
+        globalAnnouncementsContainer: document.getElementById('global-announcements-container')
     };
     
     // --- LÓGICA DE AUTENTICAÇÃO E SETUP ---
@@ -110,8 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateChart() {if (!statsChartInstance) return; statsChartInstance.data.datasets[0].data = Object.values(game.player.stats).map(s => s.level); statsChartInstance.update();}
     function checkTitleUnlocks(targetGame = game) {for (const unlock of titleUnlocks) {if (targetGame.player.level >= unlock.level) {if (targetGame.player.title !== unlock.title) {targetGame.player.title = unlock.title;} return;}}}
     function showStatsDetailModal() {ui.statsDetailGrid.innerHTML = ''; const statLabels = { for: 'Força', agi: 'Agilidade', vig: 'Vigor', int: 'Intelecto', per: 'Percepção', lid: 'Liderança' }; for (const statKey in game.player.stats) {const stat = game.player.stats[statKey]; const expNeeded = getExpToNextLevel(stat.level, config.STAT_EXP_TO_LEVEL, config.STAT_EXP_MULTIPLIER); const progress = (stat.exp / expNeeded) * 100; const item = document.createElement('div'); item.className = 'stat-detail-item'; item.innerHTML = `<h4>${statLabels[statKey]} - Nível ${stat.level}</h4><div class="stat-detail-progress"><div class="stat-detail-bar" style="width: ${progress}%"></div></div><div class="stat-detail-text">EXP: ${stat.exp} / ${expNeeded}</div>`; ui.statsDetailGrid.appendChild(item);} ui.statsDetailModal.classList.remove('hidden');}
-    function gainMainExp(amount) {if (!amount) return; game.player.exp += amount; logMessage(`Ganhou ${amount} EXP.`); let expNeeded = getExpToNextLevel(game.player.level, config.BASE_EXP_TO_LEVEL, config.LEVEL_EXP_MULTIPLIER); while (game.player.exp >= expNeeded) {game.player.level++; game.player.exp -= expNeeded; logMessage(`AVANÇOU PARA O NÍVEL ${game.player.level}!`, 'log-levelup'); checkTitleUnlocks(); expNeeded = getExpToNextLevel(game.player.level, config.BASE_EXP_TO_LEVEL, config.LEVEL_EXP_MULTIPLIER);}}
-    function gainStatExp(stat, amount) {if (!amount) return; const statData = game.player.stats[stat]; statData.exp += amount; let expNeeded = getExpToNextLevel(statData.level, config.STAT_EXP_TO_LEVEL, config.STAT_EXP_MULTIPLIER); while (statData.exp >= expNeeded) {statData.level++; statData.exp -= expNeeded; const statName = stat.charAt(0).toUpperCase() + stat.slice(1); logMessage(`${statName} aumentou para o Nível ${statData.level}!`, 'log-statup'); gainMainExp(50); checkAchievements(); expNeeded = getExpToNextLevel(statData.level, config.STAT_EXP_TO_LEVEL, config.STAT_EXP_MULTIPLIER);}}
+    function gainMainExp(amount, log=true) {if (!amount) return; game.player.exp += amount; if(log) logMessage(`Ganhou ${amount} EXP.`); let expNeeded = getExpToNextLevel(game.player.level, config.BASE_EXP_TO_LEVEL, config.LEVEL_EXP_MULTIPLIER); while (game.player.exp >= expNeeded) {game.player.level++; game.player.exp -= expNeeded; if(log) logMessage(`AVANÇOU PARA O NÍVEL ${game.player.level}!`, 'log-levelup'); checkTitleUnlocks(); expNeeded = getExpToNextLevel(game.player.level, config.BASE_EXP_TO_LEVEL, config.LEVEL_EXP_MULTIPLIER);}}
+    function gainStatExp(stat, amount, log=true) {if (!amount) return; const statData = game.player.stats[stat]; statData.exp += amount; let expNeeded = getExpToNextLevel(statData.level, config.STAT_EXP_TO_LEVEL, config.STAT_EXP_MULTIPLIER); while (statData.exp >= expNeeded) {statData.level++; statData.exp -= expNeeded; const statName = stat.charAt(0).toUpperCase() + stat.slice(1); if(log) logMessage(`${statName} aumentou para o Nível ${statData.level}!`, 'log-statup'); gainMainExp(50, false); checkAchievements(); expNeeded = getExpToNextLevel(statData.level, config.STAT_EXP_TO_LEVEL, config.STAT_EXP_MULTIPLIER);}}
     function updateCountdown() { ui.goalList.innerHTML = ''; const now = new Date(game.time.currentDate); if(!game.time.goals) game.time.goals = []; game.time.goals.sort((a,b) => new Date(a.date) - new Date(b.date)); const upcomingGoals = game.time.goals.filter(g => new Date(g.date + 'T00:00:00') >= now); let nextGoal = upcomingGoals[0]; if (!nextGoal) { ui.countdownDisplayContainer.innerHTML = `<div class="goal-header">PRÓXIMO OBJETIVO:</div><div class="countdown-text">Nenhum objetivo definido</div>`; return; } const daysLeft = Math.ceil((new Date(nextGoal.date + 'T00:00:00') - now) / (1000 * 60 * 60 * 24)); ui.countdownDisplayContainer.innerHTML = `<div class="goal-header">PRÓXIMO OBJETIVO:</div><div class="countdown-text">${nextGoal.name} (${daysLeft} dias - ${formatDate(new Date(nextGoal.date+'T00:00:00'))})</div>`; upcomingGoals.slice(1).forEach(g => { const daysLeftForGoal = Math.ceil((new Date(g.date + 'T00:00:00') - now) / (1000 * 60 * 60 * 24)); ui.goalList.innerHTML += `<div><span>${g.name} (${daysLeftForGoal} dias - ${formatDate(new Date(g.date+'T00:00:00'))})</span><button class="delete-goal-btn" data-name="${g.name}">X</button></div>`; }); }
     function updateAllUI() { const now = new Date(game.time.currentDate); const start = new Date(game.time.startDate); const dayNumber = Math.floor((now - start) / (1000 * 60 * 60 * 24)); const percentage = ((dayNumber / config.TOTAL_COURSE_DAYS) * 100); ui.playerName.textContent = game.player.nomeDeGuerra; ui.level.textContent = `NÍVEL ${game.player.level}`; ui.playerTitle.innerHTML = game.player.title; const expNeeded = getExpToNextLevel(game.player.level, config.BASE_EXP_TO_LEVEL, config.LEVEL_EXP_MULTIPLIER); ui.expText.textContent = `EXP: ${game.player.exp} / ${expNeeded}`; ui.expBar.style.width = `${(game.player.exp / expNeeded) * 100}%`; ui.coursePercentageLarge.textContent = `${percentage.toFixed(1)}%`; ui.courseDayDisplay.innerHTML = `Dia ${dayNumber} de ${config.TOTAL_COURSE_DAYS}<br><span id="course-days-remaining">${config.TOTAL_COURSE_DAYS - dayNumber} dias restantes</span>`; updateCountdown(); renderMissionForecast(); updateChart(); }
     function setupTabs() {ui.tabButtons.forEach(button => {button.addEventListener('click', () => {ui.tabButtons.forEach(btn => btn.classList.remove('active')); button.classList.add('active'); ui.tabs.forEach(tab => {tab.classList.remove('active'); if (tab.id === button.dataset.tab) {tab.classList.add('active'); if (tab.id === 'tab-calendario') {initCalendar();} if(tab.id === 'tab-ranking'){renderRanking();} if(tab.id === 'tab-settings'){renderSettingsPage();}}});});});}
@@ -143,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleQTSInput(e) { if(e.target.classList.contains('qts-input')) { const day = e.target.dataset.day; const time = e.target.dataset.time; game.qts_schedule[day][time] = e.target.value.trim().toUpperCase(); saveGame(); } }
     async function renderRanking() { ui.rankingList.innerHTML = 'Carregando ranking...'; const { data, error } = await supabase.from('profiles').select('nome_de_guerra, level, grades_average, profile_pic').order('grades_average', { ascending: false }).limit(50); if (error) { ui.rankingList.innerHTML = 'Não foi possível carregar o ranking.'; console.error(error); return; } ui.rankingList.innerHTML = ''; data.forEach((profile, index) => { const item = document.createElement('div'); item.className = 'ranking-item'; item.innerHTML = ` <div class="ranking-pos">${index + 1}</div> <img class="ranking-avatar" src="${profile.profile_pic || 'https://i.imgur.com/K3wY2mn.png'}"> <div class="ranking-info"> <div class="ranking-name">${profile.nome_de_guerra}</div> <div class="ranking-details">Nível ${profile.level}</div> </div> <div class="ranking-avg">${profile.grades_average ? profile.grades_average.toFixed(2) : '0.00'}</div> `; ui.rankingList.appendChild(item); }); }
     async function renderSettingsPage() { ui.instagramInput.value = game.player.instagram || ''; const { data, error } = await supabase.from('profile_likes').select('liker_id, profiles(nome_de_guerra, profile_pic)').eq('liked_id', game.player.id); ui.elogiosList.innerHTML = ''; if(error || data.length === 0){ ui.elogiosList.innerHTML = '<p>Nenhum elogio recebido ainda.</p>'; return; } data.forEach(like => { const el = document.createElement('div'); el.className = 'elogio-item'; el.innerHTML = `<img src="${like.profiles.profile_pic || 'https://i.imgur.com/K3wY2mn.png'}" alt="avatar"><span>${like.profiles.nome_de_guerra}</span>`; ui.elogiosList.appendChild(el); }); }
-    async function saveProfileSettings() { const newInsta = ui.instagramInput.value.trim(); game.player.instagram = newInsta; await saveGame(); logMessage("Perfil atualizado com sucesso!"); }
+    async function saveProfileSettings() { const newInsta = ui.instagramInput.value.trim(); game.player.instagram = newInsta; await saveGame(); logMessage("Perfil atualizado com sucesso!"); alert('Perfil salvo com sucesso!');}
     async function updateUserPassword() { const newPassword = ui.newPasswordInput.value; if(newPassword.length < 6) { alert('A nova senha precisa ter no mínimo 6 caracteres.'); return; } const { error } = await supabase.auth.updateUser({ password: newPassword }); if(error){ alert('Erro ao atualizar a senha: ' + error.message); } else { alert('Senha atualizada com sucesso!'); ui.newPasswordInput.value = ''; } }
 
     async function loadGameAndStart(user) {
@@ -198,9 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.mainQuestDisplay.addEventListener('click', handleQuickQuestInteraction);
         ui.profilePic.addEventListener('contextmenu', e => e.preventDefault());
         ui.logoutButton.addEventListener('click', handleLogout);
-        ui.settingsButton.addEventListener('click', () => {
-            document.querySelector('.tab-button[data-tab="tab-settings"]').click();
-        });
+        ui.settingsButton.addEventListener('click', () => { document.querySelector('.tab-button[data-tab="tab-settings"]').click(); });
         ui.saveProfileButton.addEventListener('click', saveProfileSettings);
         ui.updatePasswordButton.addEventListener('click', updateUserPassword);
     }
@@ -215,7 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 location.reload();
             }
         } else {
-            document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
             ui.loginModal.classList.remove('hidden');
             ui.switchToSignupBtn.addEventListener('click', () => {
                 ui.loginModal.classList.add('hidden');
