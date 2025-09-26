@@ -32,11 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: "Preparação para Desfile", duration: 7, reward: { main_exp: 200, stats_exp: { agi: 50, lid: 50 } }, description: "Treine ordem unida para uma apresentação impecável." }
     ];
     const titleUnlocks = [
-        { level: 50, title: "Cadete de Brigada 🦅" }, { level: 40, title: "Elite 💀" },
-        { level: 30, title: "Veterano 🎖️" }, { level: 25, title: "Cadete Antigo ⚔️" },
-        { level: 20, title: "Cadete Raso ⭐⭐" }, { level: 15, title: "Cadete Moderno I ⭐" },
-        { level: 10, title: "Cadete Moderno II" }, { level: 7, title: "Bizurado 🧠" },
-        { level: 4, title: "Aluno Dedicado 🔰" }, { level: 1,  title: "Aluno Novinho 🌱" }
+        { level: 50, title: "Cadete de Brigada 🦅" }, { level: 25, title: "Cadete Raso ⭐" },
+        { level: 10, title: "Bizurado 🧠" }, { level: 1,  title: "Aluno Novinho 🌱" }
     ];
     const achievementsData = {
         LEVEL_5: { name: "Recruta", icon: "🔰", description: "Alcance o Nível 5.", condition: () => game.player.level >= 5 },
@@ -68,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupModal: document.getElementById('setup-modal'), statsDetailModal: document.getElementById('stats-detail-modal'), statsDetailGrid: document.getElementById('stats-detail-grid'), statsDetailCloseButton: document.getElementById('stats-detail-close-button'),
         gameContainer: document.getElementById('game-container'), profilePic: document.getElementById('profile-pic'), uploadPicButton: document.getElementById('upload-pic-button'), uploadPicInput: document.getElementById('upload-pic-input'),
         playerName: document.getElementById('player-name'), level: document.getElementById('level'), playerTitle: document.getElementById('player-title'), expBar: document.getElementById('exp-bar'), expText: document.getElementById('exp-text'),
-        settingsButton: document.getElementById('settings-button'), logoutButton: document.getElementById('logout-button'),
+        logoutButton: document.getElementById('logout-button'),
         statsChart: document.getElementById('stats-chart'),
         coursePercentageLarge: document.getElementById('course-percentage-large'), courseDayDisplay: document.getElementById('course-day-display'), courseDaysRemaining: document.getElementById('course-days-remaining'), countdownDisplayContainer: document.getElementById('countdown-display-container'), goalList: document.getElementById('goal-list'),
         goalNameInput: document.getElementById('goal-name-input'), goalDateInput: document.getElementById('goal-date-input'), addGoalButton: document.getElementById('add-goal-button'),
@@ -80,12 +77,13 @@ document.addEventListener('DOMContentLoaded', () => {
         linksList: document.getElementById('links-list'), addLinkForm: document.getElementById('add-link-form'), linkTitleInput: document.getElementById('link-title-input'), linkValueInput: document.getElementById('link-value-input'), linkTypeInput: document.getElementById('link-type-input'),
         qtsScheduleContainer: document.getElementById('qts-schedule-container'),
         rankingList: document.getElementById('ranking-list'),
+        settingsButton: document.getElementById('settings-button'),
         instagramInput: document.getElementById('instagram-input'), saveProfileButton: document.getElementById('save-profile-button'),
         newPasswordInput: document.getElementById('new-password-input'), updatePasswordButton: document.getElementById('update-password-button'),
         elogiosList: document.getElementById('elogios-list')
     };
     
-    // --- LÓGICA DE LOGIN E SETUP ---
+    // --- LÓGICA DE AUTENTICAÇÃO E SETUP ---
     // (O restante do seu código JavaScript vai aqui, exatamente como na versão 19, pois a estrutura do banco de dados e as interações não mudam)
     
     // --- PONTO DE ENTRADA ---
