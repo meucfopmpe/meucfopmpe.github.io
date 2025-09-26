@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solo Leveling: Academia PMPE [v22.0 - Online]</title>
+    <title>Solo Leveling: Academia PMPE [v23.0 - Social]</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -12,35 +12,12 @@
 </head>
 <body>
 
-    <div id="auth-container">
-        <div class="auth-panel">
-            <div class="auth-tabs">
-                <button id="show-login-btn" class="auth-tab-btn active">Login</button>
-                <button id="show-signup-btn" class="auth-tab-btn">Criar Conta</button>
-            </div>
-            <form id="login-form">
-                <label for="login-numerica">Sua Numérica:</label>
-                <input type="number" id="login-numerica" placeholder="Digite sua numérica..." required>
-                <label for="login-password">Sua Senha:</label>
-                <input type="password" id="login-password" placeholder="Digite sua senha..." required>
-                <button type="submit">Entrar</button>
-                <p id="login-error" class="error-message"></p>
-            </form>
-            <form id="signup-form" class="hidden">
-                <label for="signup-guerra">Nome de Guerra:</label>
-                <input type="text" id="signup-guerra" required>
-                <label for="signup-numerica">Numérica:</label>
-                <input type="number" id="signup-numerica" required>
-                <label for="signup-pelotao">Pelotão (somente o número):</label>
-                <input type="text" id="signup-pelotao" required>
-                <label for="signup-password">Crie uma Senha (mín. 6 caracteres):</label>
-                <input type="password" id="signup-password" required>
-                <button type="submit">Criar Conta</button>
-                <p id="signup-error" class="error-message"></p>
-            </form>
-        </div>
+    <div id="login-modal">
+        <div id="login-content" class="panel"><h2 class="panel-title">Identificação do Combatente</h2><form id="login-form"><label for="login-numerica">Sua Numérica:</label><input type="number" id="login-numerica" placeholder="Digite sua numérica..." required><label for="login-password">Sua Senha:</label><input type="password" id="login-password" placeholder="Digite sua senha..." required><button type="submit">Entrar</button><p id="login-error" class="error-message"></p></form><p class="auth-switcher">Não tem uma conta? <button id="switch-to-signup">Crie uma</button></p></div>
     </div>
-
+    <div id="signup-modal" class="modal hidden">
+        <div id="signup-content" class="panel"><h2 class="panel-title">Criar Conta</h2><form id="signup-form"><label for="signup-guerra">Nome de Guerra:</label><input type="text" id="signup-guerra" required><label for="signup-numerica">Numérica:</label><input type="number" id="signup-numerica" required><label for="signup-pelotao">Pelotão (somente o número):</label><input type="text" id="signup-pelotao" required><label for="signup-password">Crie uma Senha (mín. 6 caracteres):</label><input type="password" id="signup-password" required><button type="submit">Criar Conta</button><p id="signup-error" class="error-message"></p></form><p class="auth-switcher">Já tem uma conta? <button id="switch-to-login">Faça Login</button></p></div>
+    </div>
     <div id="stats-detail-modal" class="modal hidden">
         <div id="stats-detail-content" class="panel"><h2 class="panel-title">Relatório Detalhado de Habilidades</h2><div id="stats-detail-grid"></div><button id="stats-detail-close-button">Fechar</button></div>
     </div>
@@ -50,7 +27,7 @@
     
     <div id="game-container" class="hidden">
         <div id="left-column">
-            <div id="profile-panel" class="panel"><div id="profile-pic-container"><img id="profile-pic" src="https://i.imgur.com/K3wY2mn.png" alt="Foto do Perfil"><input type="file" id="upload-pic-input" accept="image/*" class="hidden"><button id="upload-pic-button" title="Trocar Foto de Perfil">📷</button></div><div id="player-info"><div id="player-name">Aluno Oficial</div><div id="level">NÍVEL 1</div><div><strong>Título:</strong> <span id="player-title"></span></div></div><div class="progress-bar-container"><div id="exp-bar"></div></div><div id="exp-text">EXP: 0 / 100</div><button id="logout-button">Sair</button></div>
+            <div id="profile-panel" class="panel"><div id="profile-pic-container"><img id="profile-pic" src="https://i.imgur.com/K3wY2mn.png" alt="Foto do Perfil"><input type="file" id="upload-pic-input" accept="image/*" class="hidden"><button id="upload-pic-button" title="Trocar Foto de Perfil">📷</button></div><div id="player-info"><div id="player-name">Aluno Oficial</div><div id="level">NÍVEL 1</div><div><strong>Título:</strong> <span id="player-title"></span></div></div><div class="progress-bar-container"><div id="exp-bar"></div></div><div id="exp-text">EXP: 0 / 100</div><div class="profile-actions"><button id="settings-button">⚙️ Configurações</button><button id="logout-button">Sair</button></div></div>
             <div id="stats-panel" class="panel"><h2 class="panel-title">HABILIDADES</h2><canvas id="stats-chart"></canvas><p class="chart-helper-text">Clique no gráfico para ver detalhes</p></div>
         </div>
 
@@ -78,6 +55,25 @@
                     <div id="tab-lembretes" class="tab"><h3>Lembretes da Semana</h3><div id="reminders-list"></div><div class="reminder-input-group"><input type="text" id="reminder-input" placeholder="Novo lembrete..."><button id="add-reminder-button">+</button></div></div>
                     <div id="tab-conquistas" class="tab"><h3>Quadro de Conquistas</h3><div id="achievements-grid"></div></div>
                     <div id="tab-escalas" class="tab"><h3>Adicionar Serviço/Plantão</h3><form id="add-mission-form"><input type="text" id="mission-name-input" placeholder="Ex: Plantão, Auxiliar, Escala de Pia..." required><input type="date" id="mission-date-input" required><button type="submit">Agendar Missão Difícil</button></form><h4>Serviços Agendados:</h4><ul id="scheduled-missions-list"></ul></div>
+                    <div id="tab-settings" class="tab">
+                        <h3>Configurações do Perfil</h3>
+                        <div class="settings-section">
+                            <h4>Atualizar Perfil</h4>
+                            <label for="instagram-input">Instagram (ex: @usuario):</label>
+                            <input type="text" id="instagram-input" placeholder="Seu @ no Instagram">
+                            <button id="save-profile-button">Salvar Perfil</button>
+                        </div>
+                        <div class="settings-section">
+                            <h4>Alterar Senha</h4>
+                            <label for="new-password-input">Nova Senha (mín. 6 caracteres):</label>
+                            <input type="password" id="new-password-input">
+                            <button id="update-password-button">Atualizar Senha</button>
+                        </div>
+                        <div class="settings-section">
+                            <h4>Elogios Recebidos</h4>
+                            <div id="elogios-list">Carregando...</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
