@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solo Leveling: Academia PMPE [v23.0 - Social]</title>
+    <title>Solo Leveling: Academia PMPE [v23.1 - Social]</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -12,12 +12,39 @@
 </head>
 <body>
 
-    <div id="login-modal">
-        <div id="login-content" class="panel"><h2 class="panel-title">Identificação do Combatente</h2><form id="login-form"><label for="login-numerica">Sua Numérica:</label><input type="number" id="login-numerica" placeholder="Digite sua numérica..." required><label for="login-password">Sua Senha:</label><input type="password" id="login-password" placeholder="Digite sua senha..." required><button type="submit">Entrar</button><p id="login-error" class="error-message"></p></form><p class="auth-switcher">Não tem uma conta? <button id="switch-to-signup">Crie uma</button></p></div>
+    <div id="login-modal" class="modal">
+        <div id="login-content" class="panel">
+            <h2 class="panel-title">Login</h2>
+            <form id="login-form">
+                <label for="login-numerica">Sua Numérica:</label>
+                <input type="number" id="login-numerica" placeholder="Digite sua numérica..." required>
+                <label for="login-password">Sua Senha:</label>
+                <input type="password" id="login-password" placeholder="Digite sua senha..." required>
+                <button type="submit">Entrar</button>
+                <p id="login-error" class="error-message"></p>
+            </form>
+            <p class="auth-switcher">Não tem uma conta? <button id="switch-to-signup">Crie uma</button></p>
+        </div>
     </div>
     <div id="signup-modal" class="modal hidden">
-        <div id="signup-content" class="panel"><h2 class="panel-title">Criar Conta</h2><form id="signup-form"><label for="signup-guerra">Nome de Guerra:</label><input type="text" id="signup-guerra" required><label for="signup-numerica">Numérica:</label><input type="number" id="signup-numerica" required><label for="signup-pelotao">Pelotão (somente o número):</label><input type="text" id="signup-pelotao" required><label for="signup-password">Crie uma Senha (mín. 6 caracteres):</label><input type="password" id="signup-password" required><button type="submit">Criar Conta</button><p id="signup-error" class="error-message"></p></form><p class="auth-switcher">Já tem uma conta? <button id="switch-to-login">Faça Login</button></p></div>
+        <div id="signup-content" class="panel">
+            <h2 class="panel-title">Criar Conta</h2>
+            <form id="signup-form">
+                <label for="signup-guerra">Nome de Guerra:</label>
+                <input type="text" id="signup-guerra" required>
+                <label for="signup-numerica">Numérica:</label>
+                <input type="number" id="signup-numerica" required>
+                <label for="signup-pelotao">Pelotão (somente o número):</label>
+                <input type="text" id="signup-pelotao" required>
+                <label for="signup-password">Crie uma Senha (mín. 6 caracteres):</label>
+                <input type="password" id="signup-password" required>
+                <button type="submit">Criar Conta</button>
+                <p id="signup-error" class="error-message"></p>
+            </form>
+            <p class="auth-switcher">Já tem uma conta? <button id="switch-to-login">Faça Login</button></p>
+        </div>
     </div>
+
     <div id="stats-detail-modal" class="modal hidden">
         <div id="stats-detail-content" class="panel"><h2 class="panel-title">Relatório Detalhado de Habilidades</h2><div id="stats-detail-grid"></div><button id="stats-detail-close-button">Fechar</button></div>
     </div>
@@ -44,6 +71,7 @@
                     <button class="tab-button" data-tab="tab-lembretes">Lembretes</button>
                     <button class="tab-button" data-tab="tab-conquistas">Conquistas</button>
                     <button class="tab-button" data-tab="tab-escalas">Escalas</button>
+                    <button class="tab-button" data-tab="tab-settings">Configurações</button>
                 </div>
                 <div class="tab-content">
                     <div id="tab-main" class="tab active"><div id="quick-quests-container"></div><div id="mission-forecast-container"></div></div>
