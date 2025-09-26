@@ -60,12 +60,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- SELETORES DE UI ---
     const ui = {
-        loginModal: document.getElementById('login-modal'), loginForm: document.getElementById('login-form'), loginNumericaInput: document.getElementById('login-numerica'), loginPasswordInput: document.getElementById('login-password'), loginError: document.getElementById('login-error'),
-        signupModal: document.getElementById('signup-modal'), signupForm: document.getElementById('signup-form'), signupPasswordInput: document.getElementById('signup-password'), signupGuerraInput: document.getElementById('signup-guerra'), signupPelotaoInput: document.getElementById('signup-pelotao'), signupNumericaInput: document.getElementById('signup-numerica'), signupError: document.getElementById('signup-error'),
-        switchToSignupBtn: document.getElementById('switch-to-signup'), switchToLoginBtn: document.getElementById('switch-to-login'),
+        authContainer: document.getElementById('auth-container'),
+        loginPanel: document.getElementById('login-panel'), signupPanel: document.getElementById('signup-panel'),
+        loginForm: document.getElementById('login-form'), loginNumericaInput: document.getElementById('login-numerica'), loginPasswordInput: document.getElementById('login-password'), loginError: document.getElementById('login-error'),
+        signupForm: document.getElementById('signup-form'), signupPasswordInput: document.getElementById('signup-password'), signupGuerraInput: document.getElementById('signup-guerra'), signupPelotaoInput: document.getElementById('signup-pelotao'), signupNumericaInput: document.getElementById('signup-numerica'), signupError: document.getElementById('signup-error'),
         eventDetailModal: document.getElementById('event-detail-modal'), eventDetailTitle: document.getElementById('event-detail-title'), eventDetailBody: document.getElementById('event-detail-body'), eventDetailCloseButton: document.getElementById('event-detail-close-button'),
         calendarContainer: document.getElementById('calendar'), gradesContainer: document.getElementById('grades-container'), gradesAverage: document.getElementById('grades-average'),
-        setupModal: document.getElementById('setup-modal'), statsDetailModal: document.getElementById('stats-detail-modal'), statsDetailGrid: document.getElementById('stats-detail-grid'), statsDetailCloseButton: document.getElementById('stats-detail-close-button'),
+        statsDetailModal: document.getElementById('stats-detail-modal'), statsDetailGrid: document.getElementById('stats-detail-grid'), statsDetailCloseButton: document.getElementById('stats-detail-close-button'),
         gameContainer: document.getElementById('game-container'), profilePic: document.getElementById('profile-pic'), uploadPicButton: document.getElementById('upload-pic-button'), uploadPicInput: document.getElementById('upload-pic-input'),
         playerName: document.getElementById('player-name'), level: document.getElementById('level'), playerTitle: document.getElementById('player-title'), expBar: document.getElementById('exp-bar'), expText: document.getElementById('exp-text'),
         logoutButton: document.getElementById('logout-button'),
@@ -84,13 +85,13 @@ document.addEventListener('DOMContentLoaded', () => {
         instagramInput: document.getElementById('instagram-input'), saveProfileButton: document.getElementById('save-profile-button'),
         newPasswordInput: document.getElementById('new-password-input'), updatePasswordButton: document.getElementById('update-password-button'),
         elogiosList: document.getElementById('elogios-list'),
-        adminTabButton: document.getElementById('admin-tab-button'),
+        adminContainer: document.getElementById('admin-container'), adminTabButton: document.getElementById('admin-tab-button'),
         announcementInput: document.getElementById('announcement-input'), publishAnnouncementButton: document.getElementById('publish-announcement-button'),
-        adminUserList: document.getElementById('admin-user-list'),
-        globalAnnouncementsContainer: document.getElementById('global-announcements-container')
+        adminUserList: document.getElementById('admin-user-list'), adminLogoutButton: document.getElementById('admin-logout-button'),
+        muralFeed: document.getElementById('mural-feed'), muralPostForm: document.getElementById('mural-post-form'), muralInput: document.getElementById('mural-input')
     };
     
-    // --- LÓGICA DE AUTENTICAÇÃO E SETUP ---
+    // --- LÓGICA DE LOGIN E SETUP ---
     async function handleLogin(e) { e.preventDefault(); ui.loginError.textContent = ''; const numerica = ui.loginNumericaInput.value; const password = ui.loginPasswordInput.value; const email = `${numerica}@cfo.pmpe.br`; const { data, error } = await supabase.auth.signInWithPassword({ email, password }); if (error) { ui.loginError.textContent = `Erro: Numérica ou senha inválidos.`; return; } if (data.user) { await loadGameAndStart(data.user); } }
     async function handleSignUp(e) { e.preventDefault(); ui.signupError.textContent = ''; const nomeDeGuerra = ui.signupGuerraInput.value.trim().toUpperCase(); const pelotao = ui.signupPelotaoInput.value.trim(); const numerica = ui.signupNumericaInput.value; const password = ui.signupPasswordInput.value; const email = `${numerica}@cfo.pmpe.br`; const { data: authData, error: authError } = await supabase.auth.signUp({ email, password }); if (authError) { ui.signupError.textContent = `Erro: ${authError.message}`; return; } if (authData.user) { const gameData = createNewGameDataObject(nomeDeGuerra, pelotao, numerica); calculateInitialState(gameData); checkTitleUnlocks(gameData); generateQuickQuestsForToday(gameData); const profileToInsert = { id: authData.user.id, nome_de_guerra: nomeDeGuerra, pelotao: pelotao, numerica: parseInt(numerica, 10), level: gameData.player.level, title: gameData.player.title, profile_pic: gameData.player.profilePic, grades_average: 0, role: 'aluno', instagram: '' }; const { error: profileError } = await supabase.from('profiles').insert(profileToInsert); if (profileError) { ui.signupError.textContent = `Erro ao criar perfil no banco de dados: ${profileError.message}`; return; } game = gameData; game.time.startDate = new Date(game.time.startDate); game.time.currentDate = new Date(game.time.currentDate); game.player.id = authData.user.id; startGame(authData.user); } }
     async function handleLogout() { await supabase.auth.signOut(); location.reload(); }
@@ -98,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- FUNÇÕES DE PERSISTÊNCIA (SAVE/LOAD) ---
     async function saveGame() { if (!game.player || !game.player.id) return; const avg = calculateGradesAverage(); game.gradesAverage = avg; const dataToSave = { nome_de_guerra: game.player.nomeDeGuerra, pelotao: game.player.pelotao, numerica: game.player.numerica, level: game.player.level, title: game.player.title, profile_pic: game.player.profilePic, grades_average: avg, instagram: game.player.instagram, role: game.player.role || 'aluno', full_data: game }; const { error } = await supabase.from('profiles').update(dataToSave).eq('id', game.player.id); if(error) console.error("Erro ao salvar:", error); }
-    async function loadGame(userId) { const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single(); if (error || !data) { console.error("Erro ao carregar perfil, pode não existir ainda.", error); return false; } if (data && data.full_data) { game = data.full_data; game.player.id = userId; game.player.role = data.role; game.player.instagram = data.instagram; game.time.startDate = new Date(game.time.startDate); game.time.currentDate = new Date(game.time.currentDate); if (!game.missions.quickQuestsToday || game.missions.quickQuestsToday.length === 0) { generateQuickQuestsForToday(); } return true; } return false; }
+    async function loadGame(userId) { const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single(); if (error || !data) { console.error("Erro ao carregar perfil, pode não existir ainda.", error); return false; } if (data && data.full_data) { game = data.full_data; game.player.id = userId; game.player.role = data.role; game.player.instagram = data.instagram; game.time.startDate = new Date(game.time.startDate); game.time.currentDate = new Date(); if (!game.missions.quickQuestsToday || game.missions.quickQuestsToday.length === 0) { generateQuickQuestsForToday(); } return true; } return false; }
 
     // --- FUNÇÕES DE LÓGICA DO JOGO ---
     const getExpToNextLevel = (level, base, multiplier) => Math.floor(base * Math.pow(multiplier, level - 1));
@@ -109,11 +110,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateChart() {if (!statsChartInstance) return; statsChartInstance.data.datasets[0].data = Object.values(game.player.stats).map(s => s.level); statsChartInstance.update();}
     function checkTitleUnlocks(targetGame = game) {for (const unlock of titleUnlocks) {if (targetGame.player.level >= unlock.level) {if (targetGame.player.title !== unlock.title) {targetGame.player.title = unlock.title;} return;}}}
     function showStatsDetailModal() {ui.statsDetailGrid.innerHTML = ''; const statLabels = { for: 'Força', agi: 'Agilidade', vig: 'Vigor', int: 'Intelecto', per: 'Percepção', lid: 'Liderança' }; for (const statKey in game.player.stats) {const stat = game.player.stats[statKey]; const expNeeded = getExpToNextLevel(stat.level, config.STAT_EXP_TO_LEVEL, config.STAT_EXP_MULTIPLIER); const progress = (stat.exp / expNeeded) * 100; const item = document.createElement('div'); item.className = 'stat-detail-item'; item.innerHTML = `<h4>${statLabels[statKey]} - Nível ${stat.level}</h4><div class="stat-detail-progress"><div class="stat-detail-bar" style="width: ${progress}%"></div></div><div class="stat-detail-text">EXP: ${stat.exp} / ${expNeeded}</div>`; ui.statsDetailGrid.appendChild(item);} ui.statsDetailModal.classList.remove('hidden');}
-    function gainMainExp(amount, log=true) {if (!amount) return; game.player.exp += amount; if(log) logMessage(`Ganhou ${amount} EXP.`); let expNeeded = getExpToNextLevel(game.player.level, config.BASE_EXP_TO_LEVEL, config.LEVEL_EXP_MULTIPLIER); while (game.player.exp >= expNeeded) {game.player.level++; game.player.exp -= expNeeded; if(log) logMessage(`AVANÇOU PARA O NÍVEL ${game.player.level}!`, 'log-levelup'); checkTitleUnlocks(); expNeeded = getExpToNextLevel(game.player.level, config.BASE_EXP_TO_LEVEL, config.LEVEL_EXP_MULTIPLIER);}}
-    function gainStatExp(stat, amount, log=true) {if (!amount) return; const statData = game.player.stats[stat]; statData.exp += amount; let expNeeded = getExpToNextLevel(statData.level, config.STAT_EXP_TO_LEVEL, config.STAT_EXP_MULTIPLIER); while (statData.exp >= expNeeded) {statData.level++; statData.exp -= expNeeded; const statName = stat.charAt(0).toUpperCase() + stat.slice(1); if(log) logMessage(`${statName} aumentou para o Nível ${statData.level}!`, 'log-statup'); gainMainExp(50, false); checkAchievements(); expNeeded = getExpToNextLevel(statData.level, config.STAT_EXP_TO_LEVEL, config.STAT_EXP_MULTIPLIER);}}
+    function gainMainExp(amount) {if (!amount) return; game.player.exp += amount; logMessage(`Ganhou ${amount} EXP.`); let expNeeded = getExpToNextLevel(game.player.level, config.BASE_EXP_TO_LEVEL, config.LEVEL_EXP_MULTIPLIER); while (game.player.exp >= expNeeded) {game.player.level++; game.player.exp -= expNeeded; logMessage(`AVANÇOU PARA O NÍVEL ${game.player.level}!`, 'log-levelup'); checkTitleUnlocks(); expNeeded = getExpToNextLevel(game.player.level, config.BASE_EXP_TO_LEVEL, config.LEVEL_EXP_MULTIPLIER);}}
+    function gainStatExp(stat, amount) {if (!amount) return; const statData = game.player.stats[stat]; statData.exp += amount; let expNeeded = getExpToNextLevel(statData.level, config.STAT_EXP_TO_LEVEL, config.STAT_EXP_MULTIPLIER); while (statData.exp >= expNeeded) {statData.level++; statData.exp -= expNeeded; const statName = stat.charAt(0).toUpperCase() + stat.slice(1); logMessage(`${statName} aumentou para o Nível ${statData.level}!`, 'log-statup'); gainMainExp(50); checkAchievements(); expNeeded = getExpToNextLevel(statData.level, config.STAT_EXP_TO_LEVEL, config.STAT_EXP_MULTIPLIER);}}
     function updateCountdown() { ui.goalList.innerHTML = ''; const now = new Date(game.time.currentDate); if(!game.time.goals) game.time.goals = []; game.time.goals.sort((a,b) => new Date(a.date) - new Date(b.date)); const upcomingGoals = game.time.goals.filter(g => new Date(g.date + 'T00:00:00') >= now); let nextGoal = upcomingGoals[0]; if (!nextGoal) { ui.countdownDisplayContainer.innerHTML = `<div class="goal-header">PRÓXIMO OBJETIVO:</div><div class="countdown-text">Nenhum objetivo definido</div>`; return; } const daysLeft = Math.ceil((new Date(nextGoal.date + 'T00:00:00') - now) / (1000 * 60 * 60 * 24)); ui.countdownDisplayContainer.innerHTML = `<div class="goal-header">PRÓXIMO OBJETIVO:</div><div class="countdown-text">${nextGoal.name} (${daysLeft} dias - ${formatDate(new Date(nextGoal.date+'T00:00:00'))})</div>`; upcomingGoals.slice(1).forEach(g => { const daysLeftForGoal = Math.ceil((new Date(g.date + 'T00:00:00') - now) / (1000 * 60 * 60 * 24)); ui.goalList.innerHTML += `<div><span>${g.name} (${daysLeftForGoal} dias - ${formatDate(new Date(g.date+'T00:00:00'))})</span><button class="delete-goal-btn" data-name="${g.name}">X</button></div>`; }); }
     function updateAllUI() { const now = new Date(game.time.currentDate); const start = new Date(game.time.startDate); const dayNumber = Math.floor((now - start) / (1000 * 60 * 60 * 24)); const percentage = ((dayNumber / config.TOTAL_COURSE_DAYS) * 100); ui.playerName.textContent = game.player.nomeDeGuerra; ui.level.textContent = `NÍVEL ${game.player.level}`; ui.playerTitle.innerHTML = game.player.title; const expNeeded = getExpToNextLevel(game.player.level, config.BASE_EXP_TO_LEVEL, config.LEVEL_EXP_MULTIPLIER); ui.expText.textContent = `EXP: ${game.player.exp} / ${expNeeded}`; ui.expBar.style.width = `${(game.player.exp / expNeeded) * 100}%`; ui.coursePercentageLarge.textContent = `${percentage.toFixed(1)}%`; ui.courseDayDisplay.innerHTML = `Dia ${dayNumber} de ${config.TOTAL_COURSE_DAYS}<br><span id="course-days-remaining">${config.TOTAL_COURSE_DAYS - dayNumber} dias restantes</span>`; updateCountdown(); renderMissionForecast(); updateChart(); }
-    function setupTabs() {ui.tabButtons.forEach(button => {button.addEventListener('click', () => {ui.tabButtons.forEach(btn => btn.classList.remove('active')); button.classList.add('active'); ui.tabs.forEach(tab => {tab.classList.remove('active'); if (tab.id === button.dataset.tab) {tab.classList.add('active'); if (tab.id === 'tab-calendario') {initCalendar();} if(tab.id === 'tab-ranking'){renderRanking();} if(tab.id === 'tab-settings'){renderSettingsPage();}}});});});}
+    function setupTabs() {ui.tabButtons.forEach(button => {button.addEventListener('click', () => {ui.tabButtons.forEach(btn => btn.classList.remove('active')); button.classList.add('active'); ui.tabs.forEach(tab => {tab.classList.remove('active'); if (tab.id === button.dataset.tab) {tab.classList.add('active'); if (tab.id === 'tab-calendario') {initCalendar();} if(tab.id === 'tab-ranking'){renderRanking();} if(tab.id === 'tab-settings'){renderSettingsPage();} if(tab.id === 'tab-admin'){renderAdminPanel();}}});});});}
     function setupAchievements() {ui.achievementsGrid.innerHTML = ''; for (const key in achievementsData) {const ach = achievementsData[key]; const div = document.createElement('div'); div.className = 'achievement'; div.title = ach.description; div.innerHTML = `<div class="achievement-icon" id="ach-${key}">${ach.icon}</div><div class="achievement-title">${ach.name}</div>`; ui.achievementsGrid.appendChild(div); if(game.player.achievements.includes(key)) {div.querySelector('.achievement-icon').classList.add('unlocked');}}}
     function checkAchievements(eventType = null, data = null) {for (const key in achievementsData) {if (!game.player.achievements.includes(key) && achievementsData[key].condition(eventType, data)) {game.player.achievements.push(key); const iconEl = document.getElementById(`ach-${key}`); if(iconEl) iconEl.classList.add('unlocked'); logMessage(`Conquista Desbloqueada: ${achievementsData[key].name}!`);}}}
     function addReminder() {const text = ui.reminderInput.value.trim(); if (text) {if(!game.reminders) game.reminders = []; game.reminders.push({ text: text, completed: false }); ui.reminderInput.value = ''; saveGame(); renderReminders(); checkAchievements('add_reminder');}}
@@ -144,6 +145,13 @@ document.addEventListener('DOMContentLoaded', () => {
     async function renderSettingsPage() { ui.instagramInput.value = game.player.instagram || ''; const { data, error } = await supabase.from('profile_likes').select('liker_id, profiles(nome_de_guerra, profile_pic)').eq('liked_id', game.player.id); ui.elogiosList.innerHTML = ''; if(error || data.length === 0){ ui.elogiosList.innerHTML = '<p>Nenhum elogio recebido ainda.</p>'; return; } data.forEach(like => { const el = document.createElement('div'); el.className = 'elogio-item'; el.innerHTML = `<img src="${like.profiles.profile_pic || 'https://i.imgur.com/K3wY2mn.png'}" alt="avatar"><span>${like.profiles.nome_de_guerra}</span>`; ui.elogiosList.appendChild(el); }); }
     async function saveProfileSettings() { const newInsta = ui.instagramInput.value.trim(); game.player.instagram = newInsta; await saveGame(); logMessage("Perfil atualizado com sucesso!"); alert('Perfil salvo com sucesso!');}
     async function updateUserPassword() { const newPassword = ui.newPasswordInput.value; if(newPassword.length < 6) { alert('A nova senha precisa ter no mínimo 6 caracteres.'); return; } const { error } = await supabase.auth.updateUser({ password: newPassword }); if(error){ alert('Erro ao atualizar a senha: ' + error.message); } else { alert('Senha atualizada com sucesso!'); ui.newPasswordInput.value = ''; } }
+    async function renderAdminPanel() { ui.adminUserList.innerHTML = 'Carregando usuários...'; const { data, error } = await supabase.from('profiles').select('*'); if(error){ ui.adminUserList.innerHTML = 'Erro ao carregar usuários.'; return; } let tableHTML = '<table><thead><tr><th>Nome de Guerra</th><th>Numérica</th><th>Pelotão</th><th>Nível</th><th>Média</th><th>Cargo</th></tr></thead><tbody>'; data.forEach(user => { tableHTML += `<tr><td>${user.nome_de_guerra}</td><td>${user.numerica}</td><td>${user.pelotao}</td><td>${user.level}</td><td>${user.grades_average.toFixed(2)}</td><td>${user.role}</td></tr>`; }); tableHTML += '</tbody></table>'; ui.adminUserList.innerHTML = tableHTML; }
+    async function addAnnouncement() { const content = ui.announcementInput.value.trim(); if(!content) return; const { error } = await supabase.from('announcements').insert({ content, author_name: game.player.nomeDeGuerra }); if(error) { alert('Erro ao publicar aviso.'); console.error(error); } else { alert('Aviso publicado com sucesso!'); ui.announcementInput.value = ''; } }
+    async function fetchAnnouncements() { const { data, error } = await supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(3); if (error || !data) return; ui.globalAnnouncementsContainer.innerHTML = '<h4>📢 Avisos Globais</h4>'; data.forEach(ann => { const item = document.createElement('div'); item.className = 'announcement-item'; item.innerHTML = `<p>${ann.content}</p><div class="author">- ${ann.author_name}</div>`; ui.globalAnnouncementsContainer.appendChild(item); }); }
+    async function initMural() { fetchAndRenderMural(); supabase.channel('mural_channel').on('postgres_changes', { event: '*', schema: 'public', table: 'mural_messages' }, () => { fetchAndRenderMural(); }).subscribe(); }
+    async function fetchAndRenderMural() { const { data, error } = await supabase.from('mural_messages').select('*, mural_likes(user_id)').order('created_at', { ascending: false }).limit(50); if (error) return; ui.muralFeed.innerHTML = ''; data.forEach(msg => { const msgDiv = document.createElement('div'); msgDiv.className = 'mural-message'; const userLiked = msg.mural_likes.some(like => like.user_id === game.player.id); msgDiv.innerHTML = `<div class="mural-header"><img src="${msg.author_profile_pic || 'https://i.imgur.com/K3wY2mn.png'}" alt="avatar"><span class="author">${msg.author_name}</span><span class="timestamp">${new Date(msg.created_at).toLocaleString('pt-BR')}</span></div><div class="mural-content"><p>${msg.content}</p></div><div class="mural-actions"><button class="like-btn ${userLiked ? 'liked' : ''}" data-message-id="${msg.id}">👍 Elogiar (${msg.mural_likes.length})</button></div>`; ui.muralFeed.appendChild(msgDiv); }); }
+    async function handleNewMuralMessage(e) { e.preventDefault(); const content = ui.muralInput.value.trim(); if(!content) return; ui.muralInput.value = ""; const { error } = await supabase.from('mural_messages').insert({ content, author_id: game.player.id, author_name: game.player.nomeDeGuerra, author_profile_pic: game.player.profilePic }); if(error) console.error("Erro ao postar mensagem", error); }
+    async function handleMuralLike(e) { if(!e.target.classList.contains('like-btn')) return; const messageId = e.target.dataset.messageId; const { data } = await supabase.from('mural_likes').select('id').eq('user_id', game.player.id).eq('message_id', messageId); if(data.length > 0) { await supabase.from('mural_likes').delete().eq('id', data[0].id); } else { await supabase.from('mural_likes').insert({ user_id: game.player.id, message_id: messageId }); } }
 
     async function loadGameAndStart(user) {
         const success = await loadGame(user.id);
@@ -156,18 +164,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function startGame(user) {
-        ui.loginModal.classList.add('hidden');
-        ui.signupModal.classList.add('hidden');
-        ui.gameContainer.classList.remove('hidden');
-        initGameUI(user);
+        if(game.player.role === 'admin' && game.player.numerica === 999) {
+            ui.authContainer.classList.add('hidden');
+            ui.adminContainer.classList.remove('hidden');
+            initAdminUI();
+        } else {
+            ui.authContainer.classList.add('hidden');
+            ui.gameContainer.classList.remove('hidden');
+            initGameUI(user);
+        }
+    }
+    
+    function initAdminUI() {
+        renderAdminPanel();
+        ui.adminLogoutButton.addEventListener('click', handleLogout);
+        ui.publishAnnouncementButton.addEventListener('click', addAnnouncement);
     }
 
     function initGameUI(user) {
         if(!game || !game.player) { location.reload(); return; }
         game.player.id = user.id;
+        if(game.player.role === 'admin') ui.adminTabButton.classList.remove('hidden');
         setupTabs();
         setupAchievements();
         try { initChart(); } catch (error) { console.error("Falha ao iniciar o gráfico:", error); }
+        fetchAnnouncements();
         renderGrades();
         renderReminders();
         renderScheduledMissions();
@@ -197,9 +218,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.mainQuestDisplay.addEventListener('click', handleQuickQuestInteraction);
         ui.profilePic.addEventListener('contextmenu', e => e.preventDefault());
         ui.logoutButton.addEventListener('click', handleLogout);
-        ui.settingsButton.addEventListener('click', () => { document.querySelector('.tab-button[data-tab="tab-settings"]').click(); });
         ui.saveProfileButton.addEventListener('click', saveProfileSettings);
         ui.updatePasswordButton.addEventListener('click', updateUserPassword);
+        ui.muralPostForm.addEventListener('submit', handleNewMuralMessage);
+        ui.muralFeed.addEventListener('click', handleMuralLike);
     }
     
     // --- PONTO DE ENTRADA ---
@@ -209,17 +231,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const success = await loadGameAndStart(session.user);
             if (!success) {
                 await handleLogout();
-                location.reload();
             }
         } else {
-            ui.loginModal.classList.remove('hidden');
-            ui.switchToSignupBtn.addEventListener('click', () => {
-                ui.loginModal.classList.add('hidden');
-                ui.signupModal.classList.remove('hidden');
+            ui.authContainer.classList.remove('hidden');
+            ui.loginPanel.classList.remove('hidden');
+            ui.signupPanel.classList.add('hidden');
+            document.getElementById('switch-to-signup').addEventListener('click', () => {
+                ui.loginPanel.classList.add('hidden');
+                ui.signupPanel.classList.remove('hidden');
             });
-            ui.switchToLoginBtn.addEventListener('click', () => {
-                ui.signupModal.classList.add('hidden');
-                ui.loginModal.classList.remove('hidden');
+            document.getElementById('switch-to-login').addEventListener('click', () => {
+                ui.signupPanel.classList.add('hidden');
+                ui.loginPanel.classList.remove('hidden');
             });
             ui.loginForm.addEventListener('submit', handleLogin);
             ui.signupForm.addEventListener('submit', handleSignUp);
