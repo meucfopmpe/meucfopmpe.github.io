@@ -16,9 +16,12 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 .hidden { display: none !important; }
 .helper-text { font-size: 0.8em; color: var(--disabled-color); margin: 5px 0 10px; }
 
-/* AUTH CONTAINER */
-#auth-container { display: flex; gap: 20px; width: 100%; max-width: 800px; flex-wrap: wrap; justify-content: center; }
-.auth-panel { background-color: var(--panel-background); border: 1px solid var(--border-color); border-radius: 8px; padding: 25px; flex: 1; min-width: 300px; }
+/* AUTH CONTAINER REDESIGN */
+#auth-container { width: 100%; max-width: 450px; }
+.auth-panel { background-color: var(--panel-background); border: 1px solid var(--border-color); border-radius: 8px; padding: 25px; }
+.auth-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
+.auth-tab-btn { background: none; border: none; color: var(--disabled-color); padding: 10px 20px; cursor: pointer; font-size: 1.1em; flex-grow: 1; font-family: 'Orbitron', sans-serif; }
+.auth-tab-btn.active { color: var(--primary-color); border-bottom: 2px solid var(--primary-color); }
 .auth-panel form { display: flex; flex-direction: column; gap: 15px; }
 .auth-panel label { font-weight: bold; text-align: left; }
 .auth-panel input { background: var(--border-color); border: 1px solid var(--text-color); color: #fff; padding: 12px; border-radius: 4px; font-size: 1em; }
@@ -36,8 +39,7 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 .stat-detail-bar { height: 100%; background-color: var(--success-color); }
 .stat-detail-text { font-size: 0.9em; margin-top: 5px; }
 
-#game-container, #admin-container { width: 100%; max-width: 1500px; }
-#game-container { display: grid; grid-template-columns: 300px 1fr 350px; gap: 15px; }
+#game-container { display: grid; grid-template-columns: 300px 1fr 350px; gap: 15px; width: 100%; max-width: 1500px; }
 #left-column, #main-column, #right-column { display: flex; flex-direction: column; gap: 15px; }
 .panel { background-color: var(--panel-background); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; box-shadow: 0 0 15px rgba(0, 255, 255, 0.05); }
 .panel-title { font-family: 'Orbitron', sans-serif; color: var(--primary-color); margin: 0 0 15px 0; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); text-align: center; font-size: 1.2em; }
@@ -149,6 +151,7 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 
 /* Aba de Configurações e Admin */
 .settings-section { margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
+.settings-section:last-child { border-bottom: none; }
 .settings-section h4 { color: var(--primary-color); margin-top: 0; }
 .settings-section label { display: block; margin-bottom: 5px; }
 .settings-section input, .settings-section textarea { width: 100%; box-sizing: border-box; background-color: var(--border-color); color: var(--text-color); border: 1px solid var(--text-color); border-radius: 4px; padding: 8px; margin-bottom: 10px; }
@@ -156,8 +159,6 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 #elogios-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
 .elogio-item { display: flex; align-items: center; gap: 10px; }
 .elogio-item img { width: 30px; height: 30px; border-radius: 50%; }
-
-/* Admin Panel */
 .admin-header { display: flex; justify-content: space-between; align-items: center; }
 #admin-container .panel { max-width: 900px; margin: auto; }
 #admin-user-list { max-height: 400px; overflow-y: auto; }
@@ -166,12 +167,12 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 #admin-user-list th { color: var(--primary-color); }
 
 /* Mural */
-#mural-feed { max-height: 400px; overflow-y: auto; display: flex; flex-direction: column-reverse; margin-bottom: 15px; }
+#mural-feed { max-height: 400px; overflow-y: auto; display: flex; flex-direction: column-reverse; margin-bottom: 15px; border: 1px solid var(--border-color); padding: 10px; border-radius: 5px; }
 .mural-message { background-color: var(--border-color); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
 .mural-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .mural-header img { width: 30px; height: 30px; border-radius: 50%; }
 .mural-header .author { font-weight: bold; }
-.mural-header .timestamp { font-size: 0.8em; color: var(--disabled-color); }
+.mural-header .timestamp { font-size: 0.8em; color: var(--disabled-color); margin-left: auto; }
 .mural-content { padding-left: 40px; }
 .mural-actions { padding-left: 40px; margin-top: 8px; display: flex; align-items: center; gap: 15px; font-size: 0.9em; }
 .mural-actions button { background: none; border: none; color: var(--disabled-color); cursor: pointer; display: flex; align-items: center; gap: 5px; }
@@ -210,6 +211,8 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 
 @media (max-width: 768px) {
     body { padding: 10px; }
+    #auth-container { flex-direction: column; }
+    .auth-panel { padding: 15px; }
     #game-container { grid-template-columns: 1fr; grid-template-areas: "left" "main" "right"; }
     .tab-buttons { justify-content: center; }
     #time-and-action-panel { flex-direction: column; }
