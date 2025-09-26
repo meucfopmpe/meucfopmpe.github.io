@@ -57,6 +57,7 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 #settings-button { background-color: var(--disabled-color); color: var(--text-color); }
 #logout-button { background-color: var(--danger-color); color: #fff; }
 
+
 /* Coluna Central */
 #time-and-action-panel { display: flex; justify-content: space-between; align-items: stretch; gap: 15px; }
 .main-progress-display { text-align: center; display: flex; flex-direction: column; justify-content: center; background-color: var(--border-color); padding: 10px; border-radius: 5px; flex-shrink: 0; }
@@ -182,6 +183,8 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--background-col
 
 @media (max-width: 768px) {
     body { padding: 10px; }
+    #auth-container { padding: 10px; }
+    .auth-panel { padding: 15px; }
     #game-container { grid-template-columns: 1fr; grid-template-areas: "left" "main" "right"; }
     .tab-buttons { justify-content: center; }
     #time-and-action-panel { flex-direction: column; }
