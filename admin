@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Portal do Cadete</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="admin-container">
+        <div class="panel">
+            <div class="admin-header">
+                <h2 class="panel-title">Painel do Administrador</h2>
+                <button id="admin-logout-button">Sair</button>
+            </div>
+            <div class="settings-section">
+                <h4>Publicar Aviso Global</h4>
+                <textarea id="announcement-input" rows="3" placeholder="Digite o aviso para todos os usuários..."></textarea>
+                <button id="publish-announcement-button">Publicar Aviso</button>
+            </div>
+            <div class="settings-section">
+                <h4>Usuários Cadastrados</h4>
+                <div id="admin-user-list">Carregando usuários...</div>
+            </div>
+        </div>
+    </div>
+    <script src="admin.js"></script>
+</body>
+</html>
