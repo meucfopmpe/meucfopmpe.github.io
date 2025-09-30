@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Desafio CFO: Versão Definitiva</title>
+    <title>Desafio CFO: GPGA Final</title>
     <style>
         :root {
             --primary-bg: #2c3e50; --secondary-bg: #34495e; --light-text: #ecf0f1;
-            --road-color: #7f8c8d; --accent-blue: #3498db; --accent-red: #e74c3c;
+            --road-color: #4a4a4a; --accent-blue: #3498db; --accent-red: #e74c3c;
             --power-yellow: #f1c40f;
         }
         * { box-sizing: border-box; }
@@ -27,7 +27,6 @@
             cursor: pointer; border: none; border-radius: 8px;
             margin: 5px; transition: transform 0.2s;
         }
-        .button:hover { transform: scale(1.05); }
         .play-button { background-color: #2ecc71; color: white; }
         .shop-button { background-color: var(--accent-blue); color: white; }
         .back-button { background-color: #f39c12; color: white; }
@@ -53,10 +52,14 @@
         }
         #power-indicator { font-size: 24px; }
         #question-area {
-            width: 100%; height: 90px; padding: 10px;
-            background-color: var(--secondary-bg); text-align: center; font-size: 16px;
-            display: flex; justify-content: center; align-items: center;
+            width: 100%; height: 110px; padding: 10px;
+            background-color: var(--secondary-bg); text-align: center; font-size: 18px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
             border-bottom: 2px solid var(--primary-bg);
+            font-family: 'Courier New', Courier, monospace;
+        }
+        #game-title {
+            font-size: 1.2em; font-weight: bold; color: var(--power-yellow); margin-bottom: 5px;
         }
         canvas {
             background-color: var(--road-color); display: block;
@@ -87,16 +90,28 @@
             background-color: var(--primary-bg); padding: 15px; border-radius: 10px;
             border: 2px solid var(--accent-blue); display: flex; flex-direction: column; justify-content: space-between;
         }
-        .shop-item canvas { border-radius: 5px; background-color: var(--road-color); width: 100px; height: 100px; margin: auto; }
-        .shop-button-equip { background-color: #9b59b6; }
-        .shop-button-equipped { background-color: #27ae60; cursor: not-allowed; }
-        .shop-button-owned { background-color: #7f8c8d; }
-
+        
+        .report-item {
+            cursor: pointer;
+            margin: 0 0 15px 0;
+            border-bottom: 1px solid #7f8c8d;
+            padding-bottom: 10px;
+        }
+        .report-item:last-child { border-bottom: none; }
+        .report-item .explanation {
+            display: none;
+            margin-top: 8px;
+            padding: 8px;
+            background-color: rgba(0,0,0,0.3);
+            border-radius: 4px;
+            font-style: italic;
+            color: #f1c40f;
+        }
+        .report-item.active .explanation {
+            display: block;
+        }
         #error-report { text-align: left; max-height: 150px; overflow-y: auto; background-color: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; margin-top: 15px;}
-        #error-report p { margin: 0 0 15px 0; border-bottom: 1px solid #7f8c8d; padding-bottom: 10px;}
-        #error-report p:last-child { border-bottom: none; }
         #error-report strong { color: var(--accent-red); }
-        #error-report em { color: #f1c40f; }
         
         .hidden { display: none; }
     </style>
@@ -119,7 +134,10 @@
 
     <div id="game-wrapper" class="hidden">
         <div id="game-container">
-            <div id="question-area">Carregando...</div>
+            <div id="question-area">
+                <div id="game-title">GPGA</div>
+                <div id="question-text">Carregando...</div>
+            </div>
             <div id="info-bar">
                 <div id="score">Pontos: 0</div>
                 <div id="power-indicator"></div>
@@ -180,107 +198,96 @@
         let playerData = {};
         let activeTimeouts = [];
         let incorrectAnswers = [];
+        let questionsAnsweredCount = 0;
 
         const questions = [
-    // Tópico 1: Conceitos Gerais da Gestão Pública
-    { text: "Estado, Governo e Administração Pública são conceitos sinônimos e intercambiáveis.", answer: false, explanation: "Explicação: São conceitos distintos. O Estado é a organização permanente, o Governo é sua cúpula política transitória e a Administração é o aparato de execução." },
-    { text: "O principal objetivo da Gestão Privada é o bem-estar da coletividade, enquanto a Pública visa o lucro.", answer: false, explanation: "Explicação: É o oposto. O objetivo da Gestão Pública é o bem-estar da coletividade, enquanto o da Gestão Privada é o lucro." },
-    { text: "Eficácia significa 'fazer as coisas certo', ou seja, usar os recursos de forma econômica.", answer: false, explanation: "Explicação: 'Fazer as coisas certo' é Eficiência. Eficácia é 'fazer a coisa certa', ou seja, atingir os objetivos propostos." },
-    { text: "A Desconcentração ocorre quando o Estado cria uma nova entidade (pessoa jurídica), como uma autarquia, para realizar um serviço.", answer: false, explanation: "Explicação: Isso é Descentralização. Desconcentração é a distribuição de tarefas DENTRO da mesma pessoa jurídica (ex: um ministério criando secretarias)." },
-    { text: "Governabilidade é a capacidade técnica e administrativa de um governo implementar políticas.", answer: false, explanation: "Explicação: Isso é Governança. Governabilidade é a capacidade POLÍTICA de governar, baseada em apoio e legitimidade social." },
-    { text: "'Accountability' é a obrigação dos gestores públicos de prestar contas de suas ações.", answer: true, explanation: "Explicação: Accountability é exatamente a responsabilidade e o dever de prestar contas dos atos e recursos utilizados perante os cidadãos." },
-    { text: "Efetividade é a capacidade de atingir as metas propostas, independentemente do impacto gerado na sociedade.", answer: false, explanation: "Explicação: Atingir metas é Eficácia. Efetividade é a união de eficiência e eficácia para gerar um impacto real e positivo na sociedade." },
-    { text: "O Brasil adota a República como forma de governo e o Parlamentarismo como sistema.", answer: false, explanation: "Explicação: O Brasil adota a República como forma de governo e o Presidencialismo como sistema." },
-    { text: "A principal fonte de recursos da Gestão Pública é o pagamento direto dos clientes pelos serviços utilizados.", answer: false, explanation: "Explicação: A principal fonte são os impostos pagos pela sociedade, independentemente do uso direto do serviço." },
-    { text: "A centralização administrativa busca agilizar a tomada de decisão, delegando autoridade para os níveis mais baixos.", answer: false, explanation: "Explicação: Isso é Descentralização. A centralização concentra a autoridade no topo da hierarquia." },
-
-    // Tópico 2 & 3: Abordagens da Administração & Evolução no Brasil
-    { text: "O paradigma do Patrimonialismo é caracterizado pela clara separação entre o patrimônio público e o privado.", answer: false, explanation: "Explicação: O Patrimonialismo é marcado pela CONFUSÃO entre o público e o privado, onde o governante trata a coisa pública como sua." },
-    { text: "A Abordagem Clássica da Administração, de Taylor e Fayol, tinha como foco principal as pessoas e seus comportamentos.", answer: false, explanation: "Explicação: O foco da Abordagem Clássica era nas Tarefas (Taylor) e na Estrutura (Fayol), com uma visão mecanicista da organização." },
-    { text: "As quatro funções do administrador definidas por Fayol são: Planejar, Organizar, Dirigir e Controlar (PODC).", answer: true, explanation: "Explicação: Fayol definiu as quatro funções clássicas do administrador como Planejar, Organizar, Dirigir (ou Comandar) e Controlar." },
-    { text: "A Experiência de Hawthorne provou que a iluminação era o fator mais importante para a produtividade.", answer: false, explanation: "Explicação: A experiência demonstrou o contrário: fatores sociais e psicológicos (como a atenção dada aos trabalhadores) eram mais importantes que os fatores físicos." },
-    { text: "A Abordagem Burocrática de Max Weber busca a eficiência através da flexibilidade e informalidade nas relações.", answer: false, explanation: "Explicação: A Burocracia de Weber busca a eficiência através da racionalidade, com regras formais, hierarquia clara e impessoalidade." },
-    { text: "A Abordagem Contingencial afirma que existe uma 'única melhor maneira' (one best way) de administrar uma organização.", answer: false, explanation: "Explicação: A Abordagem Contingencial defende o oposto: não existe uma única maneira, e a melhor abordagem 'depende' da situação e do ambiente." },
-    { text: "O DASP (Departamento Administrativo do Serviço Público), criado em 1938, foi um marco do paradigma Patrimonialista.", answer: false, explanation: "Explicação: O DASP foi um marco do paradigma da 'AP como Ciência Administrativa', buscando racionalizar o serviço público para superar o Patrimonialismo." },
-    { text: "A Abordagem Sistêmica vê a organização como um sistema fechado, sem interação com o ambiente externo.", answer: false, explanation: "Explicação: A Abordagem Sistêmica enxerga a organização como um sistema aberto, que sofre e exerce influência no ambiente externo." },
-    { text: "A Administração por Objetivos (APO), popularizada por Peter Drucker, faz parte da Abordagem Neoclássica.", answer: true, explanation: "Explicação: A APO é um conceito central da Abordagem Neoclássica, que retomou os conceitos clássicos com foco pragmático em objetivos e resultados." },
-    { text: "A principal característica da fase 'AP como Ciência Política' (1980-89) foi a busca pela eficiência técnica acima de tudo.", answer: false, explanation: "Explicação: O foco deste paradigma, no contexto da redemocratização, foi a equidade social, a cidadania e a participação política." },
-
-    // Tópico 4: Princípios (LIMPE)
-    { text: "O princípio da Legalidade determina que o administrador público pode fazer tudo o que a lei não proíbe.", answer: false, explanation: "Explicação: Essa é a legalidade para o cidadão comum. Para o administrador público, ele só pode fazer o que a lei expressamente autoriza ou determina." },
-    { text: "O princípio da Impessoalidade visa garantir que o administrador atenda primeiramente aos interesses de seu grupo político.", answer: false, explanation: "Explicação: O princípio da Impessoalidade exige que o administrador vise o interesse público e trate todos de forma igual, sem favorecimentos ou perseguições." },
-    { text: "A Moralidade administrativa se satisfaz apenas com o cumprimento da lei, não se preocupando com a ética ou honestidade do ato.", answer: false, explanation: "Explicação: A Moralidade vai além da legalidade, exigindo uma conduta ética, honesta e de 'bom administrador'." },
-    { text: "O princípio da Publicidade garante que todos os atos administrativos, sem exceção, devem ser divulgados.", answer: false, explanation: "Explicação: O princípio da Publicidade não é absoluto. Atos relacionados à segurança nacional ou investigações sigilosas são exceções." },
-    { text: "O princípio da Eficiência foi adicionado à Constituição de 1988 pela Emenda Constitucional nº 19, de 1998.", answer: true, explanation: "Explicação: Originalmente, o artigo 37 continha apenas L, I, M, P. A Eficiência (E) foi incluída posteriormente para completar o acrônimo LIMPE." },
-    { text: "O acrônimo LIMPE se refere aos princípios de Legalidade, Interesse Público, Moralidade, Publicidade e Economicidade.", answer: false, explanation: "Explicação: O 'I' de LIMPE se refere a Impessoalidade e o 'E' se refere a Eficiência." },
-    { text: "Publicar um ato no Diário Oficial é uma manifestação do princípio da Moralidade.", answer: false, explanation: "Explicação: A publicação de atos em diários oficiais é a principal manifestação do princípio da Publicidade." },
-    { text: "Tratar todos os cidadãos de forma igual, sem privilégios, é uma exigência do princípio da Legalidade.", answer: false, explanation: "Explicação: Tratar todos de forma igual, sem favorecimentos, é a essência do princípio da Impessoalidade." },
-    { text: "Agir com presteza e buscar os melhores resultados com os menores custos se relaciona com o princípio da Eficiência.", answer: true, explanation: "Explicação: A eficiência busca exatamente a prestação do serviço com qualidade, racionalidade e economia de recursos." },
-    { text: "O princípio da Legalidade na Administração Pública é mais restritivo do que na esfera privada.", answer: true, explanation: "Explicação: Sim. No direito privado pode-se fazer tudo que a lei não proíbe; no público, só se pode fazer o que a lei permite." },
-
-    // Tópico 5: Organização da Administração
-    { text: "A Administração Indireta é composta por órgãos sem personalidade jurídica própria, como os Ministérios.", answer: false, explanation: "Explicação: Os Ministérios fazem parte da Adm. Direta. A Adm. Indireta é composta por ENTIDADES com personalidade jurídica própria (autarquias, fundações, etc.)." },
-    { text: "As autarquias, como o INSS, fazem parte da Administração Direta.", answer: false, explanation: "Explicação: Autarquias são entidades com personalidade jurídica própria e fazem parte da Administração Indireta." },
-    { text: "O Terceiro Setor é composto por entidades privadas que colaboram com o Estado em atividades de interesse público, sem visar lucro.", answer: true, explanation: "Explicação: Essa é a definição do Terceiro Setor, que inclui ONGs, OSs, e outras entidades paraestatais." },
-    { text: "A PMPE, como órgão do Poder Executivo, faz parte da Administração Indireta do Estado de Pernambuco.", answer: false, explanation: "Explicação: A PMPE é um órgão da Administração Direta, diretamente vinculada à Secretaria de Defesa Social (SDS)." },
-    { text: "As Sociedades de Economia Mista, como a Petrobras, são controladas exclusivamente pelo capital privado.", answer: false, explanation: "Explicação: Sociedades de Economia Mista têm capital misto (público e privado), com o controle acionário pertencendo ao poder público." },
-    { text: "Empresas Públicas, como os Correios, possuem personalidade jurídica de direito privado.", answer: true, explanation: "Explicação: Sim, tanto Empresas Públicas quanto Sociedades de Economia Mista possuem personalidade jurídica de direito privado, embora integrem a Adm. Indireta." },
-    { text: "A criação de uma Secretaria dentro de um Ministério é um exemplo de Descentralização.", answer: false, explanation: "Explicação: É um exemplo de Desconcentração, pois é uma divisão de competências dentro da mesma pessoa jurídica (a União)." },
-    { text: "O 'Sistema S' (SESI, SENAI, etc.) são exemplos de autarquias da Administração Indireta.", answer: false, explanation: "Explicação: O 'Sistema S' são Serviços Sociais Autônomos, entidades paraestatais que compõem o Terceiro Setor, não a Adm. Indireta." },
-    { text: "Órgãos da Administração Direta não possuem personalidade jurídica própria.", answer: true, explanation: "Explicação: Correto. Eles são parte do ente federativo (União, Estado, etc.), que é quem detém a personalidade jurídica." },
-    { text: "A vinculação da Administração Indireta à Direta implica uma relação de subordinação hierárquica.", answer: false, explanation: "Explicação: Não há hierarquia, mas sim um controle finalístico (tutela). As entidades da Adm. Indireta possuem autonomia." },
-    
-    // Tópico 6: Ciclos de Gestão
-    { text: "O PPA (Plano Plurianual) é um instrumento de planejamento de curto prazo, com validade de apenas um ano.", answer: false, explanation: "Explicação: O PPA é o planejamento de médio prazo do governo, com duração de 4 anos." },
-    { text: "A LDO (Lei de Diretrizes Orçamentárias) serve como ponte entre o PPA e a LOA, definindo as metas e prioridades para o ano seguinte.", answer: true, explanation: "Explicação: A LDO tem a função de orientar a elaboração da LOA, detalhando as metas anuais baseadas no PPA." },
-    { text: "A LOA (Lei Orçamentária Anual) é a lei que estabelece os objetivos e metas do governo para um período de 4 anos.", answer: false, explanation: "Explicação: Isso é o PPA. A LOA é o orçamento anual que estima as receitas e fixa as despesas para o ano." },
-    { text: "O PPA tem vigência que coincide exatamente com o mandato de 4 anos do governante.", answer: false, explanation: "Explicação: O PPA inicia no 2º ano de um mandato e termina no 1º ano do mandato seguinte, para garantir a continuidade do planejamento." },
-    { text: "A LDO deve ser elaborada anualmente, enquanto o PPA e a LOA são quadrienais.", answer: false, explanation: "Explicação: A LDO e a LOA são anuais. O PPA é o único dos três que tem um planejamento de médio prazo (quadrienal)." },
-    { text: "A principal função da LOA é EXECUTAR o orçamento, estimando receitas e fixando despesas.", answer: true, explanation: "Explicação: A LOA é o orçamento propriamente dito, sendo o instrumento de execução orçamentária anual." },
-    { text: "A única função da LDO é autorizar a abertura de créditos suplementares.", answer: false, explanation: "Explicação: Sua função principal é estabelecer metas e prioridades para o ano seguinte e orientar a elaboração da LOA." },
-    { text: "O fluxo correto do ciclo de gestão é: LOA guia a LDO, que guia o PPA.", answer: false, explanation: "Explicação: O fluxo correto é o inverso: O PPA (planejamento de 4 anos) guia a LDO (metas anuais), que por sua vez orienta a LOA (orçamento anual)." },
-    { text: "O projeto do PPA deve ser enviado ao Legislativo até quatro meses antes do encerramento do primeiro ano financeiro do mandato.", answer: true, explanation: "Explicação: Conforme o ADCT, o PPA é encaminhado até 31 de agosto do primeiro ano de mandato." },
-    { text: "A LOA pode ser executada sem a orientação prévia de uma LDO.", answer: false, explanation: "Explicação: A LOA é elaborada com base nas diretrizes e prioridades estabelecidas anualmente pela LDO." },
-    
-    // Tópico 7: Licitações
-    { text: "Licitação é o procedimento administrativo para selecionar a proposta mais vantajosa para a administração pública.", answer: true, explanation: "Explicação: A licitação é o processo formal que garante a isonomia e a escolha da melhor proposta para contratos com o governo." },
-    { text: "A Lei nº 14.133/2021 extinguiu a modalidade de licitação 'Pregão'.", answer: false, explanation: "Explicação: A Lei 14.133/21 manteve o Pregão como uma das modalidades de licitação, ao lado de concorrência, concurso, leilão e diálogo competitivo." },
-    { text: "A modalidade de licitação 'Diálogo Competitivo' foi introduzida pela nova Lei de Licitações (14.133/21).", answer: true, explanation: "Explicação: O Diálogo Competitivo é uma das inovações da Lei 14.133/21, destinada a contratações complexas." },
-    { text: "O 'Leilão' é a modalidade de licitação utilizada para a venda de bens móveis inservíveis para a administração.", answer: true, explanation: "Explicação: O leilão é a modalidade correta para a alienação (venda) de bens pela administração a quem oferecer o maior lance." },
-    { text: "A licitação é sempre obrigatória, não havendo exceções para dispensa ou inexigibilidade.", answer: false, explanation: "Explicação: A lei prevê casos específicos de dispensa (ex: baixo valor) e inexigibilidade (ex: competição inviável) de licitação." },
-    
-    // Tópico 8: Políticas Públicas
-    { text: "Políticas Públicas são um fluxo de decisões orientadas a resolver problemas sociais.", answer: true, explanation: "Explicação: Políticas públicas são as ações e decisões do governo para manter o equilíbrio social ou introduzir mudanças na realidade." },
-    { text: "A fase de 'Avaliação' é a primeira etapa do ciclo de políticas públicas.", answer: false, explanation: "Explicação: A primeira etapa é a 'Construção da Agenda'. A Avaliação é a última, analisando os resultados da política implementada." },
-    { text: "A fase de 'Implementação' no ciclo de políticas públicas é quando as alternativas são discutidas e elaboradas.", answer: false, explanation: "Explicação: Isso ocorre na fase de 'Formulação'. A 'Implementação' é quando a política escolhida é colocada em prática." },
-    { text: "A 'Construção da Agenda' é a fase onde se decide qual alternativa de política pública será adotada.", answer: false, explanation: "Explicação: Isso é o 'Processo Decisório'. A Construção da Agenda é a fase inicial onde um problema é identificado e colocado em pauta." },
-    { text: "Uma política pública é considerada causal, pois, quando implementada, promove impactos (positivos ou negativos) na sociedade.", answer: true, explanation: "Explicação: A causalidade é uma característica das políticas públicas, pois elas geram consequências e modificam a realidade social." },
-    
-    // Tópico 9: Controle da Administração
-    { text: "O Controle Interno da administração é exercido por um Poder sobre os atos de outro Poder (ex: Judiciário controlando o Executivo).", answer: false, explanation: "Explicação: Isso é Controle Externo. O Controle Interno é exercido dentro de cada poder, para fiscalizar os próprios atos (autotutela)." },
-    { text: "O controle de 'Mérito' analisa a conveniência e oportunidade de um ato administrativo, sendo de natureza objetiva.", answer: false, explanation: "Explicação: O controle de mérito é de natureza SUBJETIVA (discricionária). O controle de legalidade é objetivo (vinculado à lei)." },
-    { text: "O controle 'Concomitante' ocorre após o ato administrativo já ter sido finalizado.", answer: false, explanation: "Explicação: O controle concomitante ocorre DURANTE a execução do ato. O controle que ocorre após é o 'Posterior' ou 'Corretivo'." },
-    { text: "O controle finalístico é aquele exercido por um órgão superior sobre um inferior dentro da mesma estrutura hierárquica.", answer: false, explanation: "Explicação: Isso é o controle hierárquico. O controle finalístico (ou tutela) é exercido pela Administração Direta sobre as entidades da Indireta." },
-    { text: "O controle exercido pelo Tribunal de Contas sobre os atos do Poder Executivo é um exemplo de Controle Interno.", answer: false, explanation: "Explicação: O Tribunal de Contas é um órgão de auxílio ao Poder Legislativo, portanto, o controle que ele exerce sobre o Executivo é um exemplo de Controle Externo." },
-    
-    // Tópico 10: Ferramentas Gerenciais
-    { text: "A ferramenta gerencial 'Benchmarking' consiste em um ciclo de melhoria contínua de planejar, executar, checar e agir.", answer: false, explanation: "Explicação: Isso é o PDCA. Benchmarking é o processo de comparar suas práticas com as melhores do mercado para aprender e melhorar." },
-    { text: "O Diagrama de Pareto baseia-se no princípio 80/20, ajudando a priorizar os problemas mais impactantes.", answer: true, explanation: "Explicação: O princípio de Pareto afirma que 80% dos problemas são causados por 20% das causas, ajudando a focar nos pontos críticos." },
-    { text: "A ferramenta Kaizen é uma filosofia de melhoria contínua que busca o aperfeiçoamento constante dos processos.", answer: true, explanation: "Explicação: Kaizen significa 'melhoria contínua' e envolve todos os membros da organização na busca por otimizações diárias." },
-    { text: "O Orçamento Participativo é uma ferramenta onde especialistas definem o orçamento sem consultar a população.", answer: false, explanation: "Explicação: O Orçamento Participativo é exatamente o oposto: envolve a participação da sociedade na decisão sobre a alocação de recursos." },
-    { text: "O ciclo PDCA é uma ferramenta estática, onde cada etapa é executada apenas uma vez.", answer: false, explanation: "Explicação: O PDCA é um CICLO de melhoria contínua, ou seja, após a etapa 'Agir', o ciclo recomeça com um novo planejamento." },
-    
-    // Tópico 11 & 12: Estrutura PMPE e Gestão de Excelência
-    { text: "A estrutura organizacional de uma empresa é representada graficamente pelo fluxograma.", answer: false, explanation: "Explicação: A estrutura é representada pelo organograma. O fluxograma representa o fluxo de um processo." },
-    { text: "A cultura organizacional é o conjunto de regras formais e escritas que regem uma instituição.", answer: false, explanation: "Explicação: A cultura organizacional representa as normas 'não escritas', os valores e hábitos compartilhados que orientam o comportamento." },
-    { text: "A PMPE está diretamente vinculada à Secretaria de Governo do Estado de Pernambuco.", answer: false, explanation: "Explicação: A PMPE está vinculada à Secretaria de Defesa Social (SDS), conforme a lei de estrutura do Poder Executivo." },
-    { text: "O MEG (Modelo de Excelência em Gestão) da FNQ se aplica exclusivamente a empresas privadas.", answer: false, explanation: "Explicação: O MEG é um sistema que orienta tanto organizações públicas quanto privadas a atingirem padrões de excelência." },
-    { text: "O fundamento 'Pensamento Sistêmico' do MEG refere-se a entender as partes da organização de forma isolada.", answer: false, explanation: "Explicação: O Pensamento Sistêmico é o oposto: refere-se a entender a interdependência e a relação entre as diversas partes da organização." },
-    { text: "O conceito moderno de qualidade, segundo a ISO 9000, foca apenas na ausência de defeitos do produto.", answer: false, explanation: "Explicação: O conceito evoluiu para a 'satisfação das necessidades e expectativas dos clientes', tanto explícitas quanto implícitas." },
-    { text: "A 'Visão de Futuro' é um fundamento do MEG que se refere à capacidade de uma organização de entender os fatores que a afetam a curto e longo prazo.", answer: true, explanation: "Explicação: Ter uma Visão de Futuro é um dos fundamentos da excelência, permitindo que a organização se prepare e se perenize." },
-    { text: "'Geração de Valor' no MEG significa alcançar resultados financeiros positivos para a organização, apenas.", answer: false, explanation: "Explicação: Geração de Valor é mais amplo, significando alcançar resultados consistentes (tangíveis e intangíveis) para TODAS as partes interessadas." },
-    { text: "A reciprocidade no comportamento organizacional diz que a organização oferece recompensas e as pessoas oferecem seu trabalho.", answer: true, explanation: "Explicação: O processo de reciprocidade é a base do comportamento organizacional, onde há uma troca mútua entre as expectativas da organização e dos indivíduos." },
-    { text: "Uma cultura organizacional conservadora é mais flexível e maleável que uma cultura adaptativa.", answer: false, explanation: "Explicação: É o contrário. Culturas conservadoras são rígidas, enquanto as adaptativas são flexíveis e mais preparadas para mudanças." }
+            { text: "Estado, Governo e Administração Pública são conceitos sinônimos.", answer: false, explanation: "Explicação: São distintos. Estado é permanente (nação), Governo é transitório (quem administra) e Administração é o aparato de execução." },
+            { text: "A principal finalidade da Gestão Privada é o bem-estar da coletividade.", answer: false, explanation: "Explicação: O objetivo da Gestão Privada é o lucro financeiro. O bem-estar da coletividade é o objetivo da Gestão Pública." },
+            { text: "Eficácia é a capacidade de atingir os objetivos propostos, ou seja, 'fazer o que deve ser feito'.", answer: true, explanation: "Explicação: Correto. Eficácia foca nos resultados e no alcance das metas, enquanto eficiência foca no uso dos recursos." },
+            { text: "Descentralização ocorre quando uma competência é transferida para outra pessoa jurídica, como uma autarquia.", answer: true, explanation: "Explicação: Sim, a descentralização envolve a criação de uma nova entidade com personalidade jurídica para executar um serviço." },
+            { text: "Governabilidade refere-se à capacidade técnica e financeira de um governo para implementar políticas.", answer: false, explanation: "Explicação: Isso é Governança. Governabilidade é a capacidade POLÍTICA de governar, dependendo de apoio e legitimidade." },
+            { text: "'Accountability' é a obrigação dos gestores de prestar contas por suas ações e uso de recursos.", answer: true, explanation: "Explicação: Accountability é exatamente o dever de prestar contas e responder pelas responsabilidades perante os cidadãos." },
+            { text: "O paradigma do Patrimonialismo é marcado pela clara distinção entre o público e o privado.", answer: false, explanation: "Explicação: O Patrimonialismo é caracterizado pela CONFUSÃO entre o público e o privado, onde o governante trata o Estado como sua propriedade." },
+            { text: "O princípio da Legalidade, para o gestor público, significa que ele pode fazer tudo que a lei não proíbe.", answer: false, explanation: "Explicação: Este é o princípio da legalidade para o cidadão. Para o gestor público, ele SÓ PODE fazer o que a lei determina ou permite." },
+            { text: "A Administração Indireta é composta por entidades com personalidade jurídica própria, como Empresas Públicas.", answer: true, explanation: "Explicação: Correto. Entidades da Adm. Indireta (autarquias, fundações, empresas públicas) possuem personalidade jurídica própria e autonomia." },
+            { text: "O PPA (Plano Plurianual) tem validade de 1 ano e detalha o orçamento do exercício seguinte.", answer: false, explanation: "Explicação: O PPA é o planejamento de médio prazo (4 anos). Quem detalha o orçamento anual é a LOA (Lei Orçamentária Anual)." },
+            { text: "A LDO (Lei de Diretrizes Orçamentárias) estabelece a ponte entre o PPA (médio prazo) e a LOA (curto prazo).", answer: true, explanation: "Explicação: A LDO tem a função de definir as metas e prioridades anuais, orientando a elaboração do orçamento (LOA) com base no PPA." },
+            { text: "A LOA (Lei Orçamentária Anual) estima as receitas e fixa as despesas para um período de 4 anos.", answer: false, explanation: "Explicação: A LOA é anual. O instrumento de 4 anos é o PPA (Plano Plurianual)." },
+            { text: "Licitação é um procedimento opcional que a administração pode realizar se quiser obter a proposta mais vantajosa.", answer: false, explanation: "Explicação: A licitação é um procedimento obrigatório por lei para a maioria das contratações públicas, garantindo isonomia." },
+            { text: "A Lei nº 14.133/2021 introduziu uma nova modalidade de licitação chamada 'Diálogo Competitivo'.", answer: true, explanation: "Explicação: Sim, o Diálogo Competitivo é uma das cinco modalidades previstas na nova lei de licitações, junto com Pregão, Concorrência, Concurso e Leilão." },
+            { text: "O ciclo de Políticas Públicas começa com a fase de 'Implementação'.", answer: false, explanation: "Explicação: O ciclo começa com a 'Construção da Agenda', que é a identificação de um problema e a decisão de colocá-lo em pauta." },
+            { text: "O Controle Externo da Administração Pública é realizado pela própria administração sobre seus atos.", answer: false, explanation: "Explicação: Isso é Controle Interno (autotutela). O Controle Externo é realizado por outro Poder (Legislativo, Judiciário) ou pela sociedade." },
+            { text: "A ferramenta PDCA, também conhecida como Ciclo de Deming, representa um ciclo de melhoria contínua.", answer: true, explanation: "Explicação: PDCA (Plan, Do, Check, Act) é a principal ferramenta para a gestão da melhoria contínua de processos." },
+            { text: "O Diagrama de Pareto é utilizado para identificar as causas mais significativas de um problema, com base no princípio 80/20.", answer: true, explanation: "Explicação: O diagrama ajuda a priorizar, mostrando que, tipicamente, 80% dos problemas vêm de 20% das causas." },
+            { text: "A PMPE é uma entidade da Administração Indireta, pois tem autonomia para gerir seus recursos.", answer: false, explanation: "Explicação: A PMPE é um ÓRGÃO da Administração Direta, vinculada à Secretaria de Defesa Social (SDS)." },
+            { text: "O Modelo de Excelência em Gestão (MEG) é aplicável apenas a organizações privadas com fins lucrativos.", answer: false, explanation: "Explicação: O MEG é um modelo de referência que pode ser adotado por qualquer tipo de organização, pública ou privada, que busque a excelência." },
+            { text: "Efetividade é a combinação de ações eficientes e eficazes que geram um impacto positivo real na sociedade.", answer: true, explanation: "Explicação: Correto. Efetividade é o resultado final, o impacto da ação governamental na resolução do problema." },
+            { text: "A Abordagem Humanística de Elton Mayo focava na estrutura e nas tarefas para aumentar a produtividade.", answer: false, explanation: "Explicação: O foco da Abordagem Humanística era nas pessoas e nos fatores sociais e psicológicos, como demonstrado na Experiência de Hawthorne." },
+            { text: "O princípio da Moralidade exige que o administrador atue com honestidade, ética e nos padrões de um 'bom administrador'.", answer: true, explanation: "Explicação: Exato. A moralidade vai além da simples legalidade, exigindo uma conduta proba e ética do gestor público." },
+            { text: "Fundações Públicas são exemplos de órgãos da Administração Direta.", answer: false, explanation: "Explicação: Fundações Públicas são entidades com personalidade jurídica própria e fazem parte da Administração Indireta." },
+            { text: "O PPA (Plano Plurianual) inicia no primeiro ano de um mandato e termina no último.", answer: false, explanation: "Explicação: Para garantir continuidade, o PPA inicia no segundo ano de um mandato e termina no primeiro ano do mandato seguinte." },
+            { text: "A fase de 'Formulação' de uma política pública é onde as ações começam a acontecer no mundo real.", answer: false, explanation: "Explicação: Isso é a fase de 'Implementação'. Na 'Formulação', as alternativas para solucionar o problema são discutidas e elaboradas." },
+            { text: "O controle de 'Legalidade' verifica se o ato administrativo está em conformidade com a lei.", answer: true, explanation: "Explicação: Correto. O controle de legalidade é objetivo e analisa a conformidade do ato com as normas legais." },
+            { text: "A filosofia Kaizen prega grandes e raras mudanças revolucionárias na organização.", answer: false, explanation: "Explicação: Kaizen é a filosofia da melhoria contínua e incremental, envolvendo pequenas melhorias feitas por todos, todos os dias." },
+            { text: "A cultura organizacional é representada pelas regras formais e escritas da empresa, como manuais e regulamentos.", answer: false, explanation: "Explicação: A cultura representa as normas 'não escritas', os valores, crenças e hábitos compartilhados que guiam o comportamento." },
+            { text: "'Pensamento Sistêmico' é um fundamento do MEG que significa entender a organização como um conjunto de partes interdependentes.", answer: true, explanation: "Explicação: Sim, o pensamento sistêmico é a capacidade de entender como as diferentes partes da organização e seu ambiente se conectam e interagem." },
+            { text: "O Governo é a parte permanente do Estado, enquanto o Estado é transitório.", answer: false, explanation: "Explicação: É o oposto. O Estado é a entidade permanente, e o Governo é a cúpula política transitória que o administra." },
+            { text: "Na gestão pública, o administrador pode fazer tudo que a lei não proíbe, similar à gestão privada.", answer: false, explanation: "Explicação: Na gestão pública, o administrador está restrito ao princípio da legalidade estrita: só pode fazer o que a lei autoriza." },
+            { text: "A Abordagem Burocrática de Max Weber valoriza a impessoalidade nas relações como forma de garantir racionalidade.", answer: true, explanation: "Explicação: A impessoalidade é uma característica chave do modelo burocrático, visando eliminar favoritismos e garantir decisões racionais." },
+            { text: "O paradigma 'AP como AP' (pós-1990) busca aliar a capacidade técnica com a capacidade política, com foco na cidadania.", answer: true, explanation: "Explicação: Sim, este paradigma busca uma síntese, aliando a competência técnica da gestão com a legitimidade política e a participação social." },
+            { text: "O princípio da Publicidade é absoluto e não admite exceções.", answer: false, explanation: "Explicação: O princípio da publicidade pode ser relativizado em casos que envolvam a segurança do Estado e da sociedade." },
+            { text: "A PMPE é um exemplo de Autarquia.", answer: false, explanation: "Explicação: A PMPE é um órgão da Administração Direta, não uma autarquia da Administração Indireta." },
+            { text: "O ciclo de gestão PPA-LDO-LOA garante que o planejamento de médio prazo oriente o orçamento anual.", answer: true, explanation: "Explicação: O PPA (4 anos) fornece as diretrizes para a LDO (anual), que por sua vez orienta a elaboração da LOA (orçamento do ano)." },
+            { text: "A modalidade 'Concurso' em licitações é usada para contratar obras de engenharia.", answer: false, explanation: "Explicação: A modalidade 'Concurso' é usada para a escolha de trabalho técnico, científico ou artístico. Obras de engenharia usam 'Concorrência'." },
+            { text: "A fase do 'Processo Decisório' nas políticas públicas é quando se escolhe qual alternativa será implementada.", answer: true, explanation: "Explicação: Correto. Após a formulação de alternativas, o processo decisório é a etapa de escolha da solução a ser adotada." },
+            { text: "O controle de mérito pode ser exercido pelo Poder Judiciário sobre qualquer ato da Administração.", answer: false, explanation: "Explicação: O Poder Judiciário exerce controle de legalidade. O controle de mérito (conveniência e oportunidade) cabe, em regra, à própria Administração." },
+            { text: "A Abordagem Científica de Taylor tinha ênfase na eficiência operacional no 'chão de fábrica'.", answer: true, explanation: "Explicação: Taylor focou em racionalizar o trabalho do operário, com estudo de tempos e movimentos para aumentar a produtividade." },
+            { text: "A Abordagem Comportamental (Behaviorista) é uma evolução da Abordagem Humanística.", answer: true, explanation: "Explicação: Sim, o Behaviorismo aprofundou os estudos da Abordagem Humanística sobre o comportamento humano nas organizações." },
+            { text: "A Desconcentração e a Descentralização são termos sinônimos.", answer: false, explanation: "Explicação: Desconcentração é interna (mesma pessoa jurídica). Descentralização é externa (cria-se outra pessoa jurídica)." },
+            { text: "O Terceiro Setor inclui empresas estatais como a Petrobras.", answer: false, explanation: "Explicação: A Petrobras é uma Sociedade de Economia Mista (Adm. Indireta). O Terceiro Setor inclui entidades privadas sem fins lucrativos (ONGs, OSs)." },
+            { text: "A LOA deve ser enviada ao Legislativo antes da LDO.", answer: false, explanation: "Explicação: A LDO é enviada e aprovada antes, pois ela orienta a elaboração da LOA." },
+            { text: "A fase de 'Construção da Agenda' de uma política pública é quando o governo decide não tratar de um problema.", answer: false, explanation: "Explicação: É o oposto. É quando um problema ganha atenção e é colocado na pauta de discussões do governo." },
+            { text: "O controle exercido por uma Corregedoria sobre os atos de seus servidores é um exemplo de Controle Externo.", answer: false, explanation: "Explicação: É um exemplo de Controle Interno, pois é realizado pela própria estrutura da administração." },
+            { text: "A ferramenta 'Brainstorming' é usada para priorizar problemas com base na frequência.", answer: false, explanation: "Explicação: Brainstorming é uma técnica para gerar um grande número de ideias criativas. A ferramenta para priorizar problemas é o Diagrama de Pareto." },
+            { text: "A cultura organizacional é composta apenas por elementos visíveis, como o organograma e os uniformes.", answer: false, explanation: "Explicação: A cultura tem três níveis. Os elementos visíveis (artefatos) são apenas o nível mais superficial." },
+            { text: "'Valorização das Pessoas' é um dos fundamentos do Modelo de Excelência em Gestão (MEG).", answer: true, explanation: "Explicação: Sim, criar condições para a realização profissional e humana dos colaboradores é um dos pilares da excelência em gestão." },
+            { text: "O Estado é composto por Povo, Território e Governo Soberano.", answer: true, explanation: "Explicação: Estes são os três elementos clássicos que compõem um Estado." },
+            { text: "Eficiência é a relação entre os resultados alcançados e os recursos utilizados, focando nos processos.", answer: true, explanation: "Explicação: Correto. Eficiência é 'fazer corretamente', com produtividade e economia de recursos." },
+            { text: "O conceito de 'Compliance' busca eliminar o 'jeitinho' na gestão pública, garantindo conformidade com as normas.", answer: true, explanation: "Explicação: Compliance significa agir em conformidade com leis e padrões, promovendo a ética e a transparência." },
+            { text: "Fayol, da Teoria Clássica, focou sua análise no nível operacional, ou 'chão de fábrica'.", answer: false, explanation: "Explicação: Quem focou no nível operacional foi Taylor. Fayol focou na estrutura organizacional como um todo, a partir da cúpula administrativa." },
+            { text: "A Abordagem Contingencial propõe que a melhor forma de administrar depende da situação.", answer: true, explanation: "Explicação: A essência da Abordagem Contingencial é que 'tudo depende', e não há uma solução única para todos os problemas." },
+            { text: "O paradigma 'AP como Ciência Jurídica' (1900-1929) foi marcado pelo foco na inovação e flexibilidade gerencial.", answer: false, explanation: "Explicação: Foi marcado pelo oposto: um foco excessivo no legalismo, que limitava a inovação e a gestão." },
+            { text: "O princípio da Impessoalidade proíbe a promoção pessoal de agentes públicos em publicidade governamental.", answer: true, explanation: "Explicação: Sim, a publicidade deve ter caráter educativo ou de orientação social, sem nomes, símbolos ou imagens que caracterizem promoção pessoal." },
+            { text: "A Administração Direta possui personalidade jurídica própria, separada dos entes federativos.", answer: false, explanation: "Explicação: Os órgãos da Adm. Direta não têm personalidade jurídica; eles são parte do próprio ente federativo (União, Estado, etc.)." },
+            { text: "O PPA, a LDO e a LOA são instrumentos exclusivos do Poder Executivo, não sendo apreciados pelo Legislativo.", answer: false, explanation: "Explicação: São leis, portanto, devem ser propostas pelo Executivo e apreciadas, emendadas e aprovadas pelo Poder Legislativo." },
+            { text: "Na inexigibilidade de licitação, a competição é possível, mas a administração opta por não realizá-la.", answer: false, explanation: "Explicação: A inexigibilidade ocorre quando a competição é inviável (ex: fornecedor exclusivo). A dispensa ocorre quando a competição é possível, mas a lei autoriza a não realização." },
+            { text: "A avaliação de uma política pública serve para verificar se seus objetivos foram alcançados e se houve impacto positivo.", answer: true, explanation: "Explicação: Esta é a função da última etapa do ciclo, a Avaliação, que fornece feedback para aprimorar ou encerrar a política." },
+            { text: "O controle de mérito exercido pela própria administração é também chamado de autotutela.", answer: true, explanation: "Explicação: A autotutela é o poder-dever da Administração de rever seus próprios atos, tanto por ilegalidade quanto por mérito (conveniência e oportunidade)." },
+            { text: "A PMPE, de acordo com a legislação, está vinculada à Secretaria de Defesa Social (SDS).", answer: true, explanation: "Explicação: A Lei nº 18.139/2023 define a estrutura do Poder Executivo, e a PMPE está sob o guarda-chuva da SDS." },
+            { text: "O conceito inicial de qualidade era focado na 'satisfação das necessidades implícitas do cliente'.", answer: false, explanation: "Explicação: O conceito inicial era focado na 'ausência de defeitos'. A satisfação das necessidades do cliente é uma visão mais moderna." },
+            { text: "A Abordagem Sistêmica introduziu a ideia de que a organização interage com o ambiente através de entradas, processos e saídas.", answer: true, explanation: "Explicação: Sim, a visão da organização como um sistema aberto que processa entradas (inputs) para gerar saídas (outputs) é central a essa abordagem." },
+            { text: "O princípio da Moralidade e o da Legalidade são idênticos, significando apenas 'cumprir a lei'.", answer: false, explanation: "Explicação: São distintos. Um ato pode ser legal, mas imoral. A moralidade exige honestidade e boa-fé, além do cumprimento da lei." },
+            { text: "A criação de uma empresa pública para explorar atividade econômica é um exemplo de Desconcentração.", answer: false, explanation: "Explicação: É um exemplo de Descentralização, pois cria-se uma nova pessoa jurídica (a empresa pública) para executar a atividade." },
+            { text: "A LDO é um instrumento de planejamento de médio prazo.", answer: false, explanation: "Explicação: A LDO é anual. O instrumento de médio prazo (4 anos) é o PPA." },
+            { text: "O controle exercido por uma CPI do Congresso Nacional sobre um Ministério é um exemplo de controle externo.", answer: true, explanation: "Explicação: Sim, pois é um controle exercido pelo Poder Legislativo sobre um ato do Poder Executivo." },
+            { text: "O organograma é uma representação gráfica da cultura de uma organização.", answer: false, explanation: "Explicação: O organograma representa a estrutura organizacional (hierarquia, departamentos). A cultura é um conceito mais abstrato de valores e crenças." },
+            { text: "No MEG, 'Liderança e Constância de Propósitos' refere-se à atuação inspiradora e motivadora dos líderes.", answer: true, explanation: "Explicação: Correto. Este fundamento destaca o papel da liderança em guiar a organização com uma visão clara e consistente." },
+            { text: "A Abordagem Neoclássica, com Peter Drucker, reafirmou a importância do PODC (Planejar, Organizar, Dirigir, Controlar).", answer: true, explanation: "Explicação: Sim, a Abordagem Neoclássica deu uma nova roupagem pragmática aos postulados clássicos, incluindo as funções do administrador de Fayol." },
+            { text: "A fase 'AP como Ciência Administrativa' no Brasil foi marcada pela criação do DASP.", answer: true, explanation: "Explicação: Sim, a criação do DASP em 1938 foi o principal marco da busca por racionalizar e tecnificar a administração pública nesse período." },
+            { text: "O princípio da Eficiência se preocupa apenas com o resultado final, não com os meios utilizados.", answer: false, explanation: "Explicação: A Eficiência se preocupa com os meios (relação entre recursos e resultados). A Eficácia se preocupa com o resultado final (atingir as metas)." },
+            { text: "As Sociedades de Economia Mista, como o Banco do Brasil, fazem parte da Administração Direta.", answer: false, explanation: "Explicação: Elas fazem parte da Administração Indireta, pois possuem personalidade jurídica própria e capital misto." },
+            { text: "O PPA é elaborado a cada ano para definir o orçamento do ano seguinte.", answer: false, explanation: "Explicação: O PPA é elaborado a cada 4 anos. A LOA é o orçamento elaborado anualmente." },
+            { text: "A modalidade 'Pregão' é preferencial para a aquisição de bens e serviços comuns.", answer: true, explanation: "Explicação: Sim, o Pregão, especialmente em sua forma eletrônica, é a modalidade padrão para bens e serviços comuns devido à sua agilidade." },
+            { text: "O controle de mérito é sempre realizado pelo Poder Judiciário.", answer: false, explanation: "Explicação: O controle de mérito (análise de conveniência e oportunidade) é, em regra, uma atribuição da própria Administração Pública (autotutela)." },
+            { text: "'Cultura de Inovação', segundo o MEG, é um fundamento que preza pela manutenção das tradições e resistência a novas ideias.", answer: false, explanation: "Explicação: É o exato oposto. A Cultura de Inovação promove um ambiente favorável à criatividade, experimentação e implementação de novas ideias." },
+            { text: "A Abordagem Humanística surgiu como uma reação à visão puramente mecanicista da Abordagem Clássica.", answer: true, explanation: "Explicação: Correto. A Abordagem Humanística trouxe o foco para as pessoas e os aspectos psicossociais do trabalho, em contraponto ao foco em tarefas e estruturas." },
+            { text: "A principal característica da Administração Pública em relação à privada é o seu objetivo de gerar lucro para o Estado.", answer: false, explanation: "Explicação: O objetivo da Administração Pública é o bem-estar da coletividade, não o lucro." },
+            { text: "A fase de 'Avaliação' do ciclo de políticas públicas é opcional e raramente realizada.", answer: false, explanation: "Explicação: A avaliação é uma fase essencial do ciclo, pois fornece o feedback necessário para corrigir, aprimorar ou descontinuar uma política." },
+            { text: "Controle hierárquico e controle finalístico são a mesma coisa.", answer: false, explanation: "Explicação: O controle hierárquico é dentro da mesma estrutura (chefe-subordinado). O controle finalístico é da Adm. Direta sobre a Indireta (tutela)." },
+            { text: "A PMPE, sendo um órgão da Administração Direta, não precisa obedecer aos princípios do LIMPE.", answer: false, explanation: "Explicação: O Art. 37 da Constituição é claro: TODA a administração pública, direta e indireta, de qualquer dos Poderes, deve obedecer ao LIMPE." },
+            { text: "A LDO, entre outras coisas, dispõe sobre as alterações na legislação tributária.", answer: true, explanation: "Explicação: Sim, além de definir metas, a LDO também trata de alterações na legislação tributária e da política de aplicação das agências financeiras." },
+            { text: "A 'Administração por Objetivos' (APO) é uma ferramenta que surgiu com a Abordagem Científica de Taylor.", answer: false, explanation: "Explicação: A APO é uma ferramenta da Abordagem Neoclássica, associada a Peter Drucker, com foco em resultados." },
+            { text: "Um ato administrativo pode ser legal, mas ser anulado pela própria administração por ser considerado inoportuno.", answer: true, explanation: "Explicação: Sim. A administração pode anular seus atos ilegais (controle de legalidade) e revogar seus atos legais, mas inoportunos ou inconvenientes (controle de mérito)." }
         ];
         let availableQuestions = [];
 
