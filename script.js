@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONEXÃO COM O SUPABASE ---
     const supabaseUrl = 'https://svijubigtigsrpfqzcgf.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2aWp1YmlndGlnc3JwZnF6Y2dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MjMwMDAsImV4cCI6MjA3NDM5OTAwMH0.Ar58k3Hfe25v2xqkhpdffQXMJkQXTTOnMkyMJiH8e9k';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2aWp1YmlndGlnc3JwZnF6Y2dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MjMwMDAsImV4cCI6MjA3NDM5OTAwMH0.Ar58k-Hfe25v2xqkhpdffQXMJkQXTTOnMkyMJiH8e9k';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
     // ---------------------------------
 
@@ -45,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dailyQuestsList: document.getElementById('daily-quests-list'),
         
         rankingList: document.getElementById('ranking-list'),
-        
         calendar: document.getElementById('calendar'),
 
         muralFeed: document.getElementById('mural-feed'), 
@@ -206,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             await supabase.from('mural_likes').insert({ user_id: userProfile.id, message_id: messageId });
         }
-        fetchAndRenderMural();
+        // A mágica do realtime já vai chamar o fetchAndRenderMural automaticamente.
     }
     
     // --- FUNÇÕES DE INICIALIZAÇÃO ---
@@ -219,6 +218,8 @@ document.addEventListener('DOMContentLoaded', () => {
         updateProfileUI();
         fetchAnnouncements();
         fetchAndRenderMural();
+        
+        // Listeners
         ui.logoutButton.addEventListener('click', handleLogout);
         ui.muralPostForm.addEventListener('submit', handleNewMuralMessage);
         ui.muralFeed.addEventListener('click', handleMuralLike);
@@ -264,4 +265,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
     main();
 });
-
