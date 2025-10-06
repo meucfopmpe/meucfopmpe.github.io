@@ -11,14 +11,26 @@
 </head>
 <body>
 
-    <div id="login-page">
-        <div class="login-container">
+    <div id="auth-page">
+        <div id="login-container" class="auth-container">
             <h1>Plataforma do Cadete</h1>
             <p>Acesse com sua numérica e senha.</p>
             <input type="text" id="login-email" placeholder="Numérica do Curso">
             <input type="password" id="login-password" placeholder="Senha">
             <button id="login-button">Entrar</button>
             <p id="login-error" class="error-message"></p>
+            <p class="toggle-auth">Não tem uma conta? <a href="#" id="show-signup">Cadastre-se</a></p>
+        </div>
+
+        <div id="signup-container" class="auth-container hidden">
+            <h1>Crie sua Conta</h1>
+            <p>Preencha os dados para se cadastrar.</p>
+            <input type="text" id="signup-name" placeholder="Nome Completo">
+            <input type="text" id="signup-course-number" placeholder="Numérica do Curso">
+            <input type="password" id="signup-password" placeholder="Crie uma Senha">
+            <button id="signup-button">Cadastrar</button>
+            <p id="signup-message" class="message"></p>
+            <p class="toggle-auth">Já tem uma conta? <a href="#" id="show-login">Faça o login</a></p>
         </div>
     </div>
 
@@ -59,7 +71,6 @@
                         Faltam <span id="days-left">...</span> dias para a formatura!
                     </div>
                 </div>
-
                 <div class="widget schedule-widget">
                     <h3>Aulas de Hoje (Segunda-feira)</h3>
                     <ul id="today-schedule">
@@ -69,11 +80,10 @@
                         <li><strong>15:40 - 17:20:</strong> Treinamento Físico Militar II</li>
                     </ul>
                 </div>
-
                 <div class="widget tasks-widget">
                     <h3>Próximas Missões</h3>
                     <ul id="tasks-list">
-                         <li>
+                        <li>
                             <span>Prova de Tiro Defensivo (Método Giraldi)</span>
                             <span class="task-date">28/10/2025</span>
                         </li>
@@ -83,28 +93,12 @@
                         </li>
                     </ul>
                 </div>
-
                 <div class="widget grades-widget">
                     <h3>Desempenho Geral</h3>
                     <div class="average-grade">
                         Média Ponderada: <span id="avg-grade">...</span>
                     </div>
                 </div>
-
-                <div class="widget notes-widget">
-                    <h3>Anotações / Processos SEI</h3>
-                    <textarea placeholder="Adicione uma anotação ou número de processo..."></textarea>
-                    <button>Salvar</button>
-                </div>
-
-                 <div class="widget ranking-widget">
-                    <h3>Ranking da Turma</h3>
-                    <ol id="ranking-list">
-                        <li><span>1. Al. CFO Fulano</span> <span>9.80</span></li>
-                        <li><span>2. Al. CFO Ciclano</span> <span>9.75</span></li>
-                        <li><span>3. Al. CFO Beltrano</span> <span>9.68</span></li>
-                    </ol>
-                 </div>
             </div>
         </main>
     </div>
