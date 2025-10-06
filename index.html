@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal do Cadete [v27.2 - Final]</title>
+    <title>Portal do Cadete</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -76,7 +76,7 @@
                 <div class="progress-bar-container"><div id="exp-bar"></div></div>
                 <div id="exp-text">EXP: 0 / 100</div>
                 <div class="profile-actions">
-                    <a href="admin.html" id="admin-link" class="hidden"><button>Painel Admin</button></a>
+                    <button class="tab-button" data-tab="tab-settings">⚙️ Configurações</button>
                     <button id="logout-button">Sair</button>
                 </div>
             </div>
@@ -116,15 +116,28 @@
                     </div>
                      <div id="tab-settings" class="tab">
                         <h3>Configurações do Perfil</h3>
-                        <div class="settings-section"><h4>Atualizar Perfil</h4><label for="instagram-input">Instagram (ex: @usuario):</label><input type="text" id="instagram-input" placeholder="Seu @ no Instagram"><button id="save-profile-button">Salvar Perfil</button></div>
-                        <div class="settings-section"><h4>Alterar Senha</h4><label for="new-password-input">Nova Senha (mín. 6 caracteres):</label><input type="password" id="new-password-input"><button id="update-password-button">Atualizar Senha</button></div>
-                        <div class="settings-section"><h4>Elogios Recebidos</h4><div id="elogios-list">Carregando...</div></div>
+                        <div class="settings-section">
+                            <h4>Atualizar Perfil</h4>
+                            <label for="instagram-input">Instagram (ex: @usuario):</label>
+                            <input type="text" id="instagram-input" placeholder="Seu @ no Instagram">
+                            <button id="save-profile-button">Salvar Perfil</button>
+                        </div>
+                        <div class="settings-section">
+                            <h4>Alterar Senha</h4>
+                            <label for="new-password-input">Nova Senha (mín. 6 caracteres):</label>
+                            <input type="password" id="new-password-input">
+                            <button id="update-password-button">Atualizar Senha</button>
+                        </div>
+                        <div class="settings-section">
+                            <h4>Elogios Recebidos</h4>
+                            <div id="elogios-list">Carregando...</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
+    
     <div id="notification-toast" class="hidden"></div>
     
     <script src="script.js"></script>
