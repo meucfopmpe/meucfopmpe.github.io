@@ -27,6 +27,7 @@
             <p>Preencha os dados para se cadastrar.</p>
             <input type="text" id="signup-name" placeholder="Nome Completo">
             <input type="text" id="signup-course-number" placeholder="Numérica do Curso">
+            <input type="text" id="signup-platoon" placeholder="Pelotão (Ex: 1º Pelotão)">
             <input type="password" id="signup-password" placeholder="Crie uma Senha">
             <button id="signup-button">Cadastrar</button>
             <p id="signup-message" class="message"></p>
@@ -36,9 +37,7 @@
 
     <div id="app" class="hidden">
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>CFO PMPE</h2>
-            </div>
+            <div class="sidebar-header"> <h2>CFO PMPE</h2> </div>
             <nav>
                 <a href="#" class="active">Painel Principal</a>
                 <a href="#">Minhas Notas</a>
@@ -49,7 +48,6 @@
             </nav>
             <button id="logout-button" class="logout-button">Sair</button>
         </aside>
-
         <main class="main-content">
             <header class="main-header">
                 <h1>Painel Principal</h1>
@@ -58,48 +56,8 @@
                     <img id="user-avatar" src="https://via.placeholder.com/40" alt="Avatar">
                 </div>
             </header>
-
             <div class="dashboard-grid">
-                <div class="widget profile-widget">
-                    <h3>Meu Progresso</h3>
-                    <p>Nível 1 - Cadete Aluno</p>
-                    <div class="xp-bar-container">
-                        <div id="xp-bar" class="xp-bar"></div>
-                    </div>
-                    <span id="xp-text">50 / 1000 XP</span>
-                    <div class="countdown">
-                        Faltam <span id="days-left">...</span> dias para a formatura!
-                    </div>
-                </div>
-                <div class="widget schedule-widget">
-                    <h3>Aulas de Hoje (Segunda-feira)</h3>
-                    <ul id="today-schedule">
-                        <li><strong>08:00 - 09:40:</strong> Direito Penal e Processual Penal Militar</li>
-                        <li><strong>10:00 - 11:40:</strong> Ordem Unida II</li>
-                        <li><strong>13:40 - 15:20:</strong> Abordagem a Veículos</li>
-                        <li><strong>15:40 - 17:20:</strong> Treinamento Físico Militar II</li>
-                    </ul>
-                </div>
-                <div class="widget tasks-widget">
-                    <h3>Próximas Missões</h3>
-                    <ul id="tasks-list">
-                        <li>
-                            <span>Prova de Tiro Defensivo (Método Giraldi)</span>
-                            <span class="task-date">28/10/2025</span>
-                        </li>
-                        <li>
-                            <span>Apresentação de Trabalho de Comando</span>
-                            <span class="task-date">12/11/2025</span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="widget grades-widget">
-                    <h3>Desempenho Geral</h3>
-                    <div class="average-grade">
-                        Média Ponderada: <span id="avg-grade">...</span>
-                    </div>
-                </div>
-            </div>
+                 </div>
         </main>
     </div>
 
