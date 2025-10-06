@@ -11,36 +11,94 @@ const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 // =======================================================
 // 2. ELEMENTOS DO DOM (HTML)
 // =======================================================
-const loginPage = document.getElementById('login-page');
+const authPage = document.getElementById('auth-page');
 const appPage = document.getElementById('app');
+
+// --- Elementos de Login ---
+const loginContainer = document.getElementById('login-container');
 const loginButton = document.getElementById('login-button');
-const logoutButton = document.getElementById('logout-button');
 const loginEmailInput = document.getElementById('login-email');
 const loginPasswordInput = document.getElementById('login-password');
 const loginError = document.getElementById('login-error');
 
+// --- Elementos de Cadastro ---
+const signupContainer = document.getElementById('signup-container');
+const signupButton = document.getElementById('signup-button');
+const signupNameInput = document.getElementById('signup-name');
+const signupCourseNumberInput = document.getElementById('signup-course-number');
+const signupPlatoonInput = document.getElementById('signup-platoon');
+const signupPasswordInput = document.getElementById('signup-password');
+const signupMessage = document.getElementById('signup-message');
+
+// --- Links de Alternância ---
+const showSignupLink = document.getElementById('show-signup');
+const showLoginLink = document.getElementById('show-login');
+
+// --- Elementos do App ---
+const logoutButton = document.getElementById('logout-button');
 const daysLeftEl = document.getElementById('days-left');
 const userNameEl = document.getElementById('user-name');
 const userAvatarEl = document.getElementById('user-avatar');
 const avgGradeEl = document.getElementById('avg-grade');
 
-
 // =======================================================
-// 3. FUNÇÕES PRINCIPAIS
+// 3. FUNÇÕES DE AUTENTICAÇÃO
 // =======================================================
 
+/**
+ * Cadastra um novo usuário.
+ */
+async function handleSignUp() {
+    const fullName = signupNameInput.value;
+    const courseNumber = signupCourseNumberInput.value;
+    const platoon = signupPlatoonInput.value;
+    const password = signupPasswordInput.value;
+    signupMessage.textContent = '';
+
+    if (!fullName || !courseNumber || !platoon || !password) {
+        signupMessage.textContent = 'Por favor, preencha todos os campos.';
+        signupMessage.classList.add('error-message');
+        return;
+    }
+    
+    const email = `${courseNumber}@cfo.pmpe`;
+
+    const { data, error } = await sb.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+            data: { 
+                full_name: fullName,
+                course_number: courseNumber,
+                platoon: platoon
+            }
+        }
+    });
+
+    if (error) {
+        console.error('Erro no cadastro:', error.message);
+        signupMessage.textContent = "Erro ao cadastrar. A numérica já pode estar em uso.";
+        signupMessage.classList.add('error-message');
+    } else {
+        console.log('Usuário cadastrado:', data.user);
+        signupMessage.textContent = 'Cadastro realizado com sucesso! Você já pode fazer o login.';
+        signupMessage.classList.remove('error-message');
+        signupMessage.classList.add('message');
+    }
+}
+
+/**
+ * Faz o login do usuário.
+ */
 async function handleLogin() {
-    const email = loginEmailInput.value; 
+    const courseNumber = loginEmailInput.value;
     const password = loginPasswordInput.value;
-    loginError.textContent = ''; 
-
-    // O Supabase espera um formato de e-mail. Uma solução é adicionar um domínio fixo.
-    // Ex: Se a numérica for "12345", o login será "12345@cfo.pmpe"
-    // Certifique-se de cadastrar o usuário dessa forma no Supabase Auth.
-    const loginIdentifier = `${email}@cfo.pmpe`;
+    loginError.textContent = '';
+    
+    const email = `${courseNumber}@cfo.pmpe`;
 
     const { data, error } = await sb.auth.signInWithPassword({
-        email: loginIdentifier,
+        email: email,
         password: password,
     });
 
@@ -56,19 +114,27 @@ async function handleLogin() {
     }
 }
 
+/**
+ * Faz o logout do usuário.
+ */
 async function handleLogout() {
     const { error } = await sb.auth.signOut();
-    if (error) console.error('Erro no logout:', error);
-    else {
-        loginEmailInput.value = '';
-        loginPasswordInput.value = '';
+    if (error) {
+        console.error('Erro no logout:', error);
+    } else {
         showLoginPage();
     }
 }
 
+// =======================================================
+// 4. FUNÇÕES DO DASHBOARD
+// =======================================================
+
+/**
+ * Carrega todos os dados do dashboard para o usuário logado.
+ */
 async function loadDashboardData() {
     const { data: { user } } = await sb.auth.getUser();
-
     if (!user) {
         showLoginPage();
         return;
@@ -81,16 +147,18 @@ async function loadDashboardData() {
     ]);
 
     // Processa o perfil
-    if (profileResponse.error) console.error('Erro ao buscar perfil:', profileResponse.error);
-    else if (profileResponse.data) {
+    if (profileResponse.error) {
+        console.error('Erro ao buscar perfil:', profileResponse.error);
+    } else if (profileResponse.data) {
         const profile = profileResponse.data;
         userNameEl.textContent = profile.full_name || 'Aluno Oficial';
         if (profile.avatar_url) userAvatarEl.src = profile.avatar_url;
     }
 
     // Processa as notas para calcular a média ponderada
-    if (gradesResponse.error) console.error('Erro ao buscar notas:', gradesResponse.error);
-    else if (gradesResponse.data) {
+    if (gradesResponse.error) {
+        console.error('Erro ao buscar notas:', gradesResponse.error);
+    } else if (gradesResponse.data) {
         calculateWeightedAverage(gradesResponse.data);
     }
 
@@ -99,10 +167,9 @@ async function loadDashboardData() {
 
 /**
  * Calcula a média ponderada com base nas notas e cargas horárias.
- * Fórmula: Soma(nota * peso) / Soma(pesos)
  */
 function calculateWeightedAverage(grades) {
-    if (grades.length === 0) {
+    if (!grades || grades.length === 0) {
         avgGradeEl.textContent = "N/A";
         return;
     }
@@ -111,17 +178,25 @@ function calculateWeightedAverage(grades) {
     let totalLoad = 0;
 
     grades.forEach(grade => {
-        // 'subjects' é um objeto porque fizemos uma busca aninhada
-        const courseLoad = grade.subjects.course_load; 
-        totalScoreAndLoad += grade.score * courseLoad;
-        totalLoad += courseLoad;
+        if (grade.subjects && typeof grade.subjects.course_load === 'number') {
+            const courseLoad = grade.subjects.course_load; 
+            totalScoreAndLoad += grade.score * courseLoad;
+            totalLoad += courseLoad;
+        }
     });
 
+    if (totalLoad === 0) {
+        avgGradeEl.textContent = "N/A";
+        return;
+    }
+
     const weightedAverage = totalScoreAndLoad / totalLoad;
-    avgGradeEl.textContent = weightedAverage.toFixed(2); // Formata para 2 casas decimais
+    avgGradeEl.textContent = weightedAverage.toFixed(2);
 }
 
-
+/**
+ * Calcula os dias que faltam para a formatura.
+ */
 function calculateDaysLeft() {
     const graduationDate = new Date('2025-05-26T00:00:00');
     const today = new Date();
@@ -130,19 +205,21 @@ function calculateDaysLeft() {
     daysLeftEl.textContent = days > 0 ? days : 0;
 }
 
+// =======================================================
+// 5. CONTROLE DE INTERFACE E SESSÃO
+// =======================================================
+
 function showApp() {
-    loginPage.classList.add('hidden');
-    app.classList.remove('hidden');
+    authPage.classList.add('hidden');
+    appPage.classList.remove('hidden');
 }
 
 function showLoginPage() {
-    loginPage.classList.remove('hidden');
-    app.classList.add('hidden');
+    authPage.classList.remove('hidden');
+    appPage.classList.add('hidden');
+    signupContainer.classList.add('hidden');
+    loginContainer.classList.remove('hidden');
 }
-
-// =======================================================
-// 4. VERIFICAÇÃO DE SESSÃO E EVENTOS
-// =======================================================
 
 async function checkSession() {
     const { data: { session } } = await sb.auth.getSession();
@@ -154,8 +231,25 @@ async function checkSession() {
     }
 }
 
+// =======================================================
+// 6. EVENT LISTENERS (EScutadores de eventos)
+// =======================================================
+
 loginButton.addEventListener('click', handleLogin);
+signupButton.addEventListener('click', handleSignUp);
 logoutButton.addEventListener('click', handleLogout);
+
+showSignupLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    loginContainer.classList.add('hidden');
+    signupContainer.classList.remove('hidden');
+});
+
+showLoginLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    signupContainer.classList.add('hidden');
+    loginContainer.classList.remove('hidden');
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     checkSession();
