@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal do Cadete</title>
+    <title>Portal do Cadete [v27.2 - Final]</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -40,6 +43,23 @@
         </div>
     </div>
 
+    <div id="profile-card-modal" class="modal hidden">
+        <div id="profile-card-content" class="panel">
+            <h2 id="profile-card-name" class="panel-title"></h2>
+            <div id="profile-card-details">
+                <img id="profile-card-pic" src="https://i.imgur.com/K3wY2mn.png" alt="Avatar">
+                <p><strong>Nível:</strong> <span id="profile-card-level"></span></p>
+                <p><strong>Média:</strong> <span id="profile-card-average"></span></p>
+                <p><strong>Pelotão:</strong> <span id="profile-card-pelotao"></span></p>
+                <p><strong>Instagram:</strong> <span id="profile-card-instagram"></span></p>
+            </div>
+            <div class="profile-card-actions">
+                <button id="profile-card-like-button">👍 Elogiar</button>
+            </div>
+            <button id="profile-card-close-button">Fechar</button>
+        </div>
+    </div>
+    
     <div id="game-container" class="hidden">
         <div id="left-column">
             <div id="profile-panel" class="panel">
@@ -68,12 +88,15 @@
                     <button class="tab-button" data-tab="tab-mural">Mural</button>
                     <button class="tab-button" data-tab="tab-ranking">Ranking</button>
                     <button class="tab-button" data-tab="tab-events">Eventos</button>
+                    <button class="tab-button" data-tab="tab-settings">Configurações</button>
                 </div>
                 <div class="tab-content">
                     <div id="tab-main" class="tab active">
                         <div id="global-announcements-container"></div>
-                        <h4>Missões Diárias</h4>
-                        <ul id="daily-quests-list"></ul>
+                        <div class="forecast-category">
+                            <h4>Missões Diárias</h4>
+                            <ul id="daily-quests-list"></ul>
+                        </div>
                     </div>
                     <div id="tab-mural" class="tab">
                         <h3>Mural de Mensagens</h3>
@@ -91,10 +114,18 @@
                         <h3>Eventos e Serviços</h3>
                         <div id="calendar"></div>
                     </div>
+                     <div id="tab-settings" class="tab">
+                        <h3>Configurações do Perfil</h3>
+                        <div class="settings-section"><h4>Atualizar Perfil</h4><label for="instagram-input">Instagram (ex: @usuario):</label><input type="text" id="instagram-input" placeholder="Seu @ no Instagram"><button id="save-profile-button">Salvar Perfil</button></div>
+                        <div class="settings-section"><h4>Alterar Senha</h4><label for="new-password-input">Nova Senha (mín. 6 caracteres):</label><input type="password" id="new-password-input"><button id="update-password-button">Atualizar Senha</button></div>
+                        <div class="settings-section"><h4>Elogios Recebidos</h4><div id="elogios-list">Carregando...</div></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div id="notification-toast" class="hidden"></div>
     
     <script src="script.js"></script>
 </body>
