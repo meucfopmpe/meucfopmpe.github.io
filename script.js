@@ -1,39 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONEXÃO COM O SUPABASE ---
     const supabaseUrl = 'https://svijubigtigsrpfqzcgf.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2aWp1YmlndGlnc3JwZnF6Y2dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MjMwMDAsImV4cCI6MjA3NDM5OTAwMH0.Ar58k3Hfe25v2xqkhpdffQXMJkQXTTOnMkyMJiH8e9k';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2aWp1YmlndGlnc3JwZnF6Y2dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MjMwMDAsImV4cCI6MjA3NDM5OTAwMH0.Ar58k-Hfe25v2xqkhpdffQXMJkQXTTOnMkyMJiH8e9k';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
     // ---------------------------------
 
-    // --- CONFIGURAÇÕES E ESTADO INICIAL ---
-    const config = {
-        COURSE_START_DATE: '2025-05-26T00:00:00',
-        TOTAL_COURSE_DAYS: 365,
-        BASE_EXP_TO_LEVEL: 100,
-        LEVEL_EXP_MULTIPLIER: 1.2
-    };
-    let game = {};
+    // --- ESTADO DA APLICAÇÃO ---
     let userProfile = {};
-    let calendarInstance;
-    let calendarInitialized = false;
+    let game = {};
     const defaultAvatar = 'https://i.imgur.com/K3wY2mn.png';
 
-    // --- BANCO DE DADOS (constantes) ---
-    const quickQuestPool = [
-        { text: "Fazer 50 flexões.", reward: { exp: 10 } },
-        { text: "Fazer 10 barras.", reward: { exp: 15 } },
-        { text: "Estudar 15min no Duolingo.", reward: { exp: 10 } },
-        { text: "Fazer 50 abdominais.", reward: { exp: 8 } },
-        { text: "Polir o coturno por 5 minutos.", reward: { exp: 5 } }
-    ];
-    const titleUnlocks = [
-        { level: 50, title: "Lenda da Academia 💀" }, { level: 40, title: "Cadete de Brigada 🦅" },
-        { level: 30, title: "Veterano 🎖️" }, { level: 25, title: "Cadete Antigo ⚔️" },
-        { level: 20, title: "Cadete Raso ⭐⭐" }, { level: 15, title: "Cadete Moderno I ⭐" },
-        { level: 10, title: "Cadete Moderno II" }, { level: 7, title: "Bizurado 🧠" },
-        { level: 4, title: "Aluno Dedicado 🔰" }, { level: 1,  title: "Aluno Novinho 🌱" }
-    ];
-    
     // --- SELETORES DE UI ---
     const ui = {
         authContainer: document.getElementById('auth-container'),
@@ -54,8 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         gameContainer: document.getElementById('game-container'), 
         profilePic: document.getElementById('profile-pic'), 
-        uploadPicButton: document.getElementById('upload-pic-button'), 
-        uploadPicInput: document.getElementById('upload-pic-input'),
         playerName: document.getElementById('player-name'), 
         level: document.getElementById('level'), 
         playerTitle: document.getElementById('player-title'), 
@@ -73,15 +47,13 @@ document.addEventListener('DOMContentLoaded', () => {
         rankingList: document.getElementById('ranking-list'),
         
         calendar: document.getElementById('calendar'),
-        
+
         muralFeed: document.getElementById('mural-feed'), 
         muralPostForm: document.getElementById('mural-post-form'), 
         muralInput: document.getElementById('mural-input'),
 
         profileCardModal: document.getElementById('profile-card-modal'),
-        profileCardContent: document.getElementById('profile-card-content'),
         profileCardName: document.getElementById('profile-card-name'),
-        profileCardDetails: document.getElementById('profile-card-details'),
         profileCardPic: document.getElementById('profile-card-pic'),
         profileCardLevel: document.getElementById('profile-card-level'),
         profileCardAverage: document.getElementById('profile-card-average'),
@@ -91,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         profileCardCloseButton: document.getElementById('profile-card-close-button'),
     };
 
-    // --- FUNÇÕES DE AUTENTICAÇÃO E SETUP ---
+    // --- FUNÇÕES DE AUTENTICAÇÃO ---
     async function handleLogin(e) {
         e.preventDefault();
         ui.loginError.textContent = '';
@@ -133,145 +105,127 @@ document.addEventListener('DOMContentLoaded', () => {
                 nome_de_guerra: nomeDeGuerra,
                 pelotao: pelotao,
                 numerica: parseInt(numerica, 10),
-                role: 'aluno',
-                level: 1,
-                exp: 0,
-                title: 'Aluno Novinho 🌱',
-                full_data: {
-                    reminders: [],
-                    links: [],
-                    qts: {},
-                    events: [],
-                    achievements: []
-                }
+                role: 'aluno'
             };
-
             const { error: profileError } = await supabase.from('profiles').insert(initialProfile);
             if (profileError) {
                 ui.signupError.textContent = `Erro ao criar perfil: ${profileError.message}`;
-                // Tenta apagar o usuário de autenticação órfão (requer privilégios de admin, pode falhar)
-                await supabase.auth.admin.deleteUser(authData.user.id);
                 return;
             }
-            
             alert("Conta criada com sucesso! Por favor, faça o login para começar.");
             location.reload();
         }
     }
-
+    
     async function handleLogout() {
         await supabase.auth.signOut();
         location.reload();
     }
 
-    // --- FUNÇÕES DE PERSISTÊNCIA (SAVE/LOAD) ---
-    async function saveGame() {
-        if (!userProfile.id) return;
-        const avg = calculateGradesAverage();
-        const dataToSave = {
-            level: game.level,
-            exp: game.exp,
-            title: game.title,
-            grades_average: avg,
-            full_data: {
-                reminders: game.reminders,
-                links: game.links,
-                qts: game.qts,
-                events: game.events,
-                achievements: game.achievements
-            }
-        };
-        const { error } = await supabase.from('profiles').update(dataToSave).eq('id', userProfile.id);
-        if (error) {
-            console.error("Erro ao salvar:", error);
-        }
-    }
-
+    // --- FUNÇÕES DE DADOS ---
     async function loadProfileAndStart(user) {
         const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        if (error || !data) {
-            console.error("Usuário autenticado, mas perfil não encontrado. Forçando logout.", error);
+        if(error || !data) {
+            console.error("Perfil não encontrado, forçando logout", error);
             await handleLogout();
             return false;
         }
-        
         userProfile = data;
-        game = data.full_data || {};
+        game = data.full_data || { dailyQuests: [] };
         game.level = data.level;
         game.exp = data.exp;
         game.title = data.title;
-        
         startGame();
         return true;
     }
 
     // --- LÓGICA DO JOGO ---
-    function getExpToNextLevel(level) {
-        return Math.floor(config.BASE_EXP_TO_LEVEL * Math.pow(config.LEVEL_EXP_MULTIPLIER, level - 1));
-    }
-
-    function gainExp(amount) {
-        if (!amount) return;
-        game.exp += amount;
-        
-        let expNeeded = getExpToNextLevel(game.level);
-        while (game.exp >= expNeeded) {
-            game.level++;
-            game.exp -= expNeeded;
-            checkTitleUnlocks();
-            expNeeded = getExpToNextLevel(game.level);
-        }
-        updateProfileUI();
-        saveGame();
-    }
-    
-    function checkTitleUnlocks() {
-        for (const unlock of titleUnlocks) {
-            if (game.level >= unlock.level) {
-                if (game.title !== unlock.title) {
-                    game.title = unlock.title;
-                }
-                return;
-            }
-        }
-    }
-
     function updateProfileUI() {
         ui.playerName.textContent = userProfile.nome_de_guerra;
         ui.level.textContent = `NÍVEL ${game.level}`;
         ui.title.textContent = game.title;
-        const expNeeded = getExpToNextLevel(game.level);
+        const expNeeded = Math.floor(100 * Math.pow(1.2, game.level - 1));
         ui.expText.textContent = `EXP: ${game.exp} / ${expNeeded}`;
         ui.expBar.style.width = `${(game.exp / expNeeded) * 100}%`;
         ui.profilePic.src = userProfile.profile_pic || defaultAvatar;
     }
+
+    async function fetchAnnouncements() {
+        const { data, error } = await supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(3);
+        if (error || !data || data.length === 0) return;
+        ui.globalAnnouncementsContainer.innerHTML = '<h4>📢 Avisos Globais</h4>';
+        data.forEach(ann => {
+            const item = document.createElement('div');
+            item.className = 'announcement-item';
+            item.innerHTML = `<p>${ann.content}</p><div class="author">- ${ann.author_name}</div>`;
+            ui.globalAnnouncementsContainer.appendChild(item);
+        });
+    }
+
+    async function fetchAndRenderMural() {
+        const { data, error } = await supabase.from('mural_messages').select('*, mural_likes(user_id)').order('created_at', { ascending: false }).limit(50);
+        if (error) { console.error('Erro ao buscar mural:', error); return; }
+        ui.muralFeed.innerHTML = '';
+        data.forEach(msg => {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'mural-message';
+            const userLiked = msg.mural_likes.some(like => like.user_id === userProfile.id);
+            msgDiv.innerHTML = `
+                <div class="mural-header">
+                    <img src="${msg.author_profile_pic || defaultAvatar}" alt="avatar">
+                    <span class="author" data-user-id="${msg.author_id}">${msg.author_name}</span>
+                    <span class="timestamp">${new Date(msg.created_at).toLocaleString('pt-BR')}</span>
+                </div>
+                <div class="mural-content"><p>${msg.content}</p></div>
+                <div class="mural-actions">
+                    <button class="like-btn ${userLiked ? 'liked' : ''}" data-message-id="${msg.id}">👍 Elogiar (${msg.mural_likes.length})</button>
+                </div>`;
+            ui.muralFeed.appendChild(msgDiv);
+        });
+    }
+
+    async function handleNewMuralMessage(e) {
+        e.preventDefault();
+        const content = ui.muralInput.value.trim();
+        if(!content) return;
+        ui.muralInput.value = "";
+        await supabase.from('mural_messages').insert({ 
+            content, 
+            author_id: userProfile.id, 
+            author_name: userProfile.nome_de_guerra, 
+            author_profile_pic: userProfile.profile_pic 
+        });
+    }
+
+    async function handleMuralLike(e) {
+        if(!e.target.classList.contains('like-btn')) return;
+        const messageId = e.target.dataset.messageId;
+        const { data } = await supabase.from('mural_likes').select('id').eq('user_id', userProfile.id).eq('message_id', messageId);
+        if(data && data.length > 0) {
+            await supabase.from('mural_likes').delete().eq('id', data[0].id);
+        } else {
+            await supabase.from('mural_likes').insert({ user_id: userProfile.id, message_id: messageId });
+        }
+        fetchAndRenderMural();
+    }
     
-    async function renderRanking() {
-        // Implementação do Ranking
-    }
-
-    async function initMural() {
-        // Implementação do Mural
-    }
-
     // --- FUNÇÕES DE INICIALIZAÇÃO ---
     function initGameUI() {
         ui.authContainer.classList.add('hidden');
         ui.gameContainer.classList.remove('hidden');
-
         if (userProfile.role === 'admin') {
             ui.adminLink.classList.remove('hidden');
         }
-
         updateProfileUI();
-        // Adicione aqui as chamadas para outras inicializações (calendário, mural, etc.)
+        fetchAnnouncements();
+        fetchAndRenderMural();
         ui.logoutButton.addEventListener('click', handleLogout);
+        ui.muralPostForm.addEventListener('submit', handleNewMuralMessage);
+        ui.muralFeed.addEventListener('click', handleMuralLike);
     }
     
     function initAdminUI() {
-        ui.authContainer.classList.add('hidden');
-        ui.adminContainer.classList.remove('hidden');
-        // Adicione aqui as chamadas para inicialização do painel de admin
+        window.location.href = 'admin.html';
     }
 
     function startGame() {
