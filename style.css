@@ -69,3 +69,9 @@
     text-decoration: none;
     font-weight: 600;
 }
+
+/* Adição para corrigir o bug da imagem */
+.user-profile-header img {
+    background-color: #e0e0e0; /* Adiciona uma cor de fundo */
+    border: 1px solid #ccc;     /* Adiciona uma borda sutil */
+}
