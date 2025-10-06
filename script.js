@@ -1,17 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONEXÃO COM O SUPABASE ---
     const supabaseUrl = 'https://svijubigtigsrpfqzcgf.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2aWp1YmlndGlnc3JwZnF6Y2dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MjMwMDAsImV4cCI6MjA3NDM5OTAwMH0.Ar58k3Hfe25v2xqkhpdffQXMJkQXTTOnMkyMJiH8e9k';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2aWp1YmlndGlnc3JwZnF6Y2dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MjMwMDAsImV4cCI6MjA3NDM5OTAwMH0.Ar58k-Hfe25v2xqkhpdffQXMJkQXTTOnMkyMJiH8e9k';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
     // ---------------------------------
-
+    
     // --- CONFIGURAÇÕES E ESTADO INICIAL ---
     const config = {
         COURSE_START_DATE: '2025-05-26T00:00:00',
         TOTAL_COURSE_DAYS: 365,
-        BASE_EXP_TO_LEVEL: 100,
-        LEVEL_EXP_MULTIPLIER: 1.2,
-        PASS_DAY_EXP: 5
+        BASE_EXP_TO_LEVEL: 100, LEVEL_EXP_MULTIPLIER: 1.2,
+        PASS_DAY_EXP: 5,
+        TASK_REWARDS: { easy: 10, medium: 25, hard: 50 }
     };
     let userProfile = {};
     let game = {};
@@ -27,7 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
         { level: 4, title: "Aluno Dedicado 🔰" }, { level: 1,  title: "Aluno Novinho 🌱" }
     ];
     const subjectList = ["Sistema de Segurança Pública", "Teoria Geral da Administração", "Gestão Pública Geral Aplicada", "Gestão de Pessoas, Comando e Liderança", "Gestão de Logística, Orçamento e Finanças Públicas", "Fundamentos da Polícia Comunitária", "Psicologia Aplicada", "Análise Criminal e Estatística", "Qualidade do Atendimento aos Grupos Vulneráveis", "Direitos Humanos Aplicados à Atividade Policial Militar", "Gerenciamento de Crises", "Saúde Mental e Qualidade de Vida", "Treinamento Físico Militar I", "Treinamento Físico Militar II", "Gestão de Processos no Sistema Eletrônico", "Tecnologia da Informação e Comunicação", "Comunicação, Mídias Sociais e Cerimonial Militar", "Inteligência e Sistema de Informação", "Ética, Cidadania e Relações Interpessoais", "Ordem Unida I", "Ordem Unida II", "Instrução Geral", "Defesa Pessoal Policial I", "Defesa Pessoal Policial II", "Uso Diferenciado da Força", "Pronto Socorrismo", "Atendimento Pré-Hospitalar Tático", "Planejamento Operacional e Especializado", "Elaboração de Projetos e Captação de Recursos", "Planejamento Estratégico", "Gestão Por Resultados e Avaliação de Políticas Públicas", "Trabalho de Comando e Estado Maior", "Polícia Judiciária Militar", "Direito Administrativo Disciplinar Militar", "Direito Penal e Processual Penal Militar", "Legislação Policial Militar e Organizacional", "Procedimento em Ocorrência", "Economia Aplicada ao Setor Público", "História da PMPE", "Abordagem a Pessoas", "Abordagem a Veículos", "Abordagem a Edificações", "Patrulhamento Urbano", "Armamento e Munição", "Tiro Policial", "Tiro Defensivo (Método Giraldi)", "Ações Básicas de Apoio Aéreo", "Manobras Acadêmicas I", "Manobras Acadêmicas II", "Metodologia da Pesquisa Científica", "Teoria e Prática do Ensino", "Trabalho de Conclusão de Curso"];
-    
+    const dailyQuestsPool = [ { text: "Treino Físico (Corrida/Musculação)", exp: 20 }, { text: "Estudo Individual (Mín. 1h)", exp: 15 }, { text: "Organização do Alojamento/Material", exp: 5 } ];
+
     // --- SELETORES DE UI ---
     const ui = {
         authContainer: document.getElementById('auth-container'),
@@ -44,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
         switchToSignupBtn: document.getElementById('switch-to-signup'),
         switchToLoginBtn: document.getElementById('switch-to-login'),
         signupError: document.getElementById('signup-error'),
-        
         gameContainer: document.getElementById('game-container'), 
         profilePic: document.getElementById('profile-pic'), 
         uploadPicButton: document.getElementById('upload-pic-button'),
@@ -55,35 +55,26 @@ document.addEventListener('DOMContentLoaded', () => {
         expBar: document.getElementById('exp-bar'), 
         expText: document.getElementById('exp-text'),
         logoutButton: document.getElementById('logout-button'),
-        
         countdownDisplay: document.getElementById('countdown-display'),
-
         tabs: document.querySelectorAll('.tab'),
         tabButtons: document.querySelectorAll('.tab-button'),
-        
         dailyQuestsList: document.getElementById('daily-quests-list'),
         upcomingEventsList: document.getElementById('upcoming-events-list'),
-        
         tasksList: document.getElementById('tasks-list'),
         taskNameInput: document.getElementById('task-name-input'),
         taskDifficultySelect: document.getElementById('task-difficulty-select'),
         addTaskButton: document.getElementById('add-task-button'),
-
         calendar: document.getElementById('calendar'),
         eventNameInput: document.getElementById('event-name-input'),
         eventDateInput: document.getElementById('event-date-input'),
         addEventButton: document.getElementById('add-event-button'),
-
         qtsScheduleContainer: document.getElementById('qts-schedule-container'),
-        
         gradesContainer: document.getElementById('grades-container'),
         gradesAverage: document.getElementById('grades-average'),
-
         achievementsGrid: document.getElementById('achievements-grid'),
-        
         notificationToast: document.getElementById('notification-toast')
     };
-
+    
     // --- FUNÇÕES DE AUTENTICAÇÃO ---
     async function handleLogin(e) {
         e.preventDefault();
@@ -142,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await supabase.auth.signOut();
         location.reload();
     }
-
+    
     // --- FUNÇÕES DE DADOS ---
     async function loadProfileAndStart(user) {
         const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
@@ -152,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
         userProfile = data;
-        game = data.game_data || createNewGameDataObject(); // Garante que o objeto game exista
+        game = data.game_data || createNewGameDataObject();
         
         // Converte as datas de string para objeto Date ao carregar
         if (game.time && game.time.startDate) game.time.startDate = new Date(game.time.startDate);
@@ -161,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startGame();
         return true;
     }
-
+    
     async function saveGame() {
         if (!userProfile.id) return;
         const { error } = await supabase.from('profiles').update({ game_data: game }).eq('id', userProfile.id);
@@ -170,15 +161,41 @@ document.addEventListener('DOMContentLoaded', () => {
             notify('Erro ao salvar progresso.', 'error');
         }
     }
-
-    // --- FUNÇÕES DE LÓGICA DO JOGO ---
-    function getExpToNextLevel(level) {
-        return Math.floor(config.BASE_EXP_TO_LEVEL * Math.pow(config.LEVEL_EXP_MULTIPLIER, level - 1));
-    }
     
+    // --- FUNÇÕES DE LÓGICA DO JOGO ---
+    function createNewGameDataObject() {
+        const startDate = new Date(config.COURSE_START_DATE);
+        const currentDate = new Date();
+        currentDate.setHours(0,0,0,0);
+    
+        let newGame = { 
+            level: 1,
+            exp: 0,
+            title: "Aluno Novinho 🌱",
+            tasks: [],
+            events: [],
+            qts: {},
+            grades: {},
+            achievements: [],
+            time: {
+                startDate: startDate.toISOString(),
+                currentDate: currentDate.toISOString()
+            }
+        };
+    
+        subjectList.forEach(subject => {
+            newGame.grades[subject] = { nota: 0 };
+        });
+    
+        return newGame;
+    }
+
+    const getExpToNextLevel = (level) => Math.floor(config.BASE_EXP_TO_LEVEL * Math.pow(config.LEVEL_EXP_MULTIPLIER, level - 1));
+    const formatDate = (date) => date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
     function gainExp(amount) {
         if (!amount) return;
-        game.exp += amount;
+        game.exp = (game.exp || 0) + amount;
         
         let expNeeded = getExpToNextLevel(game.level);
         while (game.exp >= expNeeded) {
@@ -189,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateProfileUI();
         saveGame();
     }
-
+    
     function checkTitleUnlocks() {
         for (const unlock of titleUnlocks) {
             if (game.level >= unlock.level) {
@@ -202,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function updateProfileUI() {
+        if(!ui.playerName) return; // Checagem de segurança
         ui.playerName.textContent = userProfile.nome_de_guerra;
         ui.level.textContent = `NÍVEL ${game.level}`;
         ui.title.textContent = game.title;
@@ -219,7 +237,38 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.countdownDisplay.innerHTML = `${daysLeft}<br><span style="font-size: 0.5em;">dias restantes</span>`;
     }
 
-    // ... (restante das funções, como renderGrades, renderTasks, etc.)
+    function renderDailyQuests() {
+        ui.dailyQuestsList.innerHTML = '';
+        dailyQuestsPool.forEach((quest, index) => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${quest.text} <strong>(+${quest.exp} EXP)</strong></span>`;
+            ui.dailyQuestsList.appendChild(li);
+        });
+    }
+
+    function renderUpcomingEvents() {
+        ui.upcomingEventsList.innerHTML = '';
+        if(!game.events || game.events.length === 0) {
+            ui.upcomingEventsList.innerHTML = '<li>Nenhum evento agendado.</li>';
+            return;
+        }
+        const now = new Date();
+        const upcoming = game.events
+            .filter(event => new Date(event.start) >= now)
+            .sort((a, b) => new Date(a.start) - new Date(b.start))
+            .slice(0, 3);
+
+        if(upcoming.length === 0) {
+            ui.upcomingEventsList.innerHTML = '<li>Nenhum evento futuro agendado.</li>';
+            return;
+        }
+
+        upcoming.forEach(event => {
+            const li = document.createElement('li');
+            li.textContent = `${formatDate(new Date(event.start))}: ${event.title}`;
+            ui.upcomingEventsList.appendChild(li);
+        });
+    }
     
     // --- FUNÇÕES DE INICIALIZAÇÃO ---
     function initGameUI() {
@@ -228,12 +277,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateProfileUI();
         updateCountdown();
-        // Adicione aqui outras inicializações
+        renderDailyQuests();
+        renderUpcomingEvents();
+        
         ui.logoutButton.addEventListener('click', handleLogout);
     }
     
     function startGame() {
-        // Remove a lógica de admin por enquanto para simplificar
         initGameUI();
     }
 
