@@ -3,42 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal do Cadete [v27.3 - Final]</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+    <title>Portal do Cadete [v29.1 - Final]</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <link rel="stylesheet" href="style.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap');
+
+        :root {
+            --primary-color: #00ffff;
+            --background-color: #0d1117;
+            --panel-background: #161b22;
+            --border-color: #30363d;
+            --text-color: #c9d1d9;
+            --danger-color: #ff4d4d;
+            --success-color: #3fb950;
+            --warning-color: #ffc107;
+            --disabled-color: #5f6a75;
+        }
+
+        body { font-family: 'Roboto', sans-serif; background-color: var(--background-color); color: var(--text-color); padding: 20px; font-size: 14px; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .hidden { display: none !important; }
+
+        /* AUTH CONTAINER */
+        #auth-container { display: flex; gap: 20px; width: 100%; max-width: 800px; flex-wrap: wrap; justify-content: center; }
+        .auth-panel { background-color: var(--panel-background); border: 1px solid var(--border-color); border-radius: 8px; padding: 25px; flex: 1; min-width: 300px; }
+        .auth-panel form { display: flex; flex-direction: column; gap: 15px; }
+        .auth-panel label { font-weight: bold; text-align: left; }
+        .auth-panel input { background: var(--border-color); border: 1px solid var(--text-color); color: #fff; padding: 12px; border-radius: 4px; font-size: 1em; }
+        .auth-panel button { font-family: 'Orbitron', sans-serif; background-color: var(--primary-color); color: var(--background-color); border: none; padding: 12px; font-size: 16px; cursor: pointer; border-radius: 5px; margin-top: 10px; }
+        .auth-switcher { text-align: center; margin-top: 15px; font-size: 0.9em; }
+        .auth-switcher button { background: none; border: none; color: var(--primary-color); cursor: pointer; text-decoration: underline; padding: 0; }
+        .error-message { color: var(--danger-color); font-size: 0.9em; text-align: center; min-height: 1em; }
+
+        #game-container { display: grid; grid-template-columns: 300px 1fr; gap: 15px; width: 100%; max-width: 1200px; }
+        #left-column, #main-column { display: flex; flex-direction: column; gap: 15px; }
+        .panel { background-color: var(--panel-background); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; box-shadow: 0 0 15px rgba(0, 255, 255, 0.05); }
+        .panel-title { font-family: 'Orbitron', sans-serif; color: var(--primary-color); margin: 0 0 15px 0; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); text-align: center; font-size: 1.2em; }
+
+        /* Coluna da Esquerda */
+        #profile-panel { text-align: center; }
+        #profile-pic-container { position: relative; width: 120px; height: 120px; margin: 0 auto 15px; }
+        #profile-pic { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--primary-color); object-fit: cover; }
+        #player-info #player-name { font-family: 'Orbitron', sans-serif; font-size: 1.5em; color: #fff; margin-bottom: 5px; }
+        #player-info #level { font-family: 'Orbitron', sans-serif; font-size: 1.2em; color: var(--primary-color); margin-bottom: 5px; }
+        .progress-bar-container { width: 100%; height: 10px; background-color: var(--border-color); border-radius: 5px; overflow: hidden; margin: 10px 0 5px; }
+        #exp-bar { width: 0%; height: 100%; background-color: var(--primary-color); transition: width 0.5s ease; }
+        #exp-text { font-size: 12px; }
+        .profile-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .profile-actions a { text-decoration: none; flex: 1; }
+        .profile-actions button { width: 100%; flex: 1; padding: 8px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; }
+        #logout-button { background-color: var(--danger-color); color: #fff; }
+
+        /* Coluna Central */
+        .tab-buttons { display: flex; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; }
+        .tab-button { background: none; border: none; color: var(--text-color); padding: 10px 15px; cursor: pointer; font-size: 1em; }
+        .tab-button.active { color: var(--primary-color); border-bottom: 2px solid var(--primary-color); }
+        .tab-content .tab { display: none; padding: 15px 5px; }
+        .tab-content .tab.active { display: block; }
+        
+        #global-announcements-container { margin-bottom: 15px; }
+        .announcement-item { background-color: var(--border-color); border-left: 3px solid var(--primary-color); padding: 10px; border-radius: 4px; margin-bottom: 10px; }
+        .announcement-item p { margin: 0; }
+        .announcement-item .author { font-size: 0.8em; color: var(--disabled-color); text-align: right; margin-top: 5px; }
+
+        /* Mural */
+        #mural-feed { max-height: 400px; overflow-y: auto; display: flex; flex-direction: column-reverse; margin-bottom: 15px; border: 1px solid var(--border-color); padding: 10px; border-radius: 5px; }
+        .mural-message { background-color: var(--border-color); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+        .mural-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .mural-header img { width: 30px; height: 30px; border-radius: 50%; }
+        .mural-header .author { font-weight: bold; }
+        .mural-header .timestamp { font-size: 0.8em; color: var(--disabled-color); margin-left: auto; }
+        .mural-content { padding-left: 40px; white-space: pre-wrap; }
+        .mural-actions { padding-left: 40px; margin-top: 8px; }
+        .mural-actions button { background: none; border: none; color: var(--disabled-color); cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .mural-actions button.liked { color: var(--primary-color); }
+        #mural-post-form { display: flex; gap: 10px; }
+        #mural-post-form textarea { flex-grow: 1; background-color: var(--border-color); color: var(--text-color); border-radius: 4px; padding: 8px; border: 1px solid var(--text-color); }
+        #mural-post-form button { background-color: var(--primary-color); color: var(--background-color); font-weight: bold; border: none; border-radius: 4px; cursor: pointer; padding: 0 15px; }
+        
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            #auth-container, #game-container { flex-direction: column; }
+            .auth-panel { padding: 15px; }
+        }
+    </style>
 </head>
 <body>
 
     <div id="auth-container">
         <div id="login-panel" class="auth-panel">
             <h2 class="panel-title">Login - Portal do Cadete</h2>
-            <form id="login-form"><label for="login-numerica">Sua Numérica:</label><input type="number" id="login-numerica" placeholder="Digite sua numérica..." required><label for="login-password">Sua Senha:</label><input type="password" id="login-password" placeholder="Digite sua senha..." required><button type="submit">Entrar</button><p id="login-error" class="error-message"></p></form>
+            <form id="login-form">
+                <label for="login-numerica">Sua Numérica:</label>
+                <input type="number" id="login-numerica" placeholder="Digite sua numérica..." required>
+                <label for="login-password">Sua Senha:</label>
+                <input type="password" id="login-password" placeholder="Digite sua senha..." required>
+                <button type="submit">Entrar</button>
+                <p id="login-error" class="error-message"></p>
+            </form>
             <p class="auth-switcher">Não tem uma conta? <button id="switch-to-signup">Crie uma</button></p>
         </div>
         <div id="signup-panel" class="auth-panel hidden">
             <h2 class="panel-title">Criar Conta</h2>
-            <form id="signup-form"><label for="signup-guerra">Nome de Guerra:</label><input type="text" id="signup-guerra" required><label for="signup-numerica">Numérica:</label><input type="number" id="signup-numerica" required><label for="signup-pelotao">Pelotão (somente o número):</label><input type="text" id="signup-pelotao" required><label for="signup-password">Crie uma Senha (mín. 6 caracteres):</label><input type="password" id="signup-password" required><button type="submit">Criar Conta</button><p id="signup-error" class="error-message"></p></form>
+            <form id="signup-form">
+                <label for="signup-guerra">Nome de Guerra:</label>
+                <input type="text" id="signup-guerra" required>
+                <label for="signup-numerica">Numérica:</label>
+                <input type="number" id="signup-numerica" required>
+                <label for="signup-pelotao">Pelotão (somente o número):</label>
+                <input type="text" id="signup-pelotao" required>
+                <label for="signup-password">Crie uma Senha (mín. 6 caracteres):</label>
+                <input type="password" id="signup-password" required>
+                <button type="submit">Criar Conta</button>
+                <p id="signup-error" class="error-message"></p>
+            </form>
             <p class="auth-switcher">Já tem uma conta? <button id="switch-to-login">Faça Login</button></p>
-        </div>
-    </div>
-
-    <div id="profile-card-modal" class="modal hidden">
-        <div id="profile-card-content" class="panel">
-            <h2 id="profile-card-name" class="panel-title"></h2>
-            <div id="profile-card-details">
-                <img id="profile-card-pic" src="https://i.imgur.com/K3wY2mn.png" alt="Avatar">
-                <p><strong>Nível:</strong> <span id="profile-card-level"></span></p>
-                <p><strong>Média:</strong> <span id="profile-card-average"></span></p>
-                <p><strong>Pelotão:</strong> <span id="profile-card-pelotao"></span></p>
-                <p><strong>Instagram:</strong> <span id="profile-card-instagram"></span></p>
-            </div>
-            <div class="profile-card-actions">
-                <button id="profile-card-like-button">👍 Elogiar</button>
-            </div>
-            <button id="profile-card-close-button">Fechar</button>
         </div>
     </div>
     
@@ -47,8 +126,6 @@
             <div id="profile-panel" class="panel">
                 <div id="profile-pic-container">
                     <img id="profile-pic" src="https://i.imgur.com/K3wY2mn.png" alt="Foto do Perfil">
-                    <input type="file" id="upload-pic-input" accept="image/*" class="hidden">
-                    <button id="upload-pic-button" title="Trocar Foto de Perfil">📷</button>
                 </div>
                 <div id="player-info">
                     <div id="player-name">Aluno Oficial</div>
@@ -69,8 +146,6 @@
                     <button class="tab-button active" data-tab="tab-main">Principal</button>
                     <button class="tab-button" data-tab="tab-mural">Mural</button>
                     <button class="tab-button" data-tab="tab-ranking">Ranking</button>
-                    <button class="tab-button" data-tab="tab-events">Eventos</button>
-                    <button class="tab-button" data-tab="tab-settings">Configurações</button>
                 </div>
                 <div class="tab-content">
                     <div id="tab-main" class="tab active">
@@ -84,31 +159,269 @@
                         <h3>Mural de Mensagens</h3>
                         <div id="mural-feed"></div>
                         <form id="mural-post-form">
-                            <textarea id="mural-input" placeholder="Digite sua mensagem (limite de 280 caracteres)..." maxlength="280" required></textarea>
+                            <textarea id="mural-input" placeholder="Digite sua mensagem..." maxlength="280" required></textarea>
                             <button type="submit">Postar</button>
                         </form>
                     </div>
                     <div id="tab-ranking" class="tab">
                         <h3>Ranking de Combatentes</h3>
-                        <div id="ranking-list">Carregando ranking...</div>
-                    </div>
-                    <div id="tab-events" class="tab">
-                        <h3>Eventos e Serviços</h3>
-                        <div id="calendar"></div>
-                    </div>
-                     <div id="tab-settings" class="tab">
-                        <h3>Configurações do Perfil</h3>
-                        <div class="settings-section"><h4>Atualizar Perfil</h4><label for="instagram-input">Instagram (ex: @usuario):</label><input type="text" id="instagram-input" placeholder="Seu @ no Instagram"><button id="save-profile-button">Salvar Perfil</button></div>
-                        <div class="settings-section"><h4>Alterar Senha</h4><label for="new-password-input">Nova Senha (mín. 6 caracteres):</label><input type="password" id="new-password-input"><button id="update-password-button">Atualizar Senha</button></div>
-                        <div class="settings-section"><h4>Elogios Recebidos</h4><div id="elogios-list">Carregando...</div></div>
+                        <div id="ranking-list"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <div id="notification-toast" class="hidden"></div>
-    
-    <script src="script.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- CONEXÃO COM O SUPABASE ---
+            const supabaseUrl = 'https://svijubigtigsrpfqzcgf.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2aWp1YmlndGlnc3JwZnF6Y2dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MjMwMDAsImV4cCI6MjA3NDM5OTAwMH0.Ar58k-Hfe25v2xqkhpdffQXMJkQXTTOnMkyMJiH8e9k';
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            // ---------------------------------
+        
+            // --- ESTADO DA APLICAÇÃO ---
+            let userProfile = {};
+            let game = {};
+            const defaultAvatar = 'https://i.imgur.com/K3wY2mn.png';
+        
+            // --- SELETORES DE UI ---
+            const ui = {
+                authContainer: document.getElementById('auth-container'),
+                loginPanel: document.getElementById('login-panel'), 
+                signupPanel: document.getElementById('signup-panel'),
+                loginForm: document.getElementById('login-form'), 
+                loginNumericaInput: document.getElementById('login-numerica'), 
+                loginPasswordInput: document.getElementById('login-password'), 
+                loginError: document.getElementById('login-error'),
+                signupForm: document.getElementById('signup-form'), 
+                signupPasswordInput: document.getElementById('signup-password'), 
+                signupGuerraInput: document.getElementById('signup-guerra'), 
+                signupPelotaoInput: document.getElementById('signup-pelotao'), 
+                signupNumericaInput: document.getElementById('signup-numerica'), 
+                signupError: document.getElementById('signup-error'),
+                switchToSignupBtn: document.getElementById('switch-to-signup'),
+                switchToLoginBtn: document.getElementById('switch-to-login'),
+                gameContainer: document.getElementById('game-container'), 
+                profilePic: document.getElementById('profile-pic'), 
+                playerName: document.getElementById('player-name'), 
+                level: document.getElementById('level'), 
+                playerTitle: document.getElementById('player-title'), 
+                expBar: document.getElementById('exp-bar'), 
+                expText: document.getElementById('exp-text'),
+                logoutButton: document.getElementById('logout-button'),
+                adminLink: document.getElementById('admin-link'),
+                tabs: document.querySelectorAll('.tab'),
+                tabButtons: document.querySelectorAll('.tab-button'),
+                globalAnnouncementsContainer: document.getElementById('global-announcements-container'),
+                dailyQuestsList: document.getElementById('daily-quests-list'),
+                rankingList: document.getElementById('ranking-list'),
+                muralFeed: document.getElementById('mural-feed'), 
+                muralPostForm: document.getElementById('mural-post-form'), 
+                muralInput: document.getElementById('mural-input')
+            };
+        
+            // --- FUNÇÕES DE AUTENTICAÇÃO ---
+            async function handleLogin(e) {
+                e.preventDefault();
+                ui.loginError.textContent = '';
+                const numerica = ui.loginNumericaInput.value;
+                const password = ui.loginPasswordInput.value;
+                const email = `${numerica}@cfo.pmpe.br`;
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) {
+                    ui.loginError.textContent = `Erro: Numérica ou senha inválidos.`;
+                    return;
+                }
+                if (data.user) {
+                    await loadProfileAndStart(data.user);
+                }
+            }
+        
+            async function handleSignUp(e) {
+                e.preventDefault();
+                ui.signupError.textContent = '';
+                const nomeDeGuerra = ui.signupGuerraInput.value.trim().toUpperCase();
+                const pelotao = ui.signupPelotaoInput.value.trim();
+                const numerica = ui.signupNumericaInput.value;
+                const password = ui.signupPasswordInput.value;
+                if (password.length < 6) {
+                    ui.signupError.textContent = 'Erro: A senha precisa ter no mínimo 6 caracteres.';
+                    return;
+                }
+                const email = `${numerica}@cfo.pmpe.br`;
+                
+                const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
+                if (authError) {
+                    ui.signupError.textContent = `Erro: ${authError.message}`;
+                    return;
+                }
+        
+                if (authData.user) {
+                    const initialProfile = {
+                        id: authData.user.id,
+                        nome_de_guerra: nomeDeGuerra,
+                        pelotao: pelotao,
+                        numerica: parseInt(numerica, 10),
+                        role: 'aluno'
+                    };
+                    const { error: profileError } = await supabase.from('profiles').insert(initialProfile);
+                    if (profileError) {
+                        ui.signupError.textContent = `Erro ao criar perfil: ${profileError.message}`;
+                        return;
+                    }
+                    alert("Conta criada com sucesso! Por favor, faça o login para começar.");
+                    location.reload();
+                }
+            }
+            
+            async function handleLogout() {
+                await supabase.auth.signOut();
+                location.reload();
+            }
+        
+            // --- FUNÇÕES DE DADOS ---
+            async function loadProfileAndStart(user) {
+                const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+                if(error || !data) {
+                    console.error("Perfil não encontrado, forçando logout", error);
+                    await handleLogout();
+                    return false;
+                }
+                userProfile = data;
+                game = data.full_data || { dailyQuests: [], level: 1, exp: 0, title: 'Aluno Novinho 🌱' };
+                game.level = data.level;
+                game.exp = data.exp;
+                game.title = data.title;
+                startGame();
+                return true;
+            }
+        
+            // --- LÓGICA DO JOGO ---
+            function updateProfileUI() {
+                ui.playerName.textContent = userProfile.nome_de_guerra;
+                ui.level.textContent = `NÍVEL ${game.level}`;
+                ui.title.textContent = game.title;
+                const expNeeded = Math.floor(100 * Math.pow(1.2, game.level - 1));
+                ui.expText.textContent = `EXP: ${game.exp} / ${expNeeded}`;
+                ui.expBar.style.width = `${(game.exp / expNeeded) * 100}%`;
+                ui.profilePic.src = userProfile.profile_pic || defaultAvatar;
+            }
+        
+            async function fetchAnnouncements() {
+                const { data, error } = await supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(3);
+                if (error || !data || data.length === 0) return;
+                ui.globalAnnouncementsContainer.innerHTML = '<h4>📢 Avisos Globais</h4>';
+                data.forEach(ann => {
+                    const item = document.createElement('div');
+                    item.className = 'announcement-item';
+                    item.innerHTML = `<p>${ann.content}</p><div class="author">- ${ann.author_name}</div>`;
+                    ui.globalAnnouncementsContainer.appendChild(item);
+                });
+            }
+        
+            async function fetchAndRenderMural() {
+                const { data, error } = await supabase.from('mural_messages').select('*, mural_likes(user_id)').order('created_at', { ascending: false }).limit(50);
+                if (error) { console.error('Erro ao buscar mural:', error); return; }
+                ui.muralFeed.innerHTML = '';
+                data.forEach(msg => {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = 'mural-message';
+                    const userLiked = msg.mural_likes.some(like => like.user_id === userProfile.id);
+                    msgDiv.innerHTML = `
+                        <div class="mural-header">
+                            <img src="${msg.author_profile_pic || defaultAvatar}" alt="avatar">
+                            <span class="author">${msg.author_name}</span>
+                            <span class="timestamp">${new Date(msg.created_at).toLocaleString('pt-BR')}</span>
+                        </div>
+                        <div class="mural-content"><p>${msg.content}</p></div>
+                        <div class="mural-actions">
+                            <button class="like-btn ${userLiked ? 'liked' : ''}" data-message-id="${msg.id}">👍 Elogiar (${msg.mural_likes.length})</button>
+                        </div>`;
+                    ui.muralFeed.appendChild(msgDiv);
+                });
+            }
+        
+            async function handleNewMuralMessage(e) {
+                e.preventDefault();
+                const content = ui.muralInput.value.trim();
+                if(!content) return;
+                ui.muralInput.value = "";
+                await supabase.from('mural_messages').insert({ 
+                    content, 
+                    author_id: userProfile.id, 
+                    author_name: userProfile.nome_de_guerra, 
+                    author_profile_pic: userProfile.profile_pic 
+                });
+            }
+        
+            async function handleMuralLike(e) {
+                if(!e.target.classList.contains('like-btn')) return;
+                const messageId = e.target.dataset.messageId;
+                const { data } = await supabase.from('mural_likes').select('id').eq('user_id', userProfile.id).eq('message_id', messageId);
+                if(data && data.length > 0) {
+                    await supabase.from('mural_likes').delete().eq('id', data[0].id);
+                } else {
+                    await supabase.from('mural_likes').insert({ user_id: userProfile.id, message_id: messageId });
+                }
+                fetchAndRenderMural();
+            }
+            
+            // --- FUNÇÕES DE INICIALIZAÇÃO ---
+            function initGameUI() {
+                ui.authContainer.classList.add('hidden');
+                ui.gameContainer.classList.remove('hidden');
+                if (userProfile.role === 'admin') {
+                    ui.adminLink.classList.remove('hidden');
+                }
+                updateProfileUI();
+                fetchAnnouncements();
+                fetchAndRenderMural();
+                ui.logoutButton.addEventListener('click', handleLogout);
+                ui.muralPostForm.addEventListener('submit', handleNewMuralMessage);
+                ui.muralFeed.addEventListener('click', handleMuralLike);
+            }
+            
+            function initAdminUI() {
+                window.location.href = 'admin.html';
+            }
+        
+            function startGame() {
+                if (userProfile.role === 'admin') {
+                    initAdminUI();
+                } else {
+                    initGameUI();
+                }
+            }
+        
+            // --- PONTO DE ENTRADA ---
+            async function main() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    await loadProfileAndStart(session.user);
+                } else {
+                    ui.authContainer.classList.remove('hidden');
+                    ui.loginPanel.classList.remove('hidden');
+                    ui.signupPanel.classList.add('hidden');
+        
+                    ui.switchToSignupBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        ui.loginPanel.classList.add('hidden');
+                        ui.signupPanel.classList.remove('hidden');
+                    });
+                    ui.switchToLoginBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        ui.signupPanel.classList.add('hidden');
+                        ui.loginPanel.classList.remove('hidden');
+                    });
+        
+                    ui.loginForm.addEventListener('submit', handleLogin);
+                    ui.signupForm.addEventListener('submit', handleSignUp);
+                }
+            }
+        
+            main();
+        });
+    </script>
 </body>
 </html>
