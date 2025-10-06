@@ -48,6 +48,7 @@
             </nav>
             <button id="logout-button" class="logout-button">Sair</button>
         </aside>
+
         <main class="main-content">
             <header class="main-header">
                 <h1>Painel Principal</h1>
@@ -56,8 +57,54 @@
                     <img id="user-avatar" src="https://via.placeholder.com/40" alt="Avatar">
                 </div>
             </header>
+
             <div class="dashboard-grid">
+                <div class="widget profile-widget">
+                    <h3>Meu Progresso</h3>
+                    <p>Nível 1 - Cadete Aluno</p>
+                    <div class="xp-bar-container">
+                        <div id="xp-bar" class="xp-bar"></div>
+                    </div>
+                    <span id="xp-text">50 / 1000 XP</span>
+                    <div class="countdown">
+                        Faltam <span id="days-left">...</span> dias para a formatura!
+                    </div>
+                </div>
+
+                <div class="widget schedule-widget">
+                    <h3>Aulas de Hoje</h3>
+                    <ul id="today-schedule">
+                        <li><strong>08:00 - 09:40:</strong> Carregando...</li>
+                    </ul>
+                </div>
+
+                <div class="widget tasks-widget">
+                    <h3>Próximas Missões</h3>
+                    <ul id="tasks-list">
+                        <li>Nenhuma missão agendada.</li>
+                    </ul>
+                </div>
+
+                <div class="widget grades-widget">
+                    <h3>Desempenho Geral</h3>
+                    <div class="average-grade">
+                        Média Ponderada: <span id="avg-grade">...</span>
+                    </div>
+                </div>
+
+                <div class="widget notes-widget">
+                    <h3>Anotações / Processos SEI</h3>
+                    <textarea placeholder="Adicione uma anotação ou número de processo..."></textarea>
+                    <button>Salvar</button>
+                </div>
+
+                 <div class="widget ranking-widget">
+                    <h3>Ranking da Turma</h3>
+                    <ol id="ranking-list">
+                        <li>Carregando ranking...</li>
+                    </ol>
                  </div>
+            </div>
         </main>
     </div>
 
