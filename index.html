@@ -3,112 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal do Cadete [v30.0 - Final]</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+    <title>Dashboard do Cadete</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div id="auth-container">
-        <div id="login-panel" class="auth-panel">
-            <h2 class="panel-title">Portal do Cadete</h2>
-            <form id="login-form"><label for="login-numerica">Sua Numérica:</label><input type="number" id="login-numerica" placeholder="Digite sua numérica..." required><label for="login-password">Sua Senha:</label><input type="password" id="login-password" placeholder="Digite sua senha..." required><button type="submit">Entrar</button><p id="login-error" class="error-message"></p></form>
-            <p class="auth-switcher">Não tem uma conta? <button id="switch-to-signup">Crie uma</button></p>
-        </div>
-        <div id="signup-panel" class="auth-panel hidden">
-            <h2 class="panel-title">Criar Conta</h2>
-            <form id="signup-form"><label for="signup-guerra">Nome de Guerra:</label><input type="text" id="signup-guerra" required><label for="signup-numerica">Numérica:</label><input type="number" id="signup-numerica" required><label for="signup-password">Crie uma Senha (mín. 6 caracteres):</label><input type="password" id="signup-password" required><button type="submit">Criar Conta</button><p id="signup-error" class="error-message"></p></form>
-            <p class="auth-switcher">Já tem uma conta? <button id="switch-to-login">Faça Login</button></p>
+    <div id="login-page">
+        <div class="login-container">
+            <h1>Plataforma do Cadete</h1>
+            <p>Acesse com sua numérica e senha.</p>
+            <input type="text" id="login-email" placeholder="Numérica do Curso">
+            <input type="password" id="login-password" placeholder="Senha">
+            <button id="login-button">Entrar</button>
+            <p id="login-error" class="error-message"></p>
         </div>
     </div>
-    
-    <div id="game-container" class="hidden">
-        <div id="left-column">
-            <div id="profile-panel" class="panel">
-                <div id="profile-pic-container">
-                    <img id="profile-pic" src="https://i.imgur.com/K3wY2mn.png" alt="Foto do Perfil">
-                    <input type="file" id="upload-pic-input" accept="image/*" class="hidden">
-                    <button id="upload-pic-button" title="Trocar Foto de Perfil">📷</button>
-                </div>
-                <div id="player-info">
-                    <div id="player-name">Aluno Oficial</div>
-                    <div id="level">NÍVEL 1</div>
-                    <div><strong>Título:</strong> <span id="player-title"></span></div>
-                </div>
-                <div class="progress-bar-container"><div id="exp-bar"></div></div>
-                <div id="exp-text">EXP: 0 / 100</div>
-                <div class="profile-actions">
-                    <button id="logout-button">Sair</button>
-                </div>
-            </div>
-            <div id="countdown-panel" class="panel">
-                <h2 class="panel-title">Fim do Curso</h2>
-                <div id="countdown-display">Calculando...</div>
-            </div>
-        </div>
 
-        <div id="main-column">
-            <div id="tabs-panel" class="panel">
-                <div class="tab-buttons">
-                    <button class="tab-button active" data-tab="tab-main">Principal</button>
-                    <button class="tab-button" data-tab="tab-tasks">Tarefas</button>
-                    <button class="tab-button" data-tab="tab-events">Eventos</button>
-                    <button class="tab-button" data-tab="tab-qts">QTS</button>
-                    <button class="tab-button" data-tab="tab-grades">Notas</button>
-                    <button class="tab-button" data-tab="tab-achievements">Conquistas</button>
-                </div>
-                <div class="tab-content">
-                    <div id="tab-main" class="tab active">
-                        <h4>Missões Diárias</h4>
-                        <ul id="daily-quests-list"></ul>
-                        <h4>Próximos Eventos</h4>
-                        <ul id="upcoming-events-list"></ul>
-                    </div>
-                    <div id="tab-tasks" class="tab">
-                        <h4>Minhas Tarefas</h4>
-                        <div id="tasks-list"></div>
-                        <div class="task-creator">
-                            <input type="text" id="task-name-input" placeholder="Nome da nova tarefa...">
-                            <select id="task-difficulty-select">
-                                <option value="easy">Fácil (+10 EXP)</option>
-                                <option value="medium">Média (+25 EXP)</option>
-                                <option value="hard">Difícil (+50 EXP)</option>
-                            </select>
-                            <button id="add-task-button">Adicionar Tarefa</button>
-                        </div>
-                    </div>
-                    <div id="tab-events" class="tab">
-                        <h3>Calendário de Eventos</h3>
-                        <div id="calendar"></div>
-                        <div class="event-creator">
-                            <input type="text" id="event-name-input" placeholder="Nome do Evento (Ex: Prova de Tiro)">
-                            <input type="date" id="event-date-input">
-                            <button id="add-event-button">Agendar Evento</button>
-                        </div>
-                    </div>
-                    <div id="tab-qts" class="tab">
-                        <h3>Quadro de Trabalho Semanal</h3>
-                        <div id="qts-schedule-container"></div>
-                    </div>
-                    <div id="tab-grades" class="tab">
-                        <div class="grades-header">
-                            <h3>Controle de Notas</h3>
-                            <div id="grades-average">Média Geral: N/A</div>
-                        </div>
-                        <div id="grades-container"></div>
-                    </div>
-                    <div id="tab-achievements" class="tab">
-                        <h3>Quadro de Conquistas</h3>
-                        <div id="achievements-grid"></div>
-                    </div>
-                </div>
+    <div id="app" class="hidden">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>CFO PMPE</h2>
             </div>
-        </div>
+            <nav>
+                <a href="#" class="active">Painel Principal</a>
+                <a href="#">Minhas Notas</a>
+                <a href="#">Calendário</a>
+                <a href="#">Ranking da Turma</a>
+                <a href="#">Conquistas</a>
+                <a href="#">Configurações</a>
+            </nav>
+            <button id="logout-button" class="logout-button">Sair</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Painel Principal</h1>
+                <div class="user-profile-header">
+                    <span id="user-name">Carregando...</span>
+                    <img id="user-avatar" src="https://via.placeholder.com/40" alt="Avatar">
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <div class="widget profile-widget">
+                    <h3>Meu Progresso</h3>
+                    <p>Nível 1 - Cadete Aluno</p>
+                    <div class="xp-bar-container">
+                        <div id="xp-bar" class="xp-bar"></div>
+                    </div>
+                    <span id="xp-text">50 / 1000 XP</span>
+                    <div class="countdown">
+                        Faltam <span id="days-left">...</span> dias para a formatura!
+                    </div>
+                </div>
+
+                <div class="widget schedule-widget">
+                    <h3>Aulas de Hoje (Segunda-feira)</h3>
+                    <ul id="today-schedule">
+                        <li><strong>08:00 - 09:40:</strong> Direito Penal e Processual Penal Militar</li>
+                        <li><strong>10:00 - 11:40:</strong> Ordem Unida II</li>
+                        <li><strong>13:40 - 15:20:</strong> Abordagem a Veículos</li>
+                        <li><strong>15:40 - 17:20:</strong> Treinamento Físico Militar II</li>
+                    </ul>
+                </div>
+
+                <div class="widget tasks-widget">
+                    <h3>Próximas Missões</h3>
+                    <ul id="tasks-list">
+                         <li>
+                            <span>Prova de Tiro Defensivo (Método Giraldi)</span>
+                            <span class="task-date">28/10/2025</span>
+                        </li>
+                        <li>
+                            <span>Apresentação de Trabalho de Comando</span>
+                            <span class="task-date">12/11/2025</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="widget grades-widget">
+                    <h3>Desempenho Geral</h3>
+                    <div class="average-grade">
+                        Média Ponderada: <span id="avg-grade">...</span>
+                    </div>
+                </div>
+
+                <div class="widget notes-widget">
+                    <h3>Anotações / Processos SEI</h3>
+                    <textarea placeholder="Adicione uma anotação ou número de processo..."></textarea>
+                    <button>Salvar</button>
+                </div>
+
+                 <div class="widget ranking-widget">
+                    <h3>Ranking da Turma</h3>
+                    <ol id="ranking-list">
+                        <li><span>1. Al. CFO Fulano</span> <span>9.80</span></li>
+                        <li><span>2. Al. CFO Ciclano</span> <span>9.75</span></li>
+                        <li><span>3. Al. CFO Beltrano</span> <span>9.68</span></li>
+                    </ol>
+                 </div>
+            </div>
+        </main>
     </div>
-    
-    <div id="notification-toast" class="hidden"></div>
-    
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
 </body>
 </html>
