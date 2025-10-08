@@ -115,7 +115,7 @@ async function uploadAvatar(file) {
 
     try {
         const resizedFile = await resizeImage(file, 200, 200);
-        const fileExt = resizedFile.name.split('.').pop();
+        const fileExt = 'jpeg'; // Forçamos jpeg por causa do canvas
         const filePath = `${user.id}/avatar.${fileExt}`;
         const { error: uploadError } = await sb.storage.from('avatars').upload(filePath, resizedFile, { upsert: true });
         if (uploadError) { throw uploadError; }
@@ -204,7 +204,7 @@ function renderDashboard() {
             dashboardMissionsList.innerHTML += `<li><span>${m.name}</span> <span>${new Date(m.date+'T00:00:00').toLocaleDateString('pt-BR')}</span></li>`;
         });
     } else {
-        dashboardMissionsList.innerHTML = '<li><span>Nenhuma missão futura agendada.</span></li>';
+        dashboardMissionsList.innerHTML = '<li><span>Nenhum serviço futuro agendado.</span></li>';
     }
 
     dashboardAchievementsList.innerHTML = '';
