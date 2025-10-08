@@ -27,6 +27,7 @@ const remindersList = document.getElementById('reminders-list'), reminderInput =
 const addLinkForm = document.getElementById('add-link-form'), linkTitleInput = document.getElementById('link-title-input'), linkValueInput = document.getElementById('link-value-input'), linkTypeInput = document.getElementById('link-type-input'), linksList = document.getElementById('links-list');
 const uploadAvatarButton = document.getElementById('upload-avatar-button'), uploadAvatarInput = document.getElementById('upload-avatar-input');
 const addQuestForm = document.getElementById('add-quest-form'), questTextInput = document.getElementById('quest-text-input'), questDifficultySelect = document.getElementById('quest-difficulty-select'), questsList = document.getElementById('quests-list'), clearCompletedQuestsButton = document.getElementById('clear-completed-quests-button');
+const achievementsWidget = document.getElementById('achievements-widget'), achievementsModal = document.getElementById('achievements-modal'), achievementsModalClose = document.getElementById('achievements-modal-close');
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -111,16 +112,52 @@ async function saveUserData() {
 async function uploadAvatar(file) {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return;
-    const fileExt = file.name.split('.').pop();
-    const filePath = `${user.id}/avatar.${fileExt}`;
-    const { error: uploadError } = await sb.storage.from('avatars').upload(filePath, file, { upsert: true });
-    if (uploadError) { console.error(uploadError); alert('Erro ao enviar a imagem. Verifique o console (F12).'); return; }
-    const { data: publicUrlData } = sb.storage.from('avatars').getPublicUrl(filePath);
-    if (!publicUrlData) { alert('Imagem enviada, mas não foi possível obter o link.'); return; }
-    const publicUrl = `${publicUrlData.publicUrl}?t=${new Date().getTime()}`;
-    const { error: updateError } = await sb.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
-    if (updateError) alert('Não foi possível salvar a nova foto de perfil.');
-    else userAvatarEl.src = publicUrl;
+
+    try {
+        const resizedFile = await resizeImage(file, 200, 200);
+        const fileExt = resizedFile.name.split('.').pop();
+        const filePath = `${user.id}/avatar.${fileExt}`;
+        const { error: uploadError } = await sb.storage.from('avatars').upload(filePath, resizedFile, { upsert: true });
+        if (uploadError) { throw uploadError; }
+        const { data: publicUrlData } = sb.storage.from('avatars').getPublicUrl(filePath);
+        const publicUrl = `${publicUrlData.publicUrl}?t=${new Date().getTime()}`;
+        const { error: updateError } = await sb.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
+        if (updateError) { throw updateError; }
+        userAvatarEl.src = publicUrl;
+    } catch (error) {
+        console.error('Erro completo no upload do avatar:', error);
+        alert('Erro ao enviar a imagem. Verifique o console (F12).');
+    }
+}
+
+function resizeImage(file, maxWidth, maxHeight) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                if (width > height) {
+                    if (width > maxWidth) { height = Math.round((height *= maxWidth / width)); width = maxWidth; }
+                } else {
+                    if (height > maxHeight) { width = Math.round((width *= maxHeight / height)); height = maxHeight; }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                canvas.toBlob((blob) => {
+                    resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
+                }, 'image/jpeg', 0.9);
+            };
+            img.onerror = reject;
+        };
+        reader.onerror = reject;
+    });
 }
 
 // =======================================================
@@ -202,7 +239,7 @@ function handleGradeChange(e) {
     const nota = parseFloat(e.target.value);
     if (subject && !isNaN(nota)) {
         userState.grades[subject] = Math.max(0, Math.min(10, nota));
-        if (nota > 0 && !userState.achievements.includes('FIRST_GRADE')) checkAchievements('add_grade');
+        if (nota > 0) checkAchievements('add_grade');
         if (nota === 10) checkAchievements('add_grade');
         saveUserData();
         updateGradesAverage();
@@ -305,6 +342,7 @@ function checkAchievements(eventType, data) {
 function addXp(amount) {
     if (!userState.xp) userState.xp = 0;
     userState.xp += amount;
+    checkAchievements();
     saveUserData();
     renderDashboard();
 }
@@ -349,14 +387,93 @@ function clearCompletedQuests() {
     renderQuests();
 }
 
-function renderScheduledMissions() { /* ... (código existente) ... */ }
-function addCustomMission(e) { /* ... (código existente) ... */ }
-function renderReminders() { /* ... (código existente) ... */ }
-function addReminder() { /* ... (código existente) ... */ }
-function handleReminderInteraction(e) { /* ... (código existente) ... */ }
-function renderLinks() { /* ... (código existente) ... */ }
-function addLink(e) { /* ... (código existente) ... */ }
-function handleLinkInteraction(e) { /* ... (código existente) ... */ }
+function renderScheduledMissions() {
+    scheduledMissionsList.innerHTML = '';
+    if (!userState.missions) return;
+    userState.missions.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach((m, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>${new Date(m.date+'T00:00:00').toLocaleDateString('pt-BR')} - ${m.name}</span><button data-index="${index}">X</button>`;
+        scheduledMissionsList.appendChild(li);
+    });
+}
+function addCustomMission(e) {
+    e.preventDefault();
+    const name = missionNameInput.value.trim(), date = missionDateInput.value;
+    if (name && date) {
+        if (!userState.missions) userState.missions = [];
+        userState.missions.push({ name, date });
+        addMissionForm.reset();
+        checkAchievements('add_mission');
+        saveUserData();
+        renderScheduledMissions();
+        if (calendarInstance) calendarInstance.refetchEvents();
+    }
+}
+
+function renderReminders() {
+    remindersList.innerHTML = '';
+    if (!userState.reminders) return;
+    userState.reminders.forEach((r, index) => {
+        const item = document.createElement('div');
+        item.className = `list-item reminder-item ${r.completed ? 'completed' : ''}`;
+        item.innerHTML = `<label><input type="checkbox" data-index="${index}" ${r.completed ? 'checked' : ''}> <span>${r.text}</span></label><button data-index="${index}">X</button>`;
+        remindersList.appendChild(item);
+    });
+}
+function addReminder() {
+    const text = reminderInput.value.trim();
+    if (text) {
+        if (!userState.reminders) userState.reminders = [];
+        userState.reminders.push({ text, completed: false });
+        reminderInput.value = '';
+        checkAchievements('add_reminder');
+        saveUserData();
+        renderReminders();
+    }
+}
+function handleReminderInteraction(e) {
+    const index = e.target.dataset.index;
+    if (index === undefined) return;
+    if (e.target.type === 'checkbox') userState.reminders[index].completed = e.target.checked;
+    if (e.target.tagName === 'BUTTON') userState.reminders.splice(index, 1);
+    saveUserData();
+    renderReminders();
+}
+
+function renderLinks() {
+    linksList.innerHTML = '';
+    if (!userState.links) return;
+    userState.links.forEach((link, index) => {
+        const item = document.createElement('div');
+        item.className = 'list-item link-item';
+        let content = link.type === 'link'
+            ? `<a href="${link.value}" target="_blank" rel="noopener noreferrer">${link.title} 🔗</a><span>${link.value}</span>`
+            : `<div>${link.title} 📄</div><span>SEI: ${link.value}</span>`;
+        item.innerHTML = `<div class="link-item-info">${content}</div><button data-index="${index}">X</button>`;
+        linksList.appendChild(item);
+    });
+}
+function addLink(e) {
+    e.preventDefault();
+    let value = linkValueInput.value.trim();
+    const title = linkTitleInput.value.trim(), type = linkTypeInput.value;
+    if (title && value) {
+        if (type === 'link' && !value.startsWith('http')) value = `https://${value}`;
+        if (!userState.links) userState.links = [];
+        userState.links.push({ title, value, type });
+        addLinkForm.reset();
+        checkAchievements('add_link');
+        saveUserData();
+        renderLinks();
+    }
+}
+function handleLinkInteraction(e) {
+    if (e.target.tagName === 'BUTTON') {
+        userState.links.splice(e.target.dataset.index, 1);
+        saveUserData();
+        renderLinks();
+    }
+}
 
 // =======================================================
 // 6. CONTROLE DE INTERFACE E EVENT LISTENERS
@@ -402,4 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addQuestForm.addEventListener('submit', addQuest);
     questsList.addEventListener('change', handleQuestInteraction);
     clearCompletedQuestsButton.addEventListener('click', clearCompletedQuests);
+    achievementsWidget.addEventListener('click', () => achievementsModal.classList.remove('hidden'));
+    achievementsModalClose.addEventListener('click', () => achievementsModal.classList.add('hidden'));
+    achievementsModal.addEventListener('click', (e) => { if (e.target === achievementsModal) achievementsModal.classList.add('hidden'); });
 });
