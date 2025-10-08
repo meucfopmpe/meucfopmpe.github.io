@@ -78,17 +78,12 @@ async function handleLogin() {
 async function handleLogout() { await sb.auth.signOut(); window.location.reload(); }
 
 async function loadUserData(user) {
-    const { data, error } = await sb.from('profiles').select('user_data, avatar_url').eq('id', user.id).single();
+    const { data, error } = await sb.from('profiles').select('user_data').eq('id', user.id).single();
     if (error) console.error("Erro ao carregar dados do usuário:", error);
     
-    if (data && data.avatar_url) {
-        userAvatarEl.src = `${data.avatar_url}?t=${new Date().getTime()}`;
-    } else {
-        userAvatarEl.src = '';
-    }
-
     if (data && data.user_data) {
         userState = data.user_data;
+        if (userState.avatar) userAvatarEl.src = userState.avatar; else userAvatarEl.src = '';
         if (!userState.xp) userState.xp = 0;
         if (!userState.missions) userState.missions = [];
         if (!userState.reminders) userState.reminders = [];
@@ -98,7 +93,7 @@ async function loadUserData(user) {
     } else { 
         userState = {
             grades: Object.fromEntries(subjectList.map(s => [s, 0])),
-            schedule: {}, achievements: [], missions: [], reminders: [], links: [], quests: [], xp: 0
+            schedule: {}, achievements: [], missions: [], reminders: [], links: [], quests: [], xp: 0, avatar: ''
         };
     }
 }
@@ -110,27 +105,14 @@ async function saveUserData() {
 }
 
 async function uploadAvatar(file) {
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) return;
-
     try {
-        const resizedFile = await resizeImage(file, 200, 200);
-        const fileExt = 'jpeg';
-        const filePath = `${user.id}/avatar.${fileExt}`;
-        
-        const { error: uploadError } = await sb.storage.from('avatars').upload(filePath, resizedFile, { upsert: true });
-        if (uploadError) { throw uploadError; }
-        
-        const { data: publicUrlData } = sb.storage.from('avatars').getPublicUrl(filePath);
-        const publicUrl = `${publicUrlData.publicUrl}?t=${new Date().getTime()}`;
-        
-        const { error: updateError } = await sb.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
-        if (updateError) { throw updateError; }
-        
-        userAvatarEl.src = publicUrl;
+        const dataUrl = await resizeImage(file, 100, 100);
+        userState.avatar = dataUrl;
+        await saveUserData();
+        userAvatarEl.src = dataUrl;
     } catch (error) {
-        console.error('Erro completo no upload do avatar:', error);
-        alert('Erro ao enviar a imagem. Verifique o console (F12).');
+        console.error('Erro ao processar imagem:', error);
+        alert('Não foi possível processar a imagem.');
     }
 }
 
@@ -154,9 +136,7 @@ function resizeImage(file, maxWidth, maxHeight) {
                 canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
-                canvas.toBlob((blob) => {
-                    resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
-                }, 'image/jpeg', 0.9);
+                resolve(canvas.toDataURL('image/jpeg', 0.9));
             };
             img.onerror = reject;
         };
@@ -306,14 +286,14 @@ function getCalendarEvents() {
 
 async function renderRanking() {
     rankingList.innerHTML = 'Carregando ranking...';
-    const { data, error } = await sb.from('profiles').select('full_name, avatar_url, grades_average').order('grades_average', { ascending: false }).limit(50);
+    const { data, error } = await sb.from('profiles').select('full_name, user_data, grades_average').order('grades_average', { ascending: false }).limit(50);
     if (error) { rankingList.innerHTML = '<p style="color: var(--sl-error);">Não foi possível carregar o ranking.</p>'; console.error(error); return; }
     if (data.length === 0) { rankingList.innerHTML = '<p>Ninguém no ranking ainda. Adicione suas notas!</p>'; return; }
     rankingList.innerHTML = '';
     data.forEach((profile, index) => {
         const item = document.createElement('div');
         item.className = 'ranking-item';
-        const avatarSrc = profile.avatar_url || 'https://i.imgur.com/K3wY2mn.png';
+        const avatarSrc = profile.user_data?.avatar || 'https://i.imgur.com/K3wY2mn.png';
         item.innerHTML = `<div class="ranking-pos">${index + 1}</div><img class="ranking-avatar" src="${avatarSrc}"><div class="ranking-info"><div class="ranking-name">${profile.full_name || 'Anônimo'}</div></div><div class="ranking-avg">${profile.grades_average ? profile.grades_average.toFixed(2) : '0.00'}</div>`;
         rankingList.appendChild(item);
     });
@@ -377,12 +357,15 @@ function handleQuestInteraction(e) {
     if (e.target.type !== 'checkbox') return;
     const index = e.target.dataset.index;
     const quest = userState.quests[index];
-    if (!quest || quest.completed) { e.target.checked = true; return; }
-    quest.completed = true;
+    if (!quest || !e.target.checked) return; // Só adiciona XP ao marcar, não ao desmarcar
+    
+    if(!quest.completed) {
+        quest.completed = true;
+        addXp(quest.xp);
+        checkAchievements('complete_quest', quest);
+        saveUserData();
+    }
     e.target.closest('.quest-item').classList.add('completed');
-    addXp(quest.xp);
-    checkAchievements('complete_quest', quest);
-    saveUserData();
 }
 function clearCompletedQuests() {
     if (!userState.quests) return;
@@ -524,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
     questsList.addEventListener('change', handleQuestInteraction);
     clearCompletedQuestsButton.addEventListener('click', clearCompletedQuests);
     achievementsWidget.addEventListener('click', () => {
-        renderAchievements(); // Garante que o conteúdo está atualizado
+        renderAchievements();
         achievementsModal.classList.remove('hidden');
     });
     achievementsModalClose.addEventListener('click', () => achievementsModal.classList.add('hidden'));
