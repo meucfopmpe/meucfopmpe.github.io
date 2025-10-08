@@ -14,28 +14,7 @@
 </head>
 <body>
 
-    <div id="auth-page">
-        <div id="login-container" class="auth-container">
-            <h1 class="auth-title">Plataforma do Cadete</h1>
-            <p class="auth-subtitle">Acesse com sua numérica e senha.</p>
-            <input type="text" id="login-email" placeholder="Numérica do Curso">
-            <input type="password" id="login-password" placeholder="Senha">
-            <button id="login-button">ENTRAR</button>
-            <p id="login-error" class="error-message"></p>
-            <p class="toggle-auth">Não tem uma conta? <a href="#" id="show-signup">Cadastre-se</a></p>
-        </div>
-        <div id="signup-container" class="auth-container hidden">
-            <h1 class="auth-title">Crie sua Conta</h1>
-            <p class="auth-subtitle">Preencha os dados para se cadastrar.</p>
-            <input type="text" id="signup-name" placeholder="Nome Completo">
-            <input type="text" id="signup-course-number" placeholder="Numérica do Curso">
-            <input type="text" id="signup-platoon" placeholder="Pelotão (Ex: 1º Pelotão)">
-            <input type="password" id="signup-password" placeholder="Crie uma Senha">
-            <button id="signup-button">CADASTRAR</button>
-            <p id="signup-message" class="message"></p>
-            <p class="toggle-auth">Já tem uma conta? <a href="#" id="show-login">Faça o login</a></p>
-        </div>
-    </div>
+    <div id="auth-page"></div>
 
     <div id="app" class="hidden">
         <aside class="sidebar">
@@ -45,106 +24,36 @@
                     <input type="file" id="upload-avatar-input" class="hidden" accept="image/*">
                     <button id="upload-avatar-button" title="Trocar Foto de Perfil">📷</button>
                 </div>
-                <h2>CFO PMPE</h2>
+                <h2 id="user-name-sidebar">Carregando...</h2>
             </div>
-            <nav id="sidebar-nav">
-                <a href="#" class="nav-link active" data-page="page-dashboard">Painel Principal</a>
-                <a href="#" class="nav-link" data-page="page-grades">Minhas Notas</a>
-                <a href="#" class="nav-link" data-page="page-schedule">Meu Horário (QTS)</a>
-                <a href="#" class="nav-link" data-page="page-calendar">Calendário</a>
-                <a href="#" class="nav-link" data-page="page-missions">Missões/Serviços</a>
-                <a href="#" class="nav-link" data-page="page-reminders">Lembretes</a>
-                <a href="#" class="nav-link" data-page="page-links">Links/SEI</a>
-                <a href="#" class="nav-link" data-page="page-ranking">Ranking da Turma</a>
-                <a href="#" class="nav-link" data-page="page-achievements">Conquistas</a>
-            </nav>
+            <nav id="sidebar-nav"></nav>
             <button id="logout-button" class="logout-button">SAIR</button>
         </aside>
 
         <main class="main-content">
-            <header class="main-header">
-                <h1 id="page-title">Painel Principal</h1>
-                <div class="user-profile-header">
-                    <span id="user-name">Carregando...</span>
-                </div>
-            </header>
+            <header class="main-header"><h1 id="page-title">Painel Principal</h1></header>
             
             <div id="page-dashboard" class="page active">
                 <div class="dashboard-grid">
                     <div class="widget">
                         <h3>MEU PROGRESSO</h3>
-                        <div class="countdown">Faltam <span id="days-left">...</span> dias para a formatura</div>
+                        <div id="player-level-title" class="level-title">NÍVEL 1 - ALUNO NOVATO</div>
                         <div class="xp-bar-container"><div id="xp-bar" class="xp-bar"></div></div>
-                        <span id="xp-text" class="xp-text">50 / 1000 XP</span>
+                        <span id="xp-text" class="xp-text">EXP: 0 / 100</span>
+                        <div class="countdown">Faltam <span id="days-left">...</span> dias para a formatura</div>
                     </div>
                     <div class="widget">
-                        <h3>HABILIDADES</h3>
-                        <canvas id="stats-chart"></canvas>
+                        <h3>PRÓXIMAS MISSÕES</h3>
+                        <ul id="dashboard-missions-list" class="dashboard-list"></ul>
+                    </div>
+                    <div class="widget">
+                        <h3>ÚLTIMAS CONQUISTAS</h3>
+                        <div id="dashboard-achievements-list" class="dashboard-achievements"></div>
                     </div>
                 </div>
             </div>
 
-            <div id="page-grades" class="page">
-                <div class="grades-header">
-                    <h2>Minhas Notas</h2>
-                    <div id="grades-average" class="average-grade"></div>
-                </div>
-                <div id="grades-container"></div>
-            </div>
-
-            <div id="page-schedule" class="page">
-                <h2>Quadro de Trabalho Semanal (QTS)</h2>
-                <p class="helper-text">Clique em uma célula para editar. As alterações são salvas automaticamente.</p>
-                <div id="qts-schedule-container"></div>
-            </div>
-
-            <div id="page-calendar" class="page">
-                <h2>Calendário de Missões e Eventos</h2>
-                <div id="calendar"></div>
-            </div>
-            
-            <div id="page-missions" class="page">
-                <h2>Adicionar Serviço/Plantão</h2>
-                <form id="add-mission-form" class="inline-form">
-                    <input type="text" id="mission-name-input" placeholder="Ex: Plantão, Auxiliar..." required>
-                    <input type="date" id="mission-date-input" required>
-                    <button type="submit">Agendar Missão</button>
-                </form>
-                <h3 class="list-header">Serviços Agendados:</h3>
-                <ul id="scheduled-missions-list" class="styled-list"></ul>
-            </div>
-
-            <div id="page-reminders" class="page">
-                <h2>Lembretes</h2>
-                <div id="reminders-list" class="styled-list"></div>
-                <div class="inline-form">
-                    <input type="text" id="reminder-input" placeholder="Novo lembrete...">
-                    <button id="add-reminder-button">+</button>
-                </div>
-            </div>
-
-            <div id="page-links" class="page">
-                <h2>Links e Processos Importantes</h2>
-                <form id="add-link-form" class="inline-form">
-                    <input type="text" id="link-title-input" placeholder="Título (Ex: Diário Oficial)" required>
-                    <input type="text" id="link-value-input" placeholder="Link ou Nº SEI" required>
-                    <select id="link-type-input">
-                        <option value="link">Link</option><option value="sei">Processo SEI</option>
-                    </select>
-                    <button type="submit">Adicionar</button>
-                </form>
-                <div id="links-list" class="styled-list"></div>
-            </div>
-
-            <div id="page-ranking" class="page">
-                <h2>Ranking de Combatentes (Top 50)</h2>
-                <div id="ranking-list"></div>
-            </div>
-            <div id="page-achievements" class="page">
-                <h2>Quadro de Conquistas</h2>
-                <div id="achievements-grid"></div>
-            </div>
-        </main>
+            </main>
     </div>
 
     <script src="script.js"></script>
