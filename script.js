@@ -35,7 +35,6 @@ const avgGradeEl = document.getElementById('avg-grade');
 // =======================================================
 // 3. FUNÇÕES DE AUTENTICAÇÃO
 // =======================================================
-
 async function handleSignUp() {
     const fullName = signupNameInput.value;
     const courseNumber = signupCourseNumberInput.value;
@@ -45,12 +44,11 @@ async function handleSignUp() {
 
     if (!fullName || !courseNumber || !platoon || !password) {
         signupMessage.textContent = 'Por favor, preencha todos os campos.';
-        signupMessage.classList.add('error-message');
+        signupMessage.className = 'error-message';
         return;
     }
     
     const email = `${courseNumber}@cfo.pmpe`;
-
     const { data, error } = await sb.auth.signUp({
         email: email,
         password: password,
@@ -58,19 +56,15 @@ async function handleSignUp() {
     });
 
     if (error) {
-        console.error('Erro no cadastro:', error.message);
-        signupMessage.textContent = "Erro ao cadastrar. A numérica já pode estar em uso.";
-        signupMessage.classList.add('error-message');
+        signupMessage.textContent = "Erro: Numérica já pode estar em uso.";
+        signupMessage.className = 'error-message';
     } else {
-        signupMessage.textContent = 'Cadastro realizado! Redirecionando para o login...';
-        signupMessage.classList.remove('error-message');
-        signupMessage.classList.add('message');
-        
-        // **MELHORIA**: Aguarda 2 segundos e volta para a tela de login
+        signupMessage.textContent = 'Sucesso! Redirecionando para login...';
+        signupMessage.className = 'message';
         setTimeout(() => {
             signupContainer.classList.add('hidden');
             loginContainer.classList.remove('hidden');
-            signupMessage.textContent = ''; // Limpa a mensagem
+            signupMessage.textContent = '';
         }, 2000);
     }
 }
@@ -79,80 +73,35 @@ async function handleLogin() {
     const courseNumber = loginEmailInput.value;
     const password = loginPasswordInput.value;
     loginError.textContent = '';
-    
     const email = `${courseNumber}@cfo.pmpe`;
 
-    // **DEBUG**: Adicionando logs para ver o que acontece
-    console.log("1. Tentando fazer login com a numérica:", courseNumber);
-
-    const { data, error } = await sb.auth.signInWithPassword({
-        email: email,
-        password: password,
-    });
+    const { data, error } = await sb.auth.signInWithPassword({ email: email, password: password, });
 
     if (error) {
-        console.error("2. Erro no login:", error.message);
         loginError.textContent = 'Numérica ou senha inválidas.';
-        return;
-    }
-
-    if (data.user) {
-        console.log("3. Login bem-sucedido. Usuário:", data.user.id);
-        console.log("4. Mostrando o painel...");
+    } else if (data.user) {
         showApp();
-        console.log("5. Carregando dados do painel...");
         loadDashboardData();
     }
 }
 
 async function handleLogout() {
-    const { error } = await sb.auth.signOut();
-    if (error) console.error('Erro no logout:', error);
-    else showLoginPage();
+    await sb.auth.signOut();
+    showLoginPage();
 }
 
 // =======================================================
 // 4. FUNÇÕES DO DASHBOARD
 // =======================================================
-
 async function loadDashboardData() {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) { showLoginPage(); return; }
-
-    const [profileResponse, gradesResponse] = await Promise.all([
-        sb.from('profiles').select('full_name, avatar_url, experience_points').eq('id', user.id).single(),
-        sb.from('grades').select('score, subjects(course_load)').eq('user_id', user.id)
-    ]);
-
-    if (profileResponse.data) {
-        const profile = profileResponse.data;
+    const { data: profile } = await sb.from('profiles').select('full_name, avatar_url').eq('id', user.id).single();
+    if (profile) {
         userNameEl.textContent = profile.full_name || 'Aluno Oficial';
         if (profile.avatar_url) userAvatarEl.src = profile.avatar_url;
-    } else {
-         console.error('Erro ao buscar perfil:', profileResponse.error);
     }
-    
-    if (gradesResponse.data) {
-        calculateWeightedAverage(gradesResponse.data);
-    } else {
-        console.error('Erro ao buscar notas:', gradesResponse.error);
-    }
-    
     calculateDaysLeft();
-    console.log("6. Dados do painel carregados.");
-}
-
-function calculateWeightedAverage(grades) {
-    if (!grades || grades.length === 0) { avgGradeEl.textContent = "N/A"; return; }
-    let totalScoreAndLoad = 0, totalLoad = 0;
-    grades.forEach(grade => {
-        if (grade.subjects && typeof grade.subjects.course_load === 'number') {
-            totalScoreAndLoad += grade.score * courseLoad;
-            totalLoad += grade.subjects.course_load;
-        }
-    });
-    if (totalLoad === 0) { avgGradeEl.textContent = "N/A"; return; }
-    avgGradeEl.textContent = (totalScoreAndLoad / totalLoad).toFixed(2);
 }
 
 function calculateDaysLeft() {
@@ -166,7 +115,6 @@ function calculateDaysLeft() {
 // =======================================================
 // 5. CONTROLE DE INTERFACE E SESSÃO
 // =======================================================
-
 function showApp() { authPage.classList.add('hidden'); appPage.classList.remove('hidden'); }
 function showLoginPage() { authPage.classList.remove('hidden'); appPage.classList.add('hidden'); }
 
