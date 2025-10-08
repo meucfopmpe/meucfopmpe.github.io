@@ -23,9 +23,10 @@ const gradesContainer = document.getElementById('grades-container'), qtsSchedule
 const addMissionForm = document.getElementById('add-mission-form'), missionNameInput = document.getElementById('mission-name-input'), missionDateInput = document.getElementById('mission-date-input'), scheduledMissionsList = document.getElementById('scheduled-missions-list');
 const remindersList = document.getElementById('reminders-list'), reminderInput = document.getElementById('reminder-input'), addReminderButton = document.getElementById('add-reminder-button');
 const addLinkForm = document.getElementById('add-link-form'), linkTitleInput = document.getElementById('link-title-input'), linkValueInput = document.getElementById('link-value-input'), linkTypeInput = document.getElementById('link-type-input'), linksList = document.getElementById('links-list');
+const uploadAvatarButton = document.getElementById('upload-avatar-button'), uploadAvatarInput = document.getElementById('upload-avatar-input');
 
 // =======================================================
-// 3. DADOS ESTÁTICOS (Matérias, Conquistas, etc.)
+// 3. DADOS ESTÁTICOS
 // =======================================================
 const subjectList = ["Sistema de Segurança Pública", "Teoria Geral da Administração", "Gestão Pública Geral Aplicada", "Gestão de Pessoas, Comando e Liderança", "Gestão de Logística, Orçamento e Finanças Públicas", "Fundamentos da Polícia Comunitária", "Psicologia Aplicada", "Análise Criminal e Estatística", "Qualidade do Atendimento aos Grupos Vulneráveis", "Direitos Humanos Aplicados à Atividade Policial Militar", "Gerenciamento de Crises", "Saúde Mental e Qualidade de Vida", "Treinamento Físico Militar I", "Treinamento Físico Militar II", "Gestão de Processos no Sistema Eletrônico", "Tecnologia da Informação e Comunicação", "Comunicação, Mídias Sociais e Cerimonial Militar", "Inteligência e Sistema de Informação", "Ética, Cidadania e Relações Interpessoais", "Ordem Unida I", "Ordem Unida II", "Instrução Geral", "Defesa Pessoal Policial I", "Defesa Pessoal Policial II", "Uso Diferenciado da Força", "Pronto Socorrismo", "Atendimento Pré-Hospitalar Tático", "Planejamento Operacional e Especializado", "Elaboração de Projetos e Captação de Recursos", "Planejamento Estratégico", "Gestão Por Resultados e Avaliação de Políticas Públicas", "Trabalho de Comando e Estado Maior", "Polícia Judiciária Militar", "Direito Administrativo Disciplinar Militar", "Direito Penal e Processual Penal Militar", "Legislação Policial Militar e Organizacional", "Procedimento em Ocorrência", "Economia Aplicada ao Setor Público", "História da PMPE", "Abordagem a Pessoas", "Abordagem a Veículos", "Abordagem a Edificações", "Patrulhamento Urbano", "Armamento e Munição", "Tiro Policial", "Tiro Defensivo (Método Giraldi)", "Ações Básicas de Apoio Aéreo", "Manobras Acadêmicas I", "Manobras Acadêmicas II", "Metodologia da Pesquisa Científica", "Teoria e Prática do Ensino", "Trabalho de Conclusão de Curso"];
 const qtsTimes = ['08:00-09:40', '10:00-11:40', '13:40-15:20', '15:40-17:20', '17:30-19:10'];
@@ -68,15 +69,18 @@ async function handleLogout() {
 }
 
 async function loadUserData(user) {
-    const { data, error } = await sb.from('profiles').select('user_data').eq('id', user.id).single();
+    const { data, error } = await sb.from('profiles').select('user_data, avatar_url').eq('id', user.id).single();
     if (error) console.error("Erro ao carregar dados do usuário:", error);
     
+    if (data && data.avatar_url) userAvatarEl.src = data.avatar_url;
+    else userAvatarEl.src = '';
+
     if (data && data.user_data) {
         userState = data.user_data;
         if (!userState.missions) userState.missions = [];
         if (!userState.reminders) userState.reminders = [];
         if (!userState.links) userState.links = [];
-        if (!userState.grades) userState.grades = Object.fromEntries(subjectList.map(s => [s, 0]));
+        if (!userState.grades || Object.keys(userState.grades).length === 0) userState.grades = Object.fromEntries(subjectList.map(s => [s, 0]));
     } else { 
         userState = {
             grades: Object.fromEntries(subjectList.map(s => [s, 0])),
@@ -91,18 +95,29 @@ async function saveUserData() {
     if (error) console.error("Erro ao salvar dados do usuário:", error);
 }
 
+async function uploadAvatar(file) {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${user.id}.${fileExt}`;
+    const { error: uploadError } = await sb.storage.from('avatars').upload(filePath, file, { upsert: true });
+    if (uploadError) { alert('Erro ao enviar a imagem.'); return; }
+    const { data: publicUrlData } = sb.storage.from('avatars').getPublicUrl(filePath);
+    if (!publicUrlData) { alert('Imagem enviada, mas não foi possível obter o link.'); return; }
+    const publicUrl = `${publicUrlData.publicUrl}?t=${new Date().getTime()}`;
+    const { error: updateError } = await sb.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
+    if (updateError) alert('Não foi possível salvar a nova foto de perfil.');
+    else userAvatarEl.src = publicUrl;
+}
+
 // =======================================================
 // 5. FUNÇÕES DE RENDERIZAÇÃO E LÓGICA DO PAINEL
 // =======================================================
 async function loadDashboardData() {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) { showLoginPage(); return; }
-
-    const { data: profile } = await sb.from('profiles').select('full_name, avatar_url').eq('id', user.id).single();
-    if (profile) {
-        userNameEl.textContent = profile.full_name || 'Aluno Oficial';
-        if (profile.avatar_url) userAvatarEl.src = profile.avatar_url;
-    }
+    const { data: profile } = await sb.from('profiles').select('full_name').eq('id', user.id).single();
+    if (profile) userNameEl.textContent = profile.full_name || 'Aluno Oficial';
     
     await loadUserData(user);
     
@@ -331,7 +346,7 @@ function handlePageNavigation(e) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     document.getElementById(targetPageId).classList.add('active');
-    e.target.classList.add('active');
+e.target.classList.add('active');
     pageTitleEl.textContent = e.target.textContent;
     if (targetPageId === 'page-calendar') initCalendar();
     if (targetPageId === 'page-ranking') renderRanking();
@@ -353,4 +368,6 @@ document.addEventListener('DOMContentLoaded', () => {
     remindersList.addEventListener('click', handleReminderInteraction);
     addLinkForm.addEventListener('submit', addLink);
     linksList.addEventListener('click', handleLinkInteraction);
+    uploadAvatarButton.addEventListener('click', () => uploadAvatarInput.click());
+    uploadAvatarInput.addEventListener('change', (event) => { if (event.target.files[0]) uploadAvatar(event.target.files[0]); });
 });
