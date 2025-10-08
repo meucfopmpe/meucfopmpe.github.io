@@ -115,14 +115,18 @@ async function uploadAvatar(file) {
 
     try {
         const resizedFile = await resizeImage(file, 200, 200);
-        const fileExt = 'jpeg'; // Forçamos jpeg por causa do canvas
+        const fileExt = 'jpeg';
         const filePath = `${user.id}/avatar.${fileExt}`;
+        
         const { error: uploadError } = await sb.storage.from('avatars').upload(filePath, resizedFile, { upsert: true });
         if (uploadError) { throw uploadError; }
+        
         const { data: publicUrlData } = sb.storage.from('avatars').getPublicUrl(filePath);
         const publicUrl = `${publicUrlData.publicUrl}?t=${new Date().getTime()}`;
+        
         const { error: updateError } = await sb.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
         if (updateError) { throw updateError; }
+        
         userAvatarEl.src = publicUrl;
     } catch (error) {
         console.error('Erro completo no upload do avatar:', error);
@@ -519,7 +523,10 @@ document.addEventListener('DOMContentLoaded', () => {
     addQuestForm.addEventListener('submit', addQuest);
     questsList.addEventListener('change', handleQuestInteraction);
     clearCompletedQuestsButton.addEventListener('click', clearCompletedQuests);
-    achievementsWidget.addEventListener('click', () => achievementsModal.classList.remove('hidden'));
+    achievementsWidget.addEventListener('click', () => {
+        renderAchievements(); // Garante que o conteúdo está atualizado
+        achievementsModal.classList.remove('hidden');
+    });
     achievementsModalClose.addEventListener('click', () => achievementsModal.classList.add('hidden'));
     achievementsModal.addEventListener('click', (e) => { if (e.target === achievementsModal) achievementsModal.classList.add('hidden'); });
 });
