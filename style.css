@@ -1,11 +1,34 @@
 :root {
-    --sl-bg: #0A0F1E; --sl-surface: #1B2139; --sl-primary: #00AFFF; --sl-glow: rgba(0, 175, 255, 0.5);
-    --sl-text-primary: #EAEFFC; --sl-text-secondary: #8A94B6; --sl-border: #394269; --sl-error: #FF4D4D; --sl-success: #33FFB5;
+    /* Paleta de Cores "Solo Leveling" */
+    --sl-bg: #0A0F1E;
+    --sl-surface: #1B2139;
+    --sl-primary: #00AFFF;
+    --sl-glow: rgba(0, 175, 255, 0.5);
+    --sl-text-primary: #EAEFFC;
+    --sl-text-secondary: #8A94B6;
+    --sl-border: #394269;
+    --sl-error: #FF4D4D;
+    --sl-success: #33FFB5;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Rajdhani', sans-serif; background-color: var(--sl-bg); color: var(--sl-text-primary); overflow: hidden; }
-.hidden { display: none !important; }
-.helper-text { color: var(--sl-text-secondary); margin-bottom: 20px; font-size: 0.9em; }
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+body { 
+    font-family: 'Rajdhani', sans-serif; 
+    background-color: var(--sl-bg); 
+    color: var(--sl-text-primary); 
+    overflow: hidden; 
+}
+.hidden { 
+    display: none !important; 
+}
+.helper-text { 
+    color: var(--sl-text-secondary); 
+    margin-bottom: 20px; 
+    font-size: 0.9em; 
+}
 
 /* --- AUTENTICAÇÃO --- */
 #auth-page { display: grid; place-items: center; width: 100vw; height: 100vh; background: radial-gradient(circle, #10182e, var(--sl-bg)); }
@@ -46,7 +69,7 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .countdown { background-color: var(--sl-bg); padding: 10px; text-align: center; font-weight: 600; border-radius: 4px; margin-top: 20px; }
 .countdown span { font-size: 1.2em; color: var(--sl-success); }
 .xp-bar-container { width: 100%; height: 8px; background-color: var(--sl-bg); border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
-.xp-bar { width: 5%; height: 100%; background-color: var(--sl-primary); border-radius: 4px; }
+.xp-bar { width: 5%; height: 100%; background-color: var(--sl-primary); border-radius: 4px; transition: width 0.5s ease; }
 .xp-text { font-size: 0.8em; color: var(--sl-text-secondary); display: block; }
 .dashboard-list { list-style: none; display: flex; flex-direction: column; gap: 15px; }
 .dashboard-list li { display: flex; justify-content: space-between; background-color: var(--sl-bg); padding: 10px; border-radius: 4px; font-weight: 600; }
@@ -88,8 +111,7 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .ranking-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background-color: var(--sl-bg); flex-shrink: 0; }
 .ranking-info { flex-grow: 1; }
 .ranking-name { font-weight: 600; }
-.ranking-details { font-size: 0.8em; color: var(--sl-text-secondary); }
-.ranking-avg { margin-left: auto; font-size: 1.2em; font-weight: bold; color: var(--sl-success); }
+.ranking-avg { font-size: 1.2em; font-weight: bold; color: var(--sl-success); }
 
 /* --- PÁGINA DE CONQUISTAS --- */
 #achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 20px; }
@@ -105,11 +127,15 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .inline-form input[type="date"] { color-scheme: dark; }
 .styled-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
 .styled-list li, .styled-list .list-item { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; background-color: var(--sl-surface); padding: 15px; border-radius: 4px; border: 1px solid var(--sl-border); gap: 10px; }
-.styled-list button, .reminder-item button, .link-item button { width: 40px; height: 30px; padding: 0; background-color: var(--sl-bg); border: 1px solid var(--sl-border); color: var(--sl-error); font-size: 1em; }
+.styled-list button { width: 40px; height: 30px; padding: 0; background-color: var(--sl-bg); border: 1px solid var(--sl-border); color: var(--sl-error); font-size: 1em; }
 .styled-list .completed span { text-decoration: line-through; color: var(--sl-text-secondary); }
 .link-item a { color: var(--sl-primary); text-decoration: none; font-weight: 600; }
 .link-item-info { word-break: break-all; }
 .link-item-info span { color: var(--sl-text-secondary); font-size: 0.9em; margin-left: 10px; }
+.quest-xp { font-weight: bold; color: var(--sl-success); }
+.list-header-container { display: flex; justify-content: space-between; align-items: center; }
+#clear-completed-quests-button { width: auto; padding: 5px 15px; font-size: 0.8em; background-color: var(--sl-surface); border: 1px solid var(--sl-border); color: var(--sl-text-secondary); }
+#clear-completed-quests-button:hover { background-color: var(--sl-error); border-color: var(--sl-error); color: var(--sl-bg); }
 
 /* --- ESTILOS PARA O AVATAR --- */
 #profile-pic-container { position: relative; width: 100px; height: 100px; margin: 0 auto 10px auto; }
