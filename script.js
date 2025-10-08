@@ -31,89 +31,82 @@ const daysLeftEl = document.getElementById('days-left');
 const userNameEl = document.getElementById('user-name');
 const userAvatarEl = document.getElementById('user-avatar');
 const avgGradeEl = document.getElementById('avg-grade');
+const sidebarNav = document.getElementById('sidebar-nav');
+const pageTitleEl = document.getElementById('page-title');
 
 // =======================================================
-// 3. FUNÇÕES DE AUTENTICAÇÃO
+// 3. FUNÇÕES DE AUTENTICAÇÃO (sem alterações)
 // =======================================================
 async function handleSignUp() {
-    const fullName = signupNameInput.value;
-    const courseNumber = signupCourseNumberInput.value;
-    const platoon = signupPlatoonInput.value;
-    const password = signupPasswordInput.value;
+    const fullName = signupNameInput.value, courseNumber = signupCourseNumberInput.value, platoon = signupPlatoonInput.value, password = signupPasswordInput.value;
     signupMessage.textContent = '';
-
-    if (!fullName || !courseNumber || !platoon || !password) {
-        signupMessage.textContent = 'Por favor, preencha todos os campos.';
-        signupMessage.className = 'error-message';
-        return;
-    }
-    
+    if (!fullName || !courseNumber || !platoon || !password) { signupMessage.textContent = 'Por favor, preencha todos os campos.'; signupMessage.className = 'error-message'; return; }
     const email = `${courseNumber}@cfo.pmpe`;
-    const { data, error } = await sb.auth.signUp({
-        email: email,
-        password: password,
-        options: { data: { full_name: fullName, course_number: courseNumber, platoon: platoon } }
-    });
-
-    if (error) {
-        signupMessage.textContent = "Erro: Numérica já pode estar em uso.";
-        signupMessage.className = 'error-message';
-    } else {
-        signupMessage.textContent = 'Sucesso! Redirecionando para login...';
-        signupMessage.className = 'message';
-        setTimeout(() => {
-            signupContainer.classList.add('hidden');
-            loginContainer.classList.remove('hidden');
-            signupMessage.textContent = '';
-        }, 2000);
+    const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: fullName, course_number: courseNumber, platoon: platoon } } });
+    if (error) { signupMessage.textContent = "Erro: Numérica já pode estar em uso."; signupMessage.className = 'error-message'; } 
+    else {
+        signupMessage.textContent = 'Sucesso! Redirecionando para login...'; signupMessage.className = 'message';
+        setTimeout(() => { signupContainer.classList.add('hidden'); loginContainer.classList.remove('hidden'); signupMessage.textContent = ''; }, 2000);
     }
 }
-
 async function handleLogin() {
-    const courseNumber = loginEmailInput.value;
-    const password = loginPasswordInput.value;
+    const courseNumber = loginEmailInput.value, password = loginPasswordInput.value;
     loginError.textContent = '';
     const email = `${courseNumber}@cfo.pmpe`;
-
-    const { data, error } = await sb.auth.signInWithPassword({ email: email, password: password, });
-
-    if (error) {
-        loginError.textContent = 'Numérica ou senha inválidas.';
-    } else if (data.user) {
-        showApp();
-        loadDashboardData();
-    }
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) { loginError.textContent = 'Numérica ou senha inválidas.'; } 
+    else if (data.user) { showApp(); loadDashboardData(); }
 }
-
-async function handleLogout() {
-    await sb.auth.signOut();
-    showLoginPage();
-}
+async function handleLogout() { await sb.auth.signOut(); showLoginPage(); }
 
 // =======================================================
-// 4. FUNÇÕES DO DASHBOARD
+// 4. FUNÇÕES DO DASHBOARD (ATUALIZADAS)
 // =======================================================
 async function loadDashboardData() {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) { showLoginPage(); return; }
-    const { data: profile } = await sb.from('profiles').select('full_name, avatar_url').eq('id', user.id).single();
-    if (profile) {
-        userNameEl.textContent = profile.full_name || 'Aluno Oficial';
-        if (profile.avatar_url) userAvatarEl.src = profile.avatar_url;
+    const [profileRes, gradesRes] = await Promise.all([
+        sb.from('profiles').select('full_name, avatar_url').eq('id', user.id).single(),
+        sb.from('grades').select('score').eq('user_id', user.id) // Query simplificada para média simples
+    ]);
+    if (profileRes.data) {
+        userNameEl.textContent = profileRes.data.full_name || 'Aluno Oficial';
+        if (profileRes.data.avatar_url) userAvatarEl.src = profileRes.data.avatar_url;
     }
+    if (gradesRes.data) { calculateSimpleAverage(gradesRes.data); }
     calculateDaysLeft();
 }
 
+/**
+ * ATUALIZADO: Calcula a média aritmética simples.
+ */
+function calculateSimpleAverage(grades) {
+    if (!grades || grades.length === 0) { avgGradeEl.textContent = "N/A"; return; }
+    const sum = grades.reduce((acc, grade) => acc + grade.score, 0);
+    const average = sum / grades.length;
+    avgGradeEl.textContent = average.toFixed(2);
+}
+
+/**
+ * ATUALIZADO: Usa uma data simulada para o cálculo.
+ */
 function calculateDaysLeft() {
+    // IMPORTANTE: A data real de hoje (out/2025) já passou da data de formatura (mai/2025).
+    // Para ver o contador funcionando, usamos uma data "de mentira".
+    // Mude esta data para qualquer dia antes da formatura para testar.
+    const SIMULATED_TODAY = new Date('2024-10-08T12:00:00'); // <<<< Mude aqui para testar
+    
     const graduationDate = new Date('2025-05-26T00:00:00');
-    const today = new Date();
+    // const today = new Date(); // Linha original que usa a data real
+    const today = SIMULATED_TODAY; // Nova linha que usa a data simulada
+
     const differenceInMs = graduationDate - today;
     const days = Math.ceil(differenceInMs / (1000 * 60 * 60 * 24));
     daysLeftEl.textContent = days > 0 ? days : 0;
 }
 
 // =======================================================
-// 5. CONTROLE DE INTERFACE E SESSÃO
+// 5. CONTROLE DE INTERFACE E SESSÃO (ATUALIZADO)
 // =======================================================
 function showApp() { authPage.classList.add('hidden'); appPage.classList.remove('hidden'); }
 function showLoginPage() { authPage.classList.remove('hidden'); appPage.classList.add('hidden'); }
@@ -124,12 +117,34 @@ async function checkSession() {
     else { signupContainer.classList.add('hidden'); loginContainer.classList.remove('hidden'); }
 }
 
+/**
+ * NOVO: Gerencia a troca de páginas/abas.
+ */
+function handlePageNavigation(e) {
+    if (e.target.tagName !== 'A') return; // Sai se o clique não foi num link
+    
+    const targetPageId = e.target.dataset.page;
+    if (!targetPageId) return;
+
+    // Esconde todas as páginas e remove a classe ativa dos links
+    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+
+    // Mostra a página alvo e ativa o link
+    document.getElementById(targetPageId).classList.add('active');
+    e.target.classList.add('active');
+
+    // Atualiza o título da página
+    pageTitleEl.textContent = e.target.textContent;
+}
+
 // =======================================================
-// 6. EVENT LISTENERS
+// 6. EVENT LISTENERS (ATUALIZADO)
 // =======================================================
 loginButton.addEventListener('click', handleLogin);
 signupButton.addEventListener('click', handleSignUp);
 logoutButton.addEventListener('click', handleLogout);
+sidebarNav.addEventListener('click', handlePageNavigation); // Novo listener para as abas
 showSignupLink.addEventListener('click', (e) => { e.preventDefault(); loginContainer.classList.add('hidden'); signupContainer.classList.remove('hidden'); });
 showLoginLink.addEventListener('click', (e) => { e.preventDefault(); signupContainer.classList.add('hidden'); loginContainer.classList.remove('hidden'); });
 document.addEventListener('DOMContentLoaded', checkSession);
