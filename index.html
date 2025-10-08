@@ -3,33 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard do Cadete</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Plataforma do Cadete</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="auth-page">
         <div id="login-container" class="auth-container">
-            <h1>Plataforma do Cadete</h1>
-            <p>Acesse com sua numérica e senha.</p>
+            <h1 class="auth-title">Plataforma do Cadete</h1>
+            <p class="auth-subtitle">Acesse com sua numérica e senha.</p>
             <input type="text" id="login-email" placeholder="Numérica do Curso">
             <input type="password" id="login-password" placeholder="Senha">
-            <button id="login-button">Entrar</button>
+            <button id="login-button">ENTRAR</button>
             <p id="login-error" class="error-message"></p>
             <p class="toggle-auth">Não tem uma conta? <a href="#" id="show-signup">Cadastre-se</a></p>
         </div>
 
         <div id="signup-container" class="auth-container hidden">
-            <h1>Crie sua Conta</h1>
-            <p>Preencha os dados para se cadastrar.</p>
+            <h1 class="auth-title">Crie sua Conta</h1>
+            <p class="auth-subtitle">Preencha os dados para se cadastrar.</p>
             <input type="text" id="signup-name" placeholder="Nome Completo">
             <input type="text" id="signup-course-number" placeholder="Numérica do Curso">
             <input type="text" id="signup-platoon" placeholder="Pelotão (Ex: 1º Pelotão)">
             <input type="password" id="signup-password" placeholder="Crie uma Senha">
-            <button id="signup-button">Cadastrar</button>
+            <button id="signup-button">CADASTRAR</button>
             <p id="signup-message" class="message"></p>
             <p class="toggle-auth">Já tem uma conta? <a href="#" id="show-login">Faça o login</a></p>
         </div>
@@ -37,7 +37,9 @@
 
     <div id="app" class="hidden">
         <aside class="sidebar">
-            <div class="sidebar-header"> <h2>CFO PMPE</h2> </div>
+            <div class="sidebar-header">
+                <h2>CFO PMPE</h2>
+            </div>
             <nav>
                 <a href="#" class="active">Painel Principal</a>
                 <a href="#">Minhas Notas</a>
@@ -46,7 +48,7 @@
                 <a href="#">Conquistas</a>
                 <a href="#">Configurações</a>
             </nav>
-            <button id="logout-button" class="logout-button">Sair</button>
+            <button id="logout-button" class="logout-button">SAIR</button>
         </aside>
 
         <main class="main-content">
@@ -58,16 +60,15 @@
                 </div>
             </header>
             <div class="dashboard-grid">
-                <div class="widget profile-widget">
-                    <h3>Meu Progresso</h3>
-                    <p>Nível 1 - Cadete Aluno</p>
+                <div class="widget">
+                    <h3>MEU PROGRESSO</h3>
+                    <div class="countdown">Faltam <span id="days-left">...</span> dias para a formatura</div>
                     <div class="xp-bar-container"><div id="xp-bar" class="xp-bar"></div></div>
-                    <span id="xp-text">50 / 1000 XP</span>
-                    <div class="countdown">Faltam <span id="days-left">...</span> dias para a formatura!</div>
+                    <span id="xp-text" class="xp-text">50 / 1000 XP</span>
                 </div>
-                <div class="widget grades-widget">
-                    <h3>Desempenho Geral</h3>
-                    <div class="average-grade">Média Ponderada: <span id="avg-grade">...</span></div>
+                <div class="widget">
+                    <h3>DESEMPENHO GERAL</h3>
+                    <div class="average-grade">MÉDIA PONDERADA: <span id="avg-grade">...</span></div>
                 </div>
             </div>
         </main>
