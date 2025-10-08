@@ -1,34 +1,11 @@
 :root {
-    /* Paleta de Cores "Solo Leveling" */
-    --sl-bg: #0A0F1E;
-    --sl-surface: #1B2139;
-    --sl-primary: #00AFFF;
-    --sl-glow: rgba(0, 175, 255, 0.5);
-    --sl-text-primary: #EAEFFC;
-    --sl-text-secondary: #8A94B6;
-    --sl-border: #394269;
-    --sl-error: #FF4D4D;
-    --sl-success: #33FFB5;
+    --sl-bg: #0A0F1E; --sl-surface: #1B2139; --sl-primary: #00AFFF; --sl-glow: rgba(0, 175, 255, 0.5);
+    --sl-text-primary: #EAEFFC; --sl-text-secondary: #8A94B6; --sl-border: #394269; --sl-error: #FF4D4D; --sl-success: #33FFB5;
 }
-* { 
-    box-sizing: border-box; 
-    margin: 0; 
-    padding: 0; 
-}
-body { 
-    font-family: 'Rajdhani', sans-serif; 
-    background-color: var(--sl-bg); 
-    color: var(--sl-text-primary); 
-    overflow: hidden; 
-}
-.hidden { 
-    display: none !important; 
-}
-.helper-text { 
-    color: var(--sl-text-secondary); 
-    margin-bottom: 20px; 
-    font-size: 0.9em; 
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Rajdhani', sans-serif; background-color: var(--sl-bg); color: var(--sl-text-primary); overflow: hidden; }
+.hidden { display: none !important; }
+.helper-text { color: var(--sl-text-secondary); margin-bottom: 20px; font-size: 0.9em; }
 
 /* --- AUTENTICAÇÃO --- */
 #auth-page { display: grid; place-items: center; width: 100vw; height: 100vh; background: radial-gradient(circle, #10182e, var(--sl-bg)); }
@@ -48,7 +25,7 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 #app { display: flex; width: 100vw; height: 100vh; }
 .sidebar { width: 250px; background-color: var(--sl-surface); border-right: 1px solid var(--sl-border); display: flex; flex-direction: column; padding: 20px; }
 .sidebar-header { text-align: center; }
-.sidebar-header h2 { text-align: center; text-shadow: 0 0 10px var(--sl-glow); }
+.sidebar-header h2 { text-align: center; text-shadow: 0 0 10px var(--sl-glow); font-size: 1.5em; }
 .sidebar nav { display: flex; flex-direction: column; gap: 10px; flex-grow: 1; margin-top: 20px; }
 .sidebar nav a { color: var(--sl-text-secondary); text-decoration: none; padding: 12px 15px; border-radius: 4px; transition: all 0.2s; font-weight: 600; cursor: pointer; }
 .sidebar nav a.active, .sidebar nav a:hover { color: var(--sl-text-primary); background-color: var(--sl-border); }
@@ -56,7 +33,6 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .logout-button:hover { background-color: var(--sl-error); color: var(--sl-bg); box-shadow: 0 0 15px var(--sl-error); }
 .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
 .main-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; background-color: var(--sl-surface); border-bottom: 1px solid var(--sl-border); }
-.user-profile-header { display: flex; align-items: center; gap: 15px; font-weight: 600; }
 .page { display: none; padding: 30px; }
 .page.active { display: block; }
 .page h2 { margin-bottom: 20px; color: var(--sl-primary); text-shadow: 0 0 5px var(--sl-glow); }
@@ -67,7 +43,7 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .widget { background-color: var(--sl-surface); padding: 20px; border-radius: 8px; border: 1px solid var(--sl-border); }
 .widget h3 { margin-bottom: 20px; letter-spacing: 1px; color: var(--sl-primary); }
 .level-title { text-align: center; font-weight: 700; font-size: 1.2em; color: var(--sl-primary); margin-bottom: 15px; text-shadow: 0 0 5px var(--sl-glow); }
-.countdown { background-color: var(--sl-bg); padding: 10px; text-align: center; font-weight: 600; border-radius: 4px; margin-bottom: 20px; }
+.countdown { background-color: var(--sl-bg); padding: 10px; text-align: center; font-weight: 600; border-radius: 4px; margin-top: 20px; }
 .countdown span { font-size: 1.2em; color: var(--sl-success); }
 .xp-bar-container { width: 100%; height: 8px; background-color: var(--sl-bg); border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
 .xp-bar { width: 5%; height: 100%; background-color: var(--sl-primary); border-radius: 4px; }
@@ -75,7 +51,7 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .dashboard-list { list-style: none; display: flex; flex-direction: column; gap: 15px; }
 .dashboard-list li { display: flex; justify-content: space-between; background-color: var(--sl-bg); padding: 10px; border-radius: 4px; font-weight: 600; }
 .dashboard-list li span:last-child { color: var(--sl-text-secondary); }
-.dashboard-achievements { display: flex; gap: 15px; justify-content: center; align-items: center; height: 100%; padding: 10px 0;}
+.dashboard-achievements { display: flex; gap: 15px; justify-content: center; align-items: center; min-height: 100px; }
 .dashboard-achievements .achievement-icon { font-size: 3em; opacity: 1; filter: none; }
 .dashboard-achievements .achievement-icon.locked { filter: grayscale(1); opacity: 0.3; }
 
@@ -113,7 +89,7 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .ranking-info { flex-grow: 1; }
 .ranking-name { font-weight: 600; }
 .ranking-details { font-size: 0.8em; color: var(--sl-text-secondary); }
-.ranking-avg { font-size: 1.2em; font-weight: bold; color: var(--sl-success); }
+.ranking-avg { margin-left: auto; font-size: 1.2em; font-weight: bold; color: var(--sl-success); }
 
 /* --- PÁGINA DE CONQUISTAS --- */
 #achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 20px; }
