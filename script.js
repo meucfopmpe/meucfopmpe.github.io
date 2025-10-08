@@ -18,8 +18,10 @@ const authPage = document.getElementById('auth-page'), appPage = document.getEle
 const loginContainer = document.getElementById('login-container'), loginButton = document.getElementById('login-button'), loginEmailInput = document.getElementById('login-email'), loginPasswordInput = document.getElementById('login-password'), loginError = document.getElementById('login-error');
 const signupContainer = document.getElementById('signup-container'), signupButton = document.getElementById('signup-button'), signupNameInput = document.getElementById('signup-name'), signupCourseNumberInput = document.getElementById('signup-course-number'), signupPlatoonInput = document.getElementById('signup-platoon'), signupPasswordInput = document.getElementById('signup-password'), signupMessage = document.getElementById('signup-message');
 const showSignupLink = document.getElementById('show-signup'), showLoginLink = document.getElementById('show-login');
-const logoutButton = document.getElementById('logout-button'), daysLeftEl = document.getElementById('days-left'), userNameEl = document.getElementById('user-name'), userAvatarEl = document.getElementById('user-avatar'), avgGradeEl = document.getElementById('grades-average'), sidebarNav = document.getElementById('sidebar-nav'), pageTitleEl = document.getElementById('page-title');
-const gradesContainer = document.getElementById('grades-container'), qtsScheduleContainer = document.getElementById('qts-schedule-container'), calendarContainer = document.getElementById('calendar'), rankingList = document.getElementById('ranking-list'), achievementsGrid = document.getElementById('achievements-grid'), statsChart = document.getElementById('stats-chart');
+const logoutButton = document.getElementById('logout-button'), daysLeftEl = document.getElementById('days-left'), userNameEl = document.getElementById('user-name'), userNameSidebar = document.getElementById('user-name-sidebar'), userAvatarEl = document.getElementById('user-avatar'), avgGradeEl = document.getElementById('grades-average'), sidebarNav = document.getElementById('sidebar-nav'), pageTitleEl = document.getElementById('page-title');
+const playerLevelTitle = document.getElementById('player-level-title'), xpBar = document.getElementById('xp-bar'), xpText = document.getElementById('xp-text');
+const gradesContainer = document.getElementById('grades-container'), qtsScheduleContainer = document.getElementById('qts-schedule-container'), calendarContainer = document.getElementById('calendar'), rankingList = document.getElementById('ranking-list'), achievementsGrid = document.getElementById('achievements-grid');
+const dashboardMissionsList = document.getElementById('dashboard-missions-list'), dashboardAchievementsList = document.getElementById('dashboard-achievements-list');
 const addMissionForm = document.getElementById('add-mission-form'), missionNameInput = document.getElementById('mission-name-input'), missionDateInput = document.getElementById('mission-date-input'), scheduledMissionsList = document.getElementById('scheduled-missions-list');
 const remindersList = document.getElementById('reminders-list'), reminderInput = document.getElementById('reminder-input'), addReminderButton = document.getElementById('add-reminder-button');
 const addLinkForm = document.getElementById('add-link-form'), linkTitleInput = document.getElementById('link-title-input'), linkValueInput = document.getElementById('link-value-input'), linkTypeInput = document.getElementById('link-type-input'), linksList = document.getElementById('links-list');
@@ -63,20 +65,21 @@ async function handleLogin() {
     if (error) { loginError.textContent = 'Numérica ou senha inválidas.'; } 
     else if (data.user) { showApp(); loadDashboardData(); }
 }
-async function handleLogout() { 
-    await sb.auth.signOut(); 
-    window.location.reload(); 
-}
+async function handleLogout() { await sb.auth.signOut(); window.location.reload(); }
 
 async function loadUserData(user) {
     const { data, error } = await sb.from('profiles').select('user_data, avatar_url').eq('id', user.id).single();
     if (error) console.error("Erro ao carregar dados do usuário:", error);
     
-    if (data && data.avatar_url) userAvatarEl.src = data.avatar_url;
-    else userAvatarEl.src = '';
+    if (data && data.avatar_url) {
+        userAvatarEl.src = `${data.avatar_url}?t=${new Date().getTime()}`;
+    } else {
+        userAvatarEl.src = '';
+    }
 
     if (data && data.user_data) {
         userState = data.user_data;
+        if (!userState.xp) userState.xp = 0;
         if (!userState.missions) userState.missions = [];
         if (!userState.reminders) userState.reminders = [];
         if (!userState.links) userState.links = [];
@@ -84,7 +87,7 @@ async function loadUserData(user) {
     } else { 
         userState = {
             grades: Object.fromEntries(subjectList.map(s => [s, 0])),
-            schedule: {}, achievements: [], missions: [], reminders: [], links: []
+            schedule: {}, achievements: [], missions: [], reminders: [], links: [], xp: 0
         };
     }
 }
@@ -117,18 +120,57 @@ async function loadDashboardData() {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) { showLoginPage(); return; }
     const { data: profile } = await sb.from('profiles').select('full_name').eq('id', user.id).single();
-    if (profile) userNameEl.textContent = profile.full_name || 'Aluno Oficial';
+    if (profile) {
+        userNameEl.textContent = profile.full_name || 'Aluno Oficial';
+        userNameSidebar.textContent = profile.full_name || 'Aluno Oficial';
+    }
     
     await loadUserData(user);
     
-    calculateDaysLeft();
+    renderDashboard();
     renderGrades();
     renderQTSSchedule();
     renderAchievements();
     renderScheduledMissions();
     renderReminders();
     renderLinks();
-    initChart();
+}
+
+function renderDashboard() {
+    calculateDaysLeft();
+
+    const level = Math.floor((userState.xp || 0) / 100) + 1;
+    const title = level >= 10 ? "CADETE VETERANO" : "CADETE NOVATO";
+    const expForNextLevel = 100;
+    const currentExp = (userState.xp || 0) % 100;
+    playerLevelTitle.textContent = `NÍVEL ${level} - ${title}`;
+    xpText.textContent = `EXP: ${currentExp} / ${expForNextLevel}`;
+    xpBar.style.width = `${currentExp}%`;
+
+    dashboardMissionsList.innerHTML = '';
+    const upcomingMissions = (userState.missions || [])
+        .filter(m => new Date(m.date) >= new Date())
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(0, 3);
+    
+    if (upcomingMissions.length > 0) {
+        upcomingMissions.forEach(m => {
+            dashboardMissionsList.innerHTML += `<li><span>${m.name}</span> <span>${new Date(m.date+'T00:00:00').toLocaleDateString('pt-BR')}</span></li>`;
+        });
+    } else {
+        dashboardMissionsList.innerHTML = '<li><span>Nenhuma missão futura agendada.</span></li>';
+    }
+
+    dashboardAchievementsList.innerHTML = '';
+    const last3Achievements = (userState.achievements || []).slice(-3);
+    if (last3Achievements.length > 0) {
+        last3Achievements.forEach(key => {
+            const ach = achievementsData[key];
+            if (ach) dashboardAchievementsList.innerHTML += `<div class="achievement-icon" title="${ach.name}">${ach.icon}</div>`;
+        });
+    } else {
+         dashboardAchievementsList.innerHTML = `<div class="achievement-icon locked" title="Nenhuma conquista desbloqueada">?</div>`;
+    }
 }
 
 function calculateDaysLeft() {
@@ -156,12 +198,17 @@ function handleGradeChange(e) {
         updateGradesAverage();
     }
 }
-function updateGradesAverage() {
+async function updateGradesAverage() {
     const grades = Object.values(userState.grades).filter(g => g > 0);
-    if (grades.length === 0) { avgGradeEl.innerHTML = `MÉDIA GERAL: <span>N/A</span>`; return; }
-    const average = grades.reduce((sum, g) => sum + g, 0) / grades.length;
-    avgGradeEl.innerHTML = `MÉDIA GERAL: <span>${average.toFixed(2)}</span>`;
+    let average = 0;
+    if (grades.length > 0) {
+        average = grades.reduce((sum, g) => sum + g, 0) / grades.length;
+    }
+    avgGradeEl.innerHTML = `MÉDIA GERAL: <span>${average > 0 ? average.toFixed(2) : 'N/A'}</span>`;
     checkAchievements('avg_update', average);
+    
+    const { data: { user } } = await sb.auth.getUser();
+    if(user) await sb.from('profiles').update({ grades_average: average }).eq('id', user.id);
 }
 
 function renderQTSSchedule() {
@@ -207,11 +254,16 @@ function getCalendarEvents() {
 
 async function renderRanking() {
     rankingList.innerHTML = 'Carregando ranking...';
-    rankingList.innerHTML = `
-        <div class="ranking-item"><div class="ranking-pos">1</div><div class="ranking-name">CADETE FULANO</div><div class="ranking-avg">9.85</div></div>
-        <div class="ranking-item"><div class="ranking-pos">2</div><div class="ranking-name">CADETE BELTRANO</div><div class="ranking-avg">9.72</div></div>
-        <div class="ranking-item"><div class="ranking-pos">3</div><div class="ranking-name">CADETE CICLANO</div><div class="ranking-avg">9.69</div></div>
-    `;
+    const { data, error } = await sb.from('profiles').select('full_name, avatar_url, grades_average').order('grades_average', { ascending: false }).limit(50);
+    if (error) { rankingList.innerHTML = 'Não foi possível carregar o ranking.'; console.error(error); return; }
+    rankingList.innerHTML = '';
+    data.forEach((profile, index) => {
+        const item = document.createElement('div');
+        item.className = 'ranking-item';
+        const avatarSrc = profile.avatar_url || 'https://i.imgur.com/K3wY2mn.png';
+        item.innerHTML = `<div class="ranking-pos">${index + 1}</div><img class="ranking-avatar" src="${avatarSrc}"><div class="ranking-info"><div class="ranking-name">${profile.full_name || 'Anônimo'}</div></div><div class="ranking-avg">${profile.grades_average ? profile.grades_average.toFixed(2) : '0.00'}</div>`;
+        rankingList.appendChild(item);
+    });
 }
 
 function renderAchievements() {
@@ -231,15 +283,6 @@ function checkAchievements(eventType, data) {
             renderAchievements();
         }
     }
-}
-
-function initChart() {
-    if (statsChartInstance) statsChartInstance.destroy();
-    const ctx = statsChart.getContext('2d');
-    statsChartInstance = new Chart(ctx, { type: 'radar', data: {
-        labels: ['FORÇA', 'AGILIDADE', 'VIGOR', 'INTELIGÊNCIA', 'PERCEPÇÃO', 'LIDERANÇA'],
-        datasets: [{ label: 'Nível', data: [5, 7, 8, 9, 6, 7], backgroundColor: 'rgba(0, 175, 255, 0.2)', borderColor: 'rgba(0, 175, 255, 1)' }]
-    }, options: { scales: { r: { suggestedMin: 0, suggestedMax: 10, ticks: { display: false }, grid: { color: 'rgba(255, 255, 255, 0.2)' }, pointLabels: { color: '#c9d1d9' } } }, plugins: { legend: { display: false } } } });
 }
 
 function renderScheduledMissions() {
@@ -346,7 +389,7 @@ function handlePageNavigation(e) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     document.getElementById(targetPageId).classList.add('active');
-e.target.classList.add('active');
+    e.target.classList.add('active');
     pageTitleEl.textContent = e.target.textContent;
     if (targetPageId === 'page-calendar') initCalendar();
     if (targetPageId === 'page-ranking') renderRanking();
