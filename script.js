@@ -18,7 +18,7 @@ const authPage = document.getElementById('auth-page'), appPage = document.getEle
 const loginContainer = document.getElementById('login-container'), loginButton = document.getElementById('login-button'), loginEmailInput = document.getElementById('login-email'), loginPasswordInput = document.getElementById('login-password'), loginError = document.getElementById('login-error');
 const signupContainer = document.getElementById('signup-container'), signupButton = document.getElementById('signup-button'), signupNameInput = document.getElementById('signup-name'), signupCourseNumberInput = document.getElementById('signup-course-number'), signupPlatoonInput = document.getElementById('signup-platoon'), signupPasswordInput = document.getElementById('signup-password'), signupMessage = document.getElementById('signup-message');
 const showSignupLink = document.getElementById('show-signup'), showLoginLink = document.getElementById('show-login');
-const logoutButton = document.getElementById('logout-button'), daysLeftEl = document.getElementById('days-left'), userNameEl = document.getElementById('user-name'), userNameSidebar = document.getElementById('user-name-sidebar'), userAvatarEl = document.getElementById('user-avatar'), avgGradeEl = document.getElementById('grades-average'), sidebarNav = document.getElementById('sidebar-nav'), pageTitleEl = document.getElementById('page-title');
+const logoutButton = document.getElementById('logout-button'), daysLeftEl = document.getElementById('days-left'), userNameSidebar = document.getElementById('user-name-sidebar'), userAvatarEl = document.getElementById('user-avatar'), avgGradeEl = document.getElementById('grades-average'), sidebarNav = document.getElementById('sidebar-nav'), pageTitleEl = document.getElementById('page-title');
 const playerLevelTitle = document.getElementById('player-level-title'), xpBar = document.getElementById('xp-bar'), xpText = document.getElementById('xp-text');
 const gradesContainer = document.getElementById('grades-container'), qtsScheduleContainer = document.getElementById('qts-schedule-container'), calendarContainer = document.getElementById('calendar'), rankingList = document.getElementById('ranking-list'), achievementsGrid = document.getElementById('achievements-grid');
 const dashboardMissionsList = document.getElementById('dashboard-missions-list'), dashboardAchievementsList = document.getElementById('dashboard-achievements-list');
@@ -121,7 +121,6 @@ async function loadDashboardData() {
     if (!user) { showLoginPage(); return; }
     const { data: profile } = await sb.from('profiles').select('full_name').eq('id', user.id).single();
     if (profile) {
-        userNameEl.textContent = profile.full_name || 'Aluno Oficial';
         userNameSidebar.textContent = profile.full_name || 'Aluno Oficial';
     }
     
@@ -138,7 +137,6 @@ async function loadDashboardData() {
 
 function renderDashboard() {
     calculateDaysLeft();
-
     const level = Math.floor((userState.xp || 0) / 100) + 1;
     const title = level >= 10 ? "CADETE VETERANO" : "CADETE NOVATO";
     const expForNextLevel = 100;
@@ -255,7 +253,8 @@ function getCalendarEvents() {
 async function renderRanking() {
     rankingList.innerHTML = 'Carregando ranking...';
     const { data, error } = await sb.from('profiles').select('full_name, avatar_url, grades_average').order('grades_average', { ascending: false }).limit(50);
-    if (error) { rankingList.innerHTML = 'Não foi possível carregar o ranking.'; console.error(error); return; }
+    if (error) { rankingList.innerHTML = '<p style="color: var(--sl-error);">Não foi possível carregar o ranking.</p>'; console.error(error); return; }
+    if (data.length === 0) { rankingList.innerHTML = '<p>Ninguém no ranking ainda. Adicione suas notas!</p>'; return; }
     rankingList.innerHTML = '';
     data.forEach((profile, index) => {
         const item = document.createElement('div');
