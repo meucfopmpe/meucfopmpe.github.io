@@ -1,34 +1,11 @@
 :root {
-    /* Paleta de Cores "Solo Leveling" */
-    --sl-bg: #0A0F1E;
-    --sl-surface: #1B2139;
-    --sl-primary: #00AFFF;
-    --sl-glow: rgba(0, 175, 255, 0.5);
-    --sl-text-primary: #EAEFFC;
-    --sl-text-secondary: #8A94B6;
-    --sl-border: #394269;
-    --sl-error: #FF4D4D;
-    --sl-success: #33FFB5;
+    --sl-bg: #0A0F1E; --sl-surface: #1B2139; --sl-primary: #00AFFF; --sl-glow: rgba(0, 175, 255, 0.5);
+    --sl-text-primary: #EAEFFC; --sl-text-secondary: #8A94B6; --sl-border: #394269; --sl-error: #FF4D4D; --sl-success: #33FFB5;
 }
-* { 
-    box-sizing: border-box; 
-    margin: 0; 
-    padding: 0; 
-}
-body { 
-    font-family: 'Rajdhani', sans-serif; 
-    background-color: var(--sl-bg); 
-    color: var(--sl-text-primary); 
-    overflow: hidden; 
-}
-.hidden { 
-    display: none !important; 
-}
-.helper-text { 
-    color: var(--sl-text-secondary); 
-    margin-bottom: 20px; 
-    font-size: 0.9em; 
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Rajdhani', sans-serif; background-color: var(--sl-bg); color: var(--sl-text-primary); overflow: hidden; }
+.hidden { display: none !important; }
+.helper-text { color: var(--sl-text-secondary); margin-bottom: 20px; font-size: 0.9em; }
 
 /* --- AUTENTICAÇÃO --- */
 #auth-page { display: grid; place-items: center; width: 100vw; height: 100vh; background: radial-gradient(circle, #10182e, var(--sl-bg)); }
@@ -113,7 +90,7 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .ranking-name { font-weight: 600; }
 .ranking-avg { font-size: 1.2em; font-weight: bold; color: var(--sl-success); }
 
-/* --- PÁGINA DE CONQUISTAS (NO MODAL) --- */
+/* --- MODAL DE CONQUISTAS --- */
 #achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 20px; }
 .achievement { display: flex; flex-direction: column; align-items: center; text-align: center; background-color: var(--sl-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--sl-border); }
 .achievement-icon { font-size: 3em; filter: grayscale(1); opacity: 0.5; transition: all 0.3s; }
