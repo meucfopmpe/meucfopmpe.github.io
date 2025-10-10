@@ -40,7 +40,7 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div id="profile-pic-container">
-                    <img id="user-avatar" alt="Avatar">
+                    <img id="user-avatar-sidebar" alt="Avatar">
                     <input type="file" id="upload-avatar-input" class="hidden" accept="image/*">
                     <button id="upload-avatar-button" title="Trocar Foto de Perfil">📷</button>
                 </div>
@@ -60,10 +60,11 @@
             <button id="logout-button" class="logout-button">SAIR</button>
         </aside>
 
-        <main class="main-content">
+        <main id="main-content" class="main-content">
             <header class="main-header">
                 <button id="hamburger-button" class="hamburger-button">☰</button>
                 <h1 id="page-title">Painel Principal</h1>
+                <img id="user-avatar-header" class="header-avatar" alt="Avatar">
             </header>
             
             <div id="page-dashboard" class="page active">
