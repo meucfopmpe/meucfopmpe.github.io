@@ -256,24 +256,28 @@ function renderDashboard() {
     xpBar.style.width = `${currentExp}%`;
 
     const today = new Date();
+    today.setHours(0,0,0,0);
+    
     const scheduled = (userState.missions || [])
-        .filter(m => new Date(m.date + 'T00:00:00') >= today)
         .map(m => ({ date: new Date(m.date + 'T00:00:00'), text: m.name, type: 'Serviço' }));
 
     const dailies = (userState.quests || [])
         .filter(q => !q.completed)
         .map(q => ({ date: today, text: q.text, type: 'Diária' }));
 
-    const allTasks = [...scheduled, ...dailies].sort((a, b) => a.date - b.date).slice(0, 3);
+    const allTasks = [...scheduled, ...dailies]
+        .filter(task => task.date >= today)
+        .sort((a, b) => a.date - b.date)
+        .slice(0, 4);
     
     dashboardMissionsList.innerHTML = '';
     if (allTasks.length > 0) {
         allTasks.forEach(task => {
             const dateStr = task.type === 'Serviço' ? task.date.toLocaleDateString('pt-BR') : 'Hoje';
-            dashboardMissionsList.innerHTML += `<li><span>${task.text}</span> <span class="task-type">${dateStr}</span></li>`;
+            dashboardMissionsList.innerHTML += `<li><div><span>${task.text}</span><span class="task-type">(${task.type})</span></div><span>${dateStr}</span></li>`;
         });
     } else {
-        dashboardMissionsList.innerHTML = '<li><span>Nenhuma missão para hoje.</span></li>';
+        dashboardMissionsList.innerHTML = '<li><span>Nenhuma missão futura agendada.</span></li>';
     }
 
     dashboardAchievementsList.innerHTML = '';
