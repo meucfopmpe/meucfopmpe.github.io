@@ -23,8 +23,9 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 
 /* --- LAYOUT PRINCIPAL E RESPONSIVIDADE --- */
 #app { display: flex; width: 100vw; height: 100vh; position: relative; }
-.hamburger-button { display: none; background: none; border: none; color: var(--sl-primary); font-size: 2em; cursor: pointer; margin-right: 15px; }
+.hamburger-button { display: none; background: none; border: none; color: var(--sl-primary); font-size: 2em; cursor: pointer; padding: 0 15px; margin-left: -15px; }
 .sidebar { width: 250px; background-color: var(--sl-surface); border-right: 1px solid var(--sl-border); display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; transition: transform 0.3s ease-in-out; }
+.sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1999; }
 .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
 .sidebar-header { text-align: center; }
 .sidebar-header h2 { text-align: center; text-shadow: 0 0 10px var(--sl-glow); font-size: 1.5em; }
@@ -33,9 +34,9 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .sidebar nav a.active, .sidebar nav a:hover { color: var(--sl-text-primary); background-color: var(--sl-border); }
 .logout-button { background-color: transparent; border: 1px solid var(--sl-error); color: var(--sl-error); }
 .logout-button:hover { background-color: var(--sl-error); color: var(--sl-bg); box-shadow: 0 0 15px var(--sl-error); }
-.main-header { display: flex; align-items: center; padding: 15px 20px; background-color: var(--sl-surface); border-bottom: 1px solid var(--sl-border); }
-.main-header h1 { flex-grow: 1; }
-.header-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background-color: var(--sl-bg); border: 2px solid var(--sl-border); display: none; /* Escondido no Desktop */ }
+.main-header { display: flex; align-items: center; padding: 15px 20px; background-color: var(--sl-surface); border-bottom: 1px solid var(--sl-border); gap: 15px; }
+.main-header h1 { flex-grow: 1; text-align: center; }
+.header-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background-color: var(--sl-bg); border: 2px solid var(--sl-border); display: none; }
 .page { display: none; padding: 30px; }
 .page.active { display: block; }
 .page h2 { margin-bottom: 20px; color: var(--sl-primary); text-shadow: 0 0 5px var(--sl-glow); }
@@ -75,15 +76,16 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .qts-input { width: 100%; background: transparent; border: none; color: var(--sl-text-primary); text-align: center; font-family: inherit; }
 
 /* --- PÁGINA DE CALENDÁRIO --- */
-:root { --fc-border-color: var(--sl-border); --fc-daygrid-event-dot-width: 8px; }
-.fc { color: var(--sl-text-primary); background-color: var(--sl-surface); padding: 20px; border-radius: 8px; border: 1px solid var(--sl-border); }
+.fc { color: var(--sl-text-primary); background-color: var(--sl-surface); padding: 10px; border-radius: 8px; border: 1px solid var(--sl-border); font-size: 0.9em; }
 .fc .fc-col-header-cell-cushion { color: var(--sl-text-secondary); text-decoration: none; }
-.fc .fc-daygrid-day-number { color: var(--sl-text-primary); text-decoration: none; font-size: 1.1em; font-weight: 600; }
+.fc .fc-daygrid-day-number { color: var(--sl-text-primary); text-decoration: none; font-size: 1em; font-weight: 600; }
 .fc .fc-button-primary { background-color: var(--sl-primary); border: none; color: var(--sl-bg); font-weight: bold; }
 .fc .fc-button-primary:hover { background-color: #fff; }
 .fc .fc-toolbar-title { color: var(--sl-text-primary); font-size: 1.2em; }
 .fc-day-today { background-color: rgba(0, 175, 255, 0.1) !important; }
 .fc-event { font-size: 0.8em; }
+.fc-list-event-title { color: var(--sl-text-primary); }
+.fc-list-event-time { color: var(--sl-text-secondary); }
 
 /* --- PÁGINA DE RANKING --- */
 #ranking-list { display: flex; flex-direction: column; gap: 10px; }
@@ -119,9 +121,9 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 #clear-completed-quests-button:hover { background-color: var(--sl-error); border-color: var(--sl-error); color: var(--sl-bg); }
 
 /* --- ESTILOS PARA O AVATAR --- */
-#profile-pic-container { position: relative; width: 100px; height: 100px; margin: 0 auto 10px auto; }
+#profile-pic-container { position: relative; width: 125px; height: 125px; margin: 0 auto 10px auto; }
 #user-avatar-sidebar { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--sl-border); object-fit: cover; background-color: var(--sl-bg); }
-#upload-avatar-button { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; padding: 0; font-size: 1.2em; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--sl-bg); cursor: pointer; }
+#upload-avatar-button { position: absolute; bottom: 5px; right: 5px; width: 32px; height: 32px; padding: 0; font-size: 1.2em; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--sl-bg); cursor: pointer; }
 
 /* --- ESTILOS PARA O MODAL --- */
 .modal { position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(10, 15, 30, 0.8); display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
@@ -137,6 +139,6 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
     .hamburger-button { display: block; }
     .header-avatar { display: block; }
     .main-header { justify-content: space-between; }
-    .main-header h1 { flex-grow: 0; }
-    .page { padding: 20px; }
+    .page { padding: 15px; }
+    .dashboard-grid { gap: 15px; }
 }
