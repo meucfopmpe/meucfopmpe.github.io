@@ -33,14 +33,16 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .sidebar nav a.active, .sidebar nav a:hover { color: var(--sl-text-primary); background-color: var(--sl-border); }
 .logout-button { background-color: transparent; border: 1px solid var(--sl-error); color: var(--sl-error); }
 .logout-button:hover { background-color: var(--sl-error); color: var(--sl-bg); box-shadow: 0 0 15px var(--sl-error); }
-.main-header { display: flex; align-items: center; padding: 20px 30px; background-color: var(--sl-surface); border-bottom: 1px solid var(--sl-border); }
+.main-header { display: flex; align-items: center; padding: 15px 20px; background-color: var(--sl-surface); border-bottom: 1px solid var(--sl-border); }
+.main-header h1 { flex-grow: 1; }
+.header-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background-color: var(--sl-bg); border: 2px solid var(--sl-border); display: none; /* Escondido no Desktop */ }
 .page { display: none; padding: 30px; }
 .page.active { display: block; }
 .page h2 { margin-bottom: 20px; color: var(--sl-primary); text-shadow: 0 0 5px var(--sl-glow); }
 .list-header { margin-top: 30px; margin-bottom: 15px; color: var(--sl-text-secondary); text-transform: uppercase; font-size: 0.9em; letter-spacing: 1px; }
 
 /* --- WIDGETS E PAINEL PRINCIPAL --- */
-.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
 .widget { background-color: var(--sl-surface); padding: 20px; border-radius: 8px; border: 1px solid var(--sl-border); }
 .widget h3 { margin-bottom: 20px; letter-spacing: 1px; color: var(--sl-primary); }
 .level-title { text-align: center; font-weight: 700; font-size: 1.2em; color: var(--sl-primary); margin-bottom: 15px; text-shadow: 0 0 5px var(--sl-glow); }
@@ -66,8 +68,8 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .grade-item-input { width: 80px; text-align: center; }
 
 /* --- PÁGINA DE HORÁRIO (QTS) --- */
-#qts-schedule-container { display: grid; grid-template-columns: 80px repeat(5, 1fr); background-color: var(--sl-surface); border: 1px solid var(--sl-border); }
-.qts-cell { padding: 8px; border: 1px solid var(--sl-border); text-align: center; }
+#qts-schedule-container { display: grid; grid-template-columns: 80px repeat(5, 1fr); background-color: var(--sl-surface); border: 1px solid var(--sl-border); overflow-x: auto; }
+.qts-cell { padding: 8px; border: 1px solid var(--sl-border); text-align: center; min-width: 80px; }
 .qts-header { font-weight: bold; background-color: var(--sl-bg); }
 .qts-time { font-size: 0.8em; }
 .qts-input { width: 100%; background: transparent; border: none; color: var(--sl-text-primary); text-align: center; font-family: inherit; }
@@ -79,8 +81,9 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .fc .fc-daygrid-day-number { color: var(--sl-text-primary); text-decoration: none; font-size: 1.1em; font-weight: 600; }
 .fc .fc-button-primary { background-color: var(--sl-primary); border: none; color: var(--sl-bg); font-weight: bold; }
 .fc .fc-button-primary:hover { background-color: #fff; }
-.fc .fc-toolbar-title { color: var(--sl-text-primary); }
+.fc .fc-toolbar-title { color: var(--sl-text-primary); font-size: 1.2em; }
 .fc-day-today { background-color: rgba(0, 175, 255, 0.1) !important; }
+.fc-event { font-size: 0.8em; }
 
 /* --- PÁGINA DE RANKING --- */
 #ranking-list { display: flex; flex-direction: column; gap: 10px; }
@@ -117,7 +120,7 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 
 /* --- ESTILOS PARA O AVATAR --- */
 #profile-pic-container { position: relative; width: 100px; height: 100px; margin: 0 auto 10px auto; }
-#user-avatar { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--sl-border); object-fit: cover; background-color: var(--sl-bg); }
+#user-avatar-sidebar { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--sl-border); object-fit: cover; background-color: var(--sl-bg); }
 #upload-avatar-button { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; padding: 0; font-size: 1.2em; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--sl-bg); cursor: pointer; }
 
 /* --- ESTILOS PARA O MODAL --- */
@@ -129,21 +132,11 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 
 /* --- MEDIA QUERY PARA CELULARES --- */
 @media (max-width: 768px) {
-    .sidebar {
-        position: fixed;
-        left: 0;
-        top: 0;
-        height: 100%;
-        z-index: 2000;
-        transform: translateX(-100%);
-    }
-    .sidebar.open {
-        transform: translateX(0);
-    }
-    .hamburger-button {
-        display: block;
-    }
-    .main-header {
-        justify-content: flex-start;
-    }
+    .sidebar { position: fixed; left: 0; top: 0; height: 100%; z-index: 2000; transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .hamburger-button { display: block; }
+    .header-avatar { display: block; }
+    .main-header { justify-content: space-between; }
+    .main-header h1 { flex-grow: 0; }
+    .page { padding: 20px; }
 }
