@@ -34,7 +34,7 @@ const detailModal = document.getElementById('detail-modal'), detailModalTitle = 
 // =======================================================
 // 3. DADOS ESTÁTICOS
 // =======================================================
-const COURSE_START_DATE = new Date('2024-05-26T00:00:00');
+const COURSE_START_DATE = new Date('2025-05-26T00:00:00');
 const subjectList = ["Sistema de Segurança Pública", "Teoria Geral da Administração", "Gestão Pública Geral Aplicada", "Gestão de Pessoas, Comando e Liderança", "Gestão de Logística, Orçamento e Finanças Públicas", "Fundamentos da Polícia Comunitária", "Psicologia Aplicada", "Análise Criminal e Estatística", "Qualidade do Atendimento aos Grupos Vulneráveis", "Direitos Humanos Aplicados à Atividade Policial Militar", "Gerenciamento de Crises", "Saúde Mental e Qualidade de Vida", "Treinamento Físico Militar I", "Treinamento Físico Militar II", "Gestão de Processos no Sistema Eletrônico", "Tecnologia da Informação e Comunicação", "Comunicação, Mídias Sociais e Cerimonial Militar", "Inteligência e Sistema de Informação", "Ética, Cidadania e Relações Interpessoais", "Ordem Unida I", "Ordem Unida II", "Instrução Geral", "Defesa Pessoal Policial I", "Defesa Pessoal Policial II", "Uso Diferenciado da Força", "Pronto Socorrismo", "Atendimento Pré-Hospitalar Tático", "Planejamento Operacional e Especializado", "Elaboração de Projetos e Captação de Recursos", "Planejamento Estratégico", "Gestão Por Resultados e Avaliação de Políticas Públicas", "Trabalho de Comando e Estado Maior", "Polícia Judiciária Militar", "Direito Administrativo Disciplinar Militar", "Direito Penal e Processual Penal Militar", "Legislação Policial Militar e Organizacional", "Procedimento em Ocorrência", "Economia Aplicada ao Setor Público", "História da PMPE", "Abordagem a Pessoas", "Abordagem a Veículos", "Abordagem a Edificações", "Patrulhamento Urbano", "Armamento e Munição", "Tiro Policial", "Tiro Defensivo (Método Giraldi)", "Ações Básicas de Apoio Aéreo", "Manobras Acadêmicas I", "Manobras Acadêmicas II", "Metodologia da Pesquisa Científica", "Teoria e Prática do Ensino", "Trabalho de Conclusão de Curso"];
 const qtsTimes = ['08:00-09:40', '10:00-11:40', '13:40-15:20', '15:40-17:20', '17:30-19:10'];
 const achievementsData = {
@@ -54,10 +54,10 @@ const achievementsData = {
     AVG_NINE_FIVE: { name: "Intelecto Superior", icon: "💡", description: "Alcance uma média geral de 9.5 ou mais.", condition: (state, type, avg) => type === 'avg_update' && avg >= 9.5 },
     SCHEDULE_COMPLETE: { name: "Planejador", icon: "📋", description: "Preencha todos os horários do seu QTS.", condition: (state, type) => { if (type !== 'save_schedule') return false; const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex']; return days.every(d => qtsTimes.every(t => state.schedule?.[d]?.[t]?.length > 0)); }},
     FIRST_SERVICE: { name: "Primeiro Serviço", icon: "🛡️", description: "Agende seu primeiro serviço no calendário.", condition: (state, type) => type === 'add_mission' },
-    FIVE_SERVICES: { name: "Sempre Presente", icon: "📅", description: "Agende 5 serviços diferentes.", condition: (state) => state.missions?.length >= 5 },
-    TEN_SERVICES: { name: "Pilar da Turma", icon: "🏛️", description: "Agende 10 serviços diferentes.", condition: (state) => state.missions?.length >= 10 },
+    FIVE_SERVICES: { name: "Sempre Presente", icon: "📅", description: "Agende 5 serviços diferentes.", condition: (state) => (state.missions || []).length >= 5 },
+    TEN_SERVICES: { name: "Pilar da Turma", icon: "🏛️", description: "Agende 10 serviços diferentes.", condition: (state) => (state.missions || []).length >= 10 },
     FIRST_REMINDER: { name: "Organizado", icon: "📝", description: "Adicione seu primeiro lembrete.", condition: (state, type) => type === 'add_reminder' },
-    TEN_REMINDERS: { name: "Mestre dos Lembretes", icon: "🧠", description: "Crie 10 lembretes.", condition: (state) => state.reminders?.length >= 10 },
+    TEN_REMINDERS: { name: "Mestre dos Lembretes", icon: "🧠", description: "Crie 10 lembretes.", condition: (state) => (state.reminders || []).length >= 10 },
     FIRST_LINK: { name: "Conectado", icon: "🔗", description: "Salve seu primeiro Link ou processo SEI.", condition: (state, type) => type === 'add_link' },
     PROGRESS_25: { name: "Início da Jornada", icon: "🌄", description: "Conclua 25% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 25 },
     PROGRESS_50: { name: "Meio Caminho", icon: "🏃", description: "Conclua 50% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 50 },
@@ -133,10 +133,15 @@ async function loadUserData(user) {
         if (!userState.quests) userState.quests = [];
         if (!userState.grades || Object.keys(userState.grades).length === 0) userState.grades = Object.fromEntries(subjectList.map(s => [s, 0]));
     } else { 
+        // Lógica para criar o estado inicial se não existir (para contas novas)
+        const today = new Date();
+        const daysPassed = Math.max(0, Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24)));
+        const initialXp = daysPassed * 15;
         userState = {
             grades: Object.fromEntries(subjectList.map(s => [s, 0])),
-            schedule: {}, achievements: [], missions: [], reminders: [], links: [], quests: [], xp: 0, avatar: ''
+            schedule: {}, achievements: [], missions: [], reminders: [], links: [], quests: [], xp: initialXp, avatar: ''
         };
+        await saveUserData(); // Salva o estado inicial imediatamente
     }
 }
 async function saveUserData() {
@@ -248,7 +253,7 @@ function renderDashboard() {
 
 function updateTimeProgress() {
     const today = new Date();
-    const graduationDate = new Date('2025-05-26T00:00:00');
+    const graduationDate = new Date('2026-05-26T00:00:00'); // Corrigido para 2026
     const totalDays = 365;
 
     const daysLeft = Math.ceil((graduationDate - today) / (1000 * 60 * 60 * 24));
@@ -337,8 +342,8 @@ function initCalendar() {
 }
 function getCalendarEvents() {
     const events = [
-        { title: 'Início do Curso', start: '2024-05-26', color: 'var(--sl-success)'}, 
-        { title: 'Fim do Curso', start: '2025-05-26', color: 'var(--sl-success)'}
+        { title: 'Início do Curso', start: '2025-05-26', color: 'var(--sl-success)'}, 
+        { title: 'Fim do Curso', start: '2026-05-26', color: 'var(--sl-success)'}
     ];
     if (userState.missions) {
         userState.missions.forEach(mission => {
@@ -367,7 +372,7 @@ function renderAchievements() {
     achievementsGrid.innerHTML = '';
     for (const key in achievementsData) {
         const ach = achievementsData[key];
-        const unlocked = userState.achievements?.includes(key);
+        const unlocked = (userState.achievements || []).includes(key);
         achievementsGrid.innerHTML += `<div class="achievement" data-key="${key}" title="Clique para ver detalhes"><div class="achievement-icon ${unlocked ? 'unlocked' : ''}">${ach.icon}</div><div class="achievement-title">${ach.name}</div></div>`;
     }
 }
@@ -599,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const key = achievementElement.dataset.key;
         const achData = achievementsData[key];
         if (achData) {
-            detailModalTitle.textContent = achData.name;
+            detailModalTitle.textContent = `${achData.icon} ${achData.name}`;
             detailModalBody.textContent = achData.description;
             detailModal.classList.remove('hidden');
         }
