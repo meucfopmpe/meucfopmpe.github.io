@@ -49,7 +49,7 @@ const achievementsData = {
     TEN_QUESTS: { name: "Combatente", icon: "💪", description: "Complete 10 missões diárias.", condition: (state) => state.quests.filter(q => q.completed).length >= 10 },
     FIFTY_QUESTS: { name: "Guerreiro", icon: "💥", description: "Complete 50 missões diárias.", condition: (state) => state.quests.filter(q => q.completed).length >= 50 },
     FIRST_GRADE: { name: "Estudante", icon: "📖", description: "Adicione sua primeira nota no sistema.", condition: (state, type) => type === 'add_grade' },
-    ALL_GRADES: { name: "Caxias", icon: "📚", description: "Preencha as notas de todas as matérias.", condition: (state) => subjectList.every(s => state.grades[s] > 0) },
+    ALL_GRADES: { name: "Caxias", icon: "📚", description: "Preencha as notas de todas as matérias.", condition: (state) => subjectList.every(s => (state.grades[s] || 0) > 0) },
     PERFECT_TEN: { name: "Nota Máxima", icon: "🔟", description: "Obtenha uma nota 10 em qualquer matéria.", condition: (state) => Object.values(state.grades).includes(10) },
     AVG_EIGHT: { name: "Acima da Média", icon: "📈", description: "Alcance uma média geral de 8.0 ou mais.", condition: (state, type, avg) => type === 'avg_update' && avg >= 8 },
     AVG_NINE_FIVE: { name: "Intelecto Superior", icon: "💡", description: "Alcance uma média geral de 9.5 ou mais.", condition: (state, type, avg) => type === 'avg_update' && avg >= 9.5 },
@@ -63,12 +63,12 @@ const achievementsData = {
     PROGRESS_25: { name: "Início da Jornada", icon: "🌄", description: "Conclua 25% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 25 },
     PROGRESS_50: { name: "Meio Caminho", icon: "🏃", description: "Conclua 50% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 50 },
     PROGRESS_75: { name: "Reta Final", icon: "🏁", description: "Conclua 75% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 75 },
-    TOP_10: { name: "Top 10", icon: "🏅", description: "Fique entre os 10 melhores no ranking.", condition: () => false },
-    TOP_3: { name: "Pódio", icon: "🥉", description: "Fique entre os 3 melhores no ranking.", condition: () => false },
-    FIRST_PLACE: { name: "Xerife", icon: "🥇", description: "Alcance o 1º lugar no ranking.", condition: () => false },
+    TOP_10: { name: "Top 10", icon: "🏅", description: "Fique entre os 10 melhores no ranking (funcionalidade futura).", condition: () => false },
+    TOP_3: { name: "Pódio", icon: "🥉", description: "Fique entre os 3 melhores no ranking (funcionalidade futura).", condition: () => false },
+    FIRST_PLACE: { name: "Xerife", icon: "🥇", description: "Alcance o 1º lugar no ranking (funcionalidade futura).", condition: () => false },
     ALL_ACHIEVEMENTS: { name: "Monarca", icon: "👑", description: "Desbloqueie todas as outras conquistas.", condition: (state) => state.achievements?.length >= Object.keys(achievementsData).length - 1 },
-    NIGHT_OWL: { name: "Coruja", icon: "🦉", description: "Agende um serviço que comece após as 18h.", condition: (state, type, data) => type === 'add_mission' && new Date(data.date).getHours() >= 18 },
-    COURSE_COMPLETE: { name: "Oficial Formado", icon: "🎓", description: "Conclua os 365 dias do curso.", condition: (state, type) => type === 'time_update' && data.days_left <= 0 },
+    NIGHT_OWL: { name: "Coruja", icon: "🦉", description: "Agende um serviço que comece após as 18h.", condition: (state, type, data) => type === 'add_mission' && new Date(data.date).getUTCHours() >= 18 },
+    COURSE_COMPLETE: { name: "Oficial Formado", icon: "🎓", description: "Conclua os 365 dias do curso.", condition: (state, type, data) => type === 'time_update' && data.days_left <= 0 },
 };
 
 // =======================================================
@@ -76,16 +76,17 @@ const achievementsData = {
 // =======================================================
 async function handleSignUp() {
     const fullName = signupNameInput.value, courseNumber = signupCourseNumberInput.value, platoon = signupPlatoonInput.value, password = signupPasswordInput.value;
-    if (!fullName || !courseNumber || !platoon || !password) { signupMessage.textContent = 'Por favor, preencha todos os campos.'; return; }
+    signupMessage.textContent = '';
+    if (!fullName || !courseNumber || !platoon || !password) { signupMessage.textContent = 'Por favor, preencha todos os campos.'; signupMessage.className = 'error-message'; return; }
     
     const email = `${courseNumber}@cfo.pmpe`;
     const { data: authData, error: authError } = await sb.auth.signUp({ email, password, options: { data: { full_name: fullName, course_number: courseNumber, platoon: platoon } } });
 
-    if (authError) { signupMessage.textContent = "Erro: Numérica já pode estar em uso."; return; }
+    if (authError) { signupMessage.textContent = "Erro: Numérica já pode estar em uso."; signupMessage.className = 'error-message'; return; }
     
     if (authData.user) {
         const daysPassed = Math.max(0, Math.floor((SIMULATED_TODAY - COURSE_START_DATE) / (1000 * 60 * 60 * 24)));
-        const initialXp = daysPassed * 15; // 15 XP por dia passado
+        const initialXp = daysPassed * 15;
 
         const initialState = {
             grades: Object.fromEntries(subjectList.map(s => [s, 0])),
@@ -277,7 +278,7 @@ function handleGradeChange(e) {
     }
 }
 async function updateGradesAverage() {
-    const grades = Object.values(userState.grades).filter(g => g > 0);
+    const grades = Object.values(userState.grades).filter(g => typeof g === 'number' && g > 0);
     let average = 0;
     if (grades.length > 0) {
         average = grades.reduce((sum, g) => sum + g, 0) / grades.length;
@@ -384,7 +385,7 @@ function checkAchievements(eventType, data) {
 function addXp(amount) {
     if (!userState.xp) userState.xp = 0;
     userState.xp += amount;
-    checkAchievements(userState);
+    checkAchievements();
     saveUserData();
     renderDashboard();
 }
@@ -419,7 +420,7 @@ function handleQuestInteraction(e) {
     if(!quest.completed) {
         quest.completed = true;
         addXp(quest.xp);
-        checkAchievements(userState, 'complete_quest', quest);
+        checkAchievements('complete_quest', quest);
         saveUserData();
     }
     e.target.closest('.quest-item').classList.add('completed');
@@ -447,7 +448,7 @@ function addCustomMission(e) {
         if (!userState.missions) userState.missions = [];
         userState.missions.push({ name, date });
         addMissionForm.reset();
-        checkAchievements(userState, 'add_mission', {date});
+        checkAchievements('add_mission', {date});
         saveUserData();
         renderScheduledMissions();
         if (calendarInstance) calendarInstance.refetchEvents();
@@ -470,7 +471,7 @@ function addReminder() {
         if (!userState.reminders) userState.reminders = [];
         userState.reminders.push({ text, completed: false });
         reminderInput.value = '';
-        checkAchievements(userState, 'add_reminder');
+        checkAchievements('add_reminder');
         saveUserData();
         renderReminders();
     }
@@ -506,7 +507,7 @@ function addLink(e) {
         if (!userState.links) userState.links = [];
         userState.links.push({ title, value, type });
         addLinkForm.reset();
-        checkAchievements(userState, 'add_link');
+        checkAchievements('add_link');
         saveUserData();
         renderLinks();
     }
@@ -567,6 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addQuestForm.addEventListener('submit', addQuest);
     questsList.addEventListener('change', handleQuestInteraction);
     clearCompletedQuestsButton.addEventListener('click', clearCompletedQuests);
+    
     achievementsWidget.addEventListener('click', () => {
         renderAchievements();
         achievementsModal.classList.remove('hidden');
@@ -583,6 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebar.classList.remove('open');
         sidebarOverlay.classList.add('hidden');
     });
+
     detailModalClose.addEventListener('click', () => detailModal.classList.add('hidden'));
     detailModal.addEventListener('click', (e) => { if (e.target === detailModal) detailModal.classList.add('hidden'); });
     achievementsGrid.addEventListener('click', (e) => {
