@@ -85,7 +85,6 @@ async function handleSignUp() {
     if (authError) { signupMessage.textContent = "Erro: Numérica já pode estar em uso."; signupMessage.className = 'error-message'; return; }
     
     if (authData.user) {
-        // A lógica de criar o estado inicial agora está em loadUserData
         signupMessage.textContent = 'Sucesso! Redirecionando para login...';
         setTimeout(() => { signupContainer.classList.add('hidden'); loginContainer.classList.remove('hidden'); signupMessage.textContent = ''; }, 2000);
     }
@@ -102,7 +101,10 @@ async function handleLogout() { await sb.auth.signOut(); window.location.reload(
 
 async function loadUserData(user) {
     const { data, error } = await sb.from('profiles').select('user_data').eq('id', user.id).single();
-    if (error) console.error("Erro ao carregar dados do usuário:", error);
+    if (error) {
+        console.error("Erro ao carregar dados do usuário:", error);
+        return;
+    }
     
     if (data && data.user_data) {
         userState = data.user_data;
@@ -123,12 +125,13 @@ async function loadUserData(user) {
         };
         await saveUserData();
     }
-    // Garante que campos novos existam para usuários antigos
     if (!userState.xp) userState.xp = 0;
     if (!userState.missions) userState.missions = [];
     if (!userState.reminders) userState.reminders = [];
     if (!userState.links) userState.links = [];
     if (!userState.quests) userState.quests = [];
+    if (!userState.achievements) userState.achievements = [];
+    if (!userState.grades || Object.keys(userState.grades).length === 0) userState.grades = Object.fromEntries(subjectList.map(s => [s, 0]));
 }
 async function saveUserData() {
     const { data: { user } } = await sb.auth.getUser();
@@ -202,7 +205,7 @@ async function loadDashboardData() {
     renderLinks();
 }
 
-async function renderAdminInfo(items) {
+async function renderAdminInfo() {
     const { data, error } = await sb.from('global_info').select('*').order('created_at', { ascending: false }).limit(5);
     if (error) {
         console.error("Erro ao buscar informações do ADM:", error);
@@ -252,18 +255,25 @@ function renderDashboard() {
     xpText.textContent = `EXP: ${currentExp} / ${expForNextLevel}`;
     xpBar.style.width = `${currentExp}%`;
 
-    dashboardMissionsList.innerHTML = '';
-    const upcomingMissions = (userState.missions || [])
-        .filter(m => new Date(m.date) >= new Date())
-        .sort((a, b) => new Date(a.date) - new Date(b.date))
-        .slice(0, 3);
+    const today = new Date();
+    const scheduled = (userState.missions || [])
+        .filter(m => new Date(m.date + 'T00:00:00') >= today)
+        .map(m => ({ date: new Date(m.date + 'T00:00:00'), text: m.name, type: 'Serviço' }));
+
+    const dailies = (userState.quests || [])
+        .filter(q => !q.completed)
+        .map(q => ({ date: today, text: q.text, type: 'Diária' }));
+
+    const allTasks = [...scheduled, ...dailies].sort((a, b) => a.date - b.date).slice(0, 3);
     
-    if (upcomingMissions.length > 0) {
-        upcomingMissions.forEach(m => {
-            dashboardMissionsList.innerHTML += `<li><span>${m.name}</span> <span>${new Date(m.date+'T00:00:00').toLocaleDateString('pt-BR')}</span></li>`;
+    dashboardMissionsList.innerHTML = '';
+    if (allTasks.length > 0) {
+        allTasks.forEach(task => {
+            const dateStr = task.type === 'Serviço' ? task.date.toLocaleDateString('pt-BR') : 'Hoje';
+            dashboardMissionsList.innerHTML += `<li><span>${task.text}</span> <span class="task-type">${dateStr}</span></li>`;
         });
     } else {
-        dashboardMissionsList.innerHTML = '<li><span>Nenhum serviço futuro agendado.</span></li>';
+        dashboardMissionsList.innerHTML = '<li><span>Nenhuma missão para hoje.</span></li>';
     }
 
     dashboardAchievementsList.innerHTML = '';
@@ -592,7 +602,16 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebarNav.addEventListener('click', handlePageNavigation);
     showSignupLink.addEventListener('click', (e) => { e.preventDefault(); loginContainer.classList.add('hidden'); signupContainer.classList.remove('hidden'); });
     showLoginLink.addEventListener('click', (e) => { e.preventDefault(); signupContainer.classList.add('hidden'); loginContainer.classList.remove('hidden'); });
-    gradesContainer.addEventListener('change', handleGradeChange);
+    
+    gradesContainer.addEventListener('click', (e) => {
+        const label = e.target.closest('.grade-item-label');
+        if (label) {
+            detailModalTitle.textContent = "Nome da Matéria";
+            detailModalBody.textContent = label.getAttribute('title');
+            detailModal.classList.remove('hidden');
+        }
+    });
+
     qtsScheduleContainer.addEventListener('change', handleQTSInput);
     addMissionForm.addEventListener('submit', addCustomMission);
     scheduledMissionsList.addEventListener('click', (e) => { if(e.target.tagName === 'BUTTON') { userState.missions.splice(e.target.dataset.index, 1); saveUserData(); renderScheduledMissions(); if(calendarInstance) calendarInstance.refetchEvents(); } });
