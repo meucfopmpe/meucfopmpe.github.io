@@ -48,7 +48,7 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .widget { background-color: var(--sl-surface); padding: 20px; border-radius: 8px; border: 1px solid var(--sl-border); }
 .widget h3 { margin-bottom: 20px; letter-spacing: 1px; color: var(--sl-primary); }
 .level-title { text-align: center; font-weight: 700; font-size: 1.2em; color: var(--sl-primary); margin-bottom: 15px; text-shadow: 0 0 5px var(--sl-glow); }
-.countdown { background-color: var(--sl-bg); padding: 10px; text-align: center; font-weight: 600; border-radius: 4px; margin-top: 15px; }
+.countdown { background-color: var(--sl-bg); padding: 10px; text-align: center; font-weight: 600; border-radius: 4px; }
 .countdown span { font-size: 1.2em; color: var(--sl-success); }
 .course-progress-container { width: 100%; height: 8px; background-color: var(--sl-bg); border-radius: 4px; overflow: hidden; margin-top: 15px; }
 .course-progress-bar { width: 0%; height: 100%; background-color: var(--sl-success); border-radius: 4px; transition: width 0.5s ease; }
