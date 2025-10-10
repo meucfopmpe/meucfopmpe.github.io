@@ -29,16 +29,17 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
 .sidebar-header { text-align: center; }
 .sidebar-header h2 { text-align: center; text-shadow: 0 0 10px var(--sl-glow); font-size: 1.5em; }
-.sidebar nav { display: flex; flex-direction: column; gap: 10px; flex-grow: 1; margin-top: 20px; }
-.sidebar nav a { color: var(--sl-text-secondary); text-decoration: none; padding: 12px 15px; border-radius: 4px; transition: all 0.2s; font-weight: 600; cursor: pointer; }
+.sidebar nav { flex-grow: 1; overflow-y: auto; margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+.sidebar nav a { color: var(--sl-text-secondary); text-decoration: none; padding: 12px 15px; border-radius: 4px; transition: all 0.2s; font-weight: 600; cursor: pointer; flex-shrink: 0; }
 .sidebar nav a.active, .sidebar nav a:hover { color: var(--sl-text-primary); background-color: var(--sl-border); }
-.logout-button { background-color: transparent; border: 1px solid var(--sl-error); color: var(--sl-error); }
+.logout-button { flex-shrink: 0; margin-top: 20px; background-color: transparent; border: 1px solid var(--sl-error); color: var(--sl-error); }
 .logout-button:hover { background-color: var(--sl-error); color: var(--sl-bg); box-shadow: 0 0 15px var(--sl-error); }
-.main-header { display: flex; align-items: center; padding: 15px 20px; background-color: var(--sl-surface); border-bottom: 1px solid var(--sl-border); gap: 15px; }
-.main-header h1 { flex-grow: 1; text-align: center; }
+.main-header { display: grid; grid-template-columns: auto 1fr auto; align-items: center; padding: 15px 20px; background-color: var(--sl-surface); border-bottom: 1px solid var(--sl-border); gap: 15px; }
+.main-header h1 { text-align: center; font-size: 1.5em; }
 .header-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background-color: var(--sl-bg); border: 2px solid var(--sl-border); display: none; }
 .page { display: none; padding: 30px; }
 .page.active { display: block; }
+#page-calendar { overflow-x: auto; }
 .page h2 { margin-bottom: 20px; color: var(--sl-primary); text-shadow: 0 0 5px var(--sl-glow); }
 .list-header { margin-top: 30px; margin-bottom: 15px; color: var(--sl-text-secondary); text-transform: uppercase; font-size: 0.9em; letter-spacing: 1px; }
 
@@ -138,7 +139,7 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
     .sidebar.open { transform: translateX(0); }
     .hamburger-button { display: block; }
     .header-avatar { display: block; }
-    .main-header { justify-content: space-between; }
+    .main-header { display: grid; grid-template-columns: auto 1fr auto; }
     .page { padding: 15px; }
     .dashboard-grid { gap: 15px; }
 }
