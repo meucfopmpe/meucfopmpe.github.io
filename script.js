@@ -28,6 +28,7 @@ const addLinkForm = document.getElementById('add-link-form'), linkTitleInput = d
 const uploadAvatarButton = document.getElementById('upload-avatar-button'), uploadAvatarInput = document.getElementById('upload-avatar-input');
 const addQuestForm = document.getElementById('add-quest-form'), questTextInput = document.getElementById('quest-text-input'), questDifficultySelect = document.getElementById('quest-difficulty-select'), questsList = document.getElementById('quests-list'), clearCompletedQuestsButton = document.getElementById('clear-completed-quests-button');
 const achievementsWidget = document.getElementById('achievements-widget'), achievementsModal = document.getElementById('achievements-modal'), achievementsModalClose = document.getElementById('achievements-modal-close');
+const hamburgerButton = document.getElementById('hamburger-button'), sidebar = document.querySelector('.sidebar');
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -106,7 +107,7 @@ async function saveUserData() {
 
 async function uploadAvatar(file) {
     try {
-        const dataUrl = await resizeImage(file, 100, 100);
+        const dataUrl = await resizeImage(file, 200, 200);
         userState.avatar = dataUrl;
         await saveUserData();
         userAvatarEl.src = dataUrl;
@@ -357,8 +358,7 @@ function handleQuestInteraction(e) {
     if (e.target.type !== 'checkbox') return;
     const index = e.target.dataset.index;
     const quest = userState.quests[index];
-    if (!quest || !e.target.checked) return; // Só adiciona XP ao marcar, não ao desmarcar
-    
+    if (!quest || !e.target.checked) return;
     if(!quest.completed) {
         quest.completed = true;
         addXp(quest.xp);
@@ -512,4 +512,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     achievementsModalClose.addEventListener('click', () => achievementsModal.classList.add('hidden'));
     achievementsModal.addEventListener('click', (e) => { if (e.target === achievementsModal) achievementsModal.classList.add('hidden'); });
+    hamburgerButton.addEventListener('click', () => { sidebar.classList.toggle('open'); });
 });
