@@ -28,7 +28,7 @@ const addLinkForm = document.getElementById('add-link-form'), linkTitleInput = d
 const uploadAvatarButton = document.getElementById('upload-avatar-button'), uploadAvatarInput = document.getElementById('upload-avatar-input');
 const addQuestForm = document.getElementById('add-quest-form'), questTextInput = document.getElementById('quest-text-input'), questDifficultySelect = document.getElementById('quest-difficulty-select'), questsList = document.getElementById('quests-list'), clearCompletedQuestsButton = document.getElementById('clear-completed-quests-button');
 const achievementsWidget = document.getElementById('achievements-widget'), achievementsModal = document.getElementById('achievements-modal'), achievementsModalClose = document.getElementById('achievements-modal-close');
-const hamburgerButton = document.getElementById('hamburger-button'), sidebar = document.querySelector('.sidebar'), mainContent = document.getElementById('main-content');
+const hamburgerButton = document.getElementById('hamburger-button'), sidebar = document.querySelector('.sidebar'), mainContent = document.getElementById('main-content'), sidebarOverlay = document.getElementById('sidebar-overlay');
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -271,11 +271,9 @@ function handleQTSInput(e) {
 
 function initCalendar() {
     if (calendarInstance) {
-        calendarInstance.destroy(); // Destrói a instância anterior para reconfigurar
+        calendarInstance.destroy();
     }
-    
     const isMobile = window.innerWidth <= 768;
-    
     calendarInstance = new FullCalendar.Calendar(calendarContainer, {
         locale: 'pt-br',
         initialView: isMobile ? 'listWeek' : 'dayGridMonth',
@@ -500,6 +498,7 @@ function handlePageNavigation(e) {
     if (targetPageId === 'page-ranking') renderRanking();
     if (window.innerWidth <= 768) {
         sidebar.classList.remove('open');
+        sidebarOverlay.classList.add('hidden');
     }
 }
 
@@ -530,10 +529,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     achievementsModalClose.addEventListener('click', () => achievementsModal.classList.add('hidden'));
     achievementsModal.addEventListener('click', (e) => { if (e.target === achievementsModal) achievementsModal.classList.add('hidden'); });
-    hamburgerButton.addEventListener('click', () => { sidebar.classList.toggle('open'); });
-    mainContent.addEventListener('click', () => {
-        if (sidebar.classList.contains('open')) {
-            sidebar.classList.remove('open');
-        }
+    
+    hamburgerButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('hidden');
+    });
+    sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.add('hidden');
     });
 });
