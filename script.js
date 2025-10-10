@@ -29,6 +29,8 @@ const uploadAvatarButton = document.getElementById('upload-avatar-button'), uplo
 const addQuestForm = document.getElementById('add-quest-form'), questTextInput = document.getElementById('quest-text-input'), questDifficultySelect = document.getElementById('quest-difficulty-select'), questsList = document.getElementById('quests-list'), clearCompletedQuestsButton = document.getElementById('clear-completed-quests-button');
 const achievementsWidget = document.getElementById('achievements-widget'), achievementsModal = document.getElementById('achievements-modal'), achievementsModalClose = document.getElementById('achievements-modal-close');
 const hamburgerButton = document.getElementById('hamburger-button'), sidebar = document.querySelector('.sidebar'), sidebarOverlay = document.getElementById('sidebar-overlay');
+const dayDetailModal = document.getElementById('day-detail-modal'), dayDetailTitle = document.getElementById('day-detail-title'), dayDetailBody = document.getElementById('day-detail-body'), dayDetailModalClose = document.getElementById('day-detail-modal-close');
+
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -273,13 +275,20 @@ function initCalendar() {
     if (calendarInstance) {
         calendarInstance.destroy();
     }
-    const isMobile = window.innerWidth <= 768;
     calendarInstance = new FullCalendar.Calendar(calendarContainer, {
         locale: 'pt-br',
-        initialView: 'dayGridMonth', // Força a visão de mês em todas as telas
+        initialView: 'dayGridMonth',
         headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek' },
         buttonText: { today: 'Hoje', month: 'Mês', week: 'Semana' },
-        events: getCalendarEvents()
+        events: getCalendarEvents(),
+        dateClick: function(info) {
+            const missionsForDay = (userState.missions || []).filter(m => m.date === info.dateStr);
+            if (missionsForDay.length > 0) {
+                dayDetailTitle.textContent = `Serviços para ${info.date.toLocaleDateString('pt-BR')}`;
+                dayDetailBody.innerHTML = '<ul>' + missionsForDay.map(m => `<li>${m.name}</li>`).join('') + '</ul>';
+                dayDetailModal.classList.remove('hidden');
+            }
+        }
     });
     calendarInstance.render();
 }
@@ -537,4 +546,6 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebar.classList.remove('open');
         sidebarOverlay.classList.add('hidden');
     });
+    dayDetailModalClose.addEventListener('click', () => dayDetailModal.classList.add('hidden'));
+    dayDetailModal.addEventListener('click', (e) => { if (e.target === dayDetailModal) dayDetailModal.classList.add('hidden'); });
 });
