@@ -30,6 +30,7 @@ const addQuestForm = document.getElementById('add-quest-form'), questTextInput =
 const achievementsWidget = document.getElementById('achievements-widget'), achievementsModal = document.getElementById('achievements-modal'), achievementsModalClose = document.getElementById('achievements-modal-close');
 const hamburgerButton = document.getElementById('hamburger-button'), sidebar = document.querySelector('.sidebar'), sidebarOverlay = document.getElementById('sidebar-overlay');
 const detailModal = document.getElementById('detail-modal'), detailModalTitle = document.getElementById('detail-modal-title'), detailModalBody = document.getElementById('detail-modal-body'), detailModalClose = document.getElementById('detail-modal-close');
+const adminInfoList = document.getElementById('admin-info-list');
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -115,7 +116,10 @@ async function handleLogout() { await sb.auth.signOut(); window.location.reload(
 
 async function loadUserData(user) {
     const { data, error } = await sb.from('profiles').select('user_data').eq('id', user.id).single();
-    if (error) console.error("Erro ao carregar dados do usuário:", error);
+    if (error) {
+        console.error("Erro ao carregar dados do usuário:", error);
+        return;
+    }
     
     if (data && data.user_data) {
         userState = data.user_data;
@@ -133,7 +137,6 @@ async function loadUserData(user) {
         if (!userState.quests) userState.quests = [];
         if (!userState.grades || Object.keys(userState.grades).length === 0) userState.grades = Object.fromEntries(subjectList.map(s => [s, 0]));
     } else { 
-        // Lógica para criar o estado inicial se não existir (para contas novas)
         const today = new Date();
         const daysPassed = Math.max(0, Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24)));
         const initialXp = daysPassed * 15;
@@ -141,7 +144,7 @@ async function loadUserData(user) {
             grades: Object.fromEntries(subjectList.map(s => [s, 0])),
             schedule: {}, achievements: [], missions: [], reminders: [], links: [], quests: [], xp: initialXp, avatar: ''
         };
-        await saveUserData(); // Salva o estado inicial imediatamente
+        await saveUserData();
     }
 }
 async function saveUserData() {
@@ -205,6 +208,7 @@ async function loadDashboardData() {
     
     await loadUserData(user);
     
+    renderAdminInfo();
     renderDashboard();
     renderQuests();
     renderGrades();
@@ -214,6 +218,31 @@ async function loadDashboardData() {
     renderReminders();
     renderLinks();
 }
+
+async function renderAdminInfo() {
+    const { data, error } = await sb.from('global_info').select('*').order('created_at', { ascending: false }).limit(5);
+    if (error) {
+        console.error("Erro ao buscar informações do ADM:", error);
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        adminInfoList.innerHTML = '<li><p>Nenhuma informação no momento.</p></li>';
+        return;
+    }
+
+    adminInfoList.innerHTML = '';
+    data.forEach(item => {
+        const li = document.createElement('li');
+        let content = `<strong>${item.title}</strong>`;
+        if (item.description) content += `<p>${item.description}</p>`;
+        if (item.type === 'PROVA' && item.due_date) content += `<p>Data: ${new Date(item.due_date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>`;
+        if (item.type === 'LINK' && item.link_url) content += `<a href="${item.link_url}" target="_blank" rel="noopener noreferrer">Acessar Link</a>`;
+        li.innerHTML = content;
+        adminInfoList.appendChild(li);
+    });
+}
+
 
 function renderDashboard() {
     updateTimeProgress();
@@ -253,7 +282,7 @@ function renderDashboard() {
 
 function updateTimeProgress() {
     const today = new Date();
-    const graduationDate = new Date('2026-05-26T00:00:00'); // Corrigido para 2026
+    const graduationDate = new Date('2026-05-26T00:00:00');
     const totalDays = 365;
 
     const daysLeft = Math.ceil((graduationDate - today) / (1000 * 60 * 60 * 24));
