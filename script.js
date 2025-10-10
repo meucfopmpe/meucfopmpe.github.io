@@ -19,7 +19,7 @@ const loginContainer = document.getElementById('login-container'), loginButton =
 const signupContainer = document.getElementById('signup-container'), signupButton = document.getElementById('signup-button'), signupNameInput = document.getElementById('signup-name'), signupCourseNumberInput = document.getElementById('signup-course-number'), signupPlatoonInput = document.getElementById('signup-platoon'), signupPasswordInput = document.getElementById('signup-password'), signupMessage = document.getElementById('signup-message');
 const showSignupLink = document.getElementById('show-signup'), showLoginLink = document.getElementById('show-login');
 const logoutButton = document.getElementById('logout-button'), daysLeftEl = document.getElementById('days-left'), userNameSidebar = document.getElementById('user-name-sidebar'), userAvatarSidebar = document.getElementById('user-avatar-sidebar'), userAvatarHeader = document.getElementById('user-avatar-header'), avgGradeEl = document.getElementById('grades-average'), sidebarNav = document.getElementById('sidebar-nav'), pageTitleEl = document.getElementById('page-title');
-const playerLevelTitle = document.getElementById('player-level-title'), xpBar = document.getElementById('xp-bar'), xpText = document.getElementById('xp-text');
+const playerLevelTitle = document.getElementById('player-level-title'), xpBar = document.getElementById('xp-bar'), xpText = document.getElementById('xp-text'), coursePercentageEl = document.getElementById('course-progress-percentage');
 const gradesContainer = document.getElementById('grades-container'), qtsScheduleContainer = document.getElementById('qts-schedule-container'), calendarContainer = document.getElementById('calendar'), rankingList = document.getElementById('ranking-list'), achievementsGrid = document.getElementById('achievements-grid');
 const dashboardMissionsList = document.getElementById('dashboard-missions-list'), dashboardAchievementsList = document.getElementById('dashboard-achievements-list');
 const addMissionForm = document.getElementById('add-mission-form'), missionNameInput = document.getElementById('mission-name-input'), missionDateInput = document.getElementById('mission-date-input'), scheduledMissionsList = document.getElementById('scheduled-missions-list');
@@ -30,7 +30,6 @@ const addQuestForm = document.getElementById('add-quest-form'), questTextInput =
 const achievementsWidget = document.getElementById('achievements-widget'), achievementsModal = document.getElementById('achievements-modal'), achievementsModalClose = document.getElementById('achievements-modal-close');
 const hamburgerButton = document.getElementById('hamburger-button'), sidebar = document.querySelector('.sidebar'), sidebarOverlay = document.getElementById('sidebar-overlay');
 const dayDetailModal = document.getElementById('day-detail-modal'), dayDetailTitle = document.getElementById('day-detail-title'), dayDetailBody = document.getElementById('day-detail-body'), dayDetailModalClose = document.getElementById('day-detail-modal-close');
-
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -178,7 +177,7 @@ async function loadDashboardData() {
 }
 
 function renderDashboard() {
-    calculateDaysLeft();
+    updateTimeProgress();
     const level = Math.floor((userState.xp || 0) / 100) + 1;
     const title = level >= 10 ? "CADETE VETERANO" : "CADETE NOVATO";
     const expForNextLevel = 100;
@@ -213,11 +212,18 @@ function renderDashboard() {
     }
 }
 
-function calculateDaysLeft() {
+function updateTimeProgress() {
     const SIMULATED_TODAY = new Date('2024-11-15T12:00:00');
+    const startDate = new Date('2024-05-26T00:00:00');
     const graduationDate = new Date('2025-05-26T00:00:00');
-    const days = Math.ceil((graduationDate - SIMULATED_TODAY) / (1000 * 60 * 60 * 24));
-    daysLeftEl.textContent = days > 0 ? days : 0;
+    const totalDays = 365;
+
+    const daysLeft = Math.ceil((graduationDate - SIMULATED_TODAY) / (1000 * 60 * 60 * 24));
+    daysLeftEl.textContent = daysLeft > 0 ? daysLeft : 0;
+
+    const daysPassed = Math.max(0, Math.floor((SIMULATED_TODAY - startDate) / (1000 * 60 * 60 * 24)));
+    const percentage = Math.min(100, (daysPassed / totalDays) * 100);
+    coursePercentageEl.innerHTML = `<span>${percentage.toFixed(1)}%</span> do curso concluído`;
 }
 
 function renderGrades() {
