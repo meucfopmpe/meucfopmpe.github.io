@@ -34,7 +34,6 @@ const detailModal = document.getElementById('detail-modal'), detailModalTitle = 
 // =======================================================
 // 3. DADOS ESTÁTICOS
 // =======================================================
-const SIMULATED_TODAY = new Date('2024-11-15T12:00:00');
 const COURSE_START_DATE = new Date('2024-05-26T00:00:00');
 const subjectList = ["Sistema de Segurança Pública", "Teoria Geral da Administração", "Gestão Pública Geral Aplicada", "Gestão de Pessoas, Comando e Liderança", "Gestão de Logística, Orçamento e Finanças Públicas", "Fundamentos da Polícia Comunitária", "Psicologia Aplicada", "Análise Criminal e Estatística", "Qualidade do Atendimento aos Grupos Vulneráveis", "Direitos Humanos Aplicados à Atividade Policial Militar", "Gerenciamento de Crises", "Saúde Mental e Qualidade de Vida", "Treinamento Físico Militar I", "Treinamento Físico Militar II", "Gestão de Processos no Sistema Eletrônico", "Tecnologia da Informação e Comunicação", "Comunicação, Mídias Sociais e Cerimonial Militar", "Inteligência e Sistema de Informação", "Ética, Cidadania e Relações Interpessoais", "Ordem Unida I", "Ordem Unida II", "Instrução Geral", "Defesa Pessoal Policial I", "Defesa Pessoal Policial II", "Uso Diferenciado da Força", "Pronto Socorrismo", "Atendimento Pré-Hospitalar Tático", "Planejamento Operacional e Especializado", "Elaboração de Projetos e Captação de Recursos", "Planejamento Estratégico", "Gestão Por Resultados e Avaliação de Políticas Públicas", "Trabalho de Comando e Estado Maior", "Polícia Judiciária Militar", "Direito Administrativo Disciplinar Militar", "Direito Penal e Processual Penal Militar", "Legislação Policial Militar e Organizacional", "Procedimento em Ocorrência", "Economia Aplicada ao Setor Público", "História da PMPE", "Abordagem a Pessoas", "Abordagem a Veículos", "Abordagem a Edificações", "Patrulhamento Urbano", "Armamento e Munição", "Tiro Policial", "Tiro Defensivo (Método Giraldi)", "Ações Básicas de Apoio Aéreo", "Manobras Acadêmicas I", "Manobras Acadêmicas II", "Metodologia da Pesquisa Científica", "Teoria e Prática do Ensino", "Trabalho de Conclusão de Curso"];
 const qtsTimes = ['08:00-09:40', '10:00-11:40', '13:40-15:20', '15:40-17:20', '17:30-19:10'];
@@ -46,8 +45,8 @@ const achievementsData = {
     LEVEL_50: { name: "Lendário", icon: "🏆", description: "Alcance o Nível 50 de cadete.", condition: (state) => Math.floor((state.xp || 0) / 100) + 1 >= 50 },
     FIRST_QUEST: { name: "Primeira Missão", icon: "⚔️", description: "Complete sua primeira missão diária.", condition: (state, type) => type === 'complete_quest' },
     HARD_QUEST: { name: "Desafiante", icon: "🔥", description: "Complete uma missão diária na dificuldade Difícil.", condition: (state, type, data) => type === 'complete_quest' && data.difficulty === 'hard' },
-    TEN_QUESTS: { name: "Combatente", icon: "💪", description: "Complete 10 missões diárias.", condition: (state) => state.quests.filter(q => q.completed).length >= 10 },
-    FIFTY_QUESTS: { name: "Guerreiro", icon: "💥", description: "Complete 50 missões diárias.", condition: (state) => state.quests.filter(q => q.completed).length >= 50 },
+    TEN_QUESTS: { name: "Combatente", icon: "💪", description: "Complete 10 missões diárias.", condition: (state) => (state.quests || []).filter(q => q.completed).length >= 10 },
+    FIFTY_QUESTS: { name: "Guerreiro", icon: "💥", description: "Complete 50 missões diárias.", condition: (state) => (state.quests || []).filter(q => q.completed).length >= 50 },
     FIRST_GRADE: { name: "Estudante", icon: "📖", description: "Adicione sua primeira nota no sistema.", condition: (state, type) => type === 'add_grade' },
     ALL_GRADES: { name: "Caxias", icon: "📚", description: "Preencha as notas de todas as matérias.", condition: (state) => subjectList.every(s => (state.grades[s] || 0) > 0) },
     PERFECT_TEN: { name: "Nota Máxima", icon: "🔟", description: "Obtenha uma nota 10 em qualquer matéria.", condition: (state) => Object.values(state.grades).includes(10) },
@@ -66,7 +65,7 @@ const achievementsData = {
     TOP_10: { name: "Top 10", icon: "🏅", description: "Fique entre os 10 melhores no ranking (funcionalidade futura).", condition: () => false },
     TOP_3: { name: "Pódio", icon: "🥉", description: "Fique entre os 3 melhores no ranking (funcionalidade futura).", condition: () => false },
     FIRST_PLACE: { name: "Xerife", icon: "🥇", description: "Alcance o 1º lugar no ranking (funcionalidade futura).", condition: () => false },
-    ALL_ACHIEVEMENTS: { name: "Monarca", icon: "👑", description: "Desbloqueie todas as outras conquistas.", condition: (state) => state.achievements?.length >= Object.keys(achievementsData).length - 1 },
+    ALL_ACHIEVEMENTS: { name: "Monarca", icon: "👑", description: "Desbloqueie todas as outras conquistas.", condition: (state) => (state.achievements || []).length >= Object.keys(achievementsData).length - 1 },
     NIGHT_OWL: { name: "Coruja", icon: "🦉", description: "Agende um serviço que comece após as 18h.", condition: (state, type, data) => type === 'add_mission' && new Date(data.date).getUTCHours() >= 18 },
     COURSE_COMPLETE: { name: "Oficial Formado", icon: "🎓", description: "Conclua os 365 dias do curso.", condition: (state, type, data) => type === 'time_update' && data.days_left <= 0 },
 };
@@ -85,7 +84,8 @@ async function handleSignUp() {
     if (authError) { signupMessage.textContent = "Erro: Numérica já pode estar em uso."; signupMessage.className = 'error-message'; return; }
     
     if (authData.user) {
-        const daysPassed = Math.max(0, Math.floor((SIMULATED_TODAY - COURSE_START_DATE) / (1000 * 60 * 60 * 24)));
+        const today = new Date();
+        const daysPassed = Math.max(0, Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24)));
         const initialXp = daysPassed * 15;
 
         const initialState = {
@@ -247,14 +247,19 @@ function renderDashboard() {
 }
 
 function updateTimeProgress() {
+    const today = new Date();
     const graduationDate = new Date('2025-05-26T00:00:00');
     const totalDays = 365;
-    const daysLeft = Math.ceil((graduationDate - SIMULATED_TODAY) / (1000 * 60 * 60 * 24));
+
+    const daysLeft = Math.ceil((graduationDate - today) / (1000 * 60 * 60 * 24));
     daysLeftEl.textContent = daysLeft > 0 ? daysLeft : 0;
-    const daysPassed = Math.max(0, Math.floor((SIMULATED_TODAY - COURSE_START_DATE) / (1000 * 60 * 60 * 24)));
+
+    const daysPassed = Math.max(0, Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24)));
     const percentage = Math.min(100, (daysPassed / totalDays) * 100);
+    
     courseProgressBar.style.width = `${percentage}%`;
     coursePercentageEl.innerHTML = `<span>${percentage.toFixed(1)}%</span> do curso concluído`;
+    
     checkAchievements('time_update', { percentage, days_left: daysLeft });
 }
 
