@@ -18,7 +18,7 @@ const authPage = document.getElementById('auth-page'), appPage = document.getEle
 const loginContainer = document.getElementById('login-container'), loginButton = document.getElementById('login-button'), loginEmailInput = document.getElementById('login-email'), loginPasswordInput = document.getElementById('login-password'), loginError = document.getElementById('login-error');
 const signupContainer = document.getElementById('signup-container'), signupButton = document.getElementById('signup-button'), signupNameInput = document.getElementById('signup-name'), signupCourseNumberInput = document.getElementById('signup-course-number'), signupPlatoonInput = document.getElementById('signup-platoon'), signupPasswordInput = document.getElementById('signup-password'), signupMessage = document.getElementById('signup-message');
 const showSignupLink = document.getElementById('show-signup'), showLoginLink = document.getElementById('show-login');
-const logoutButton = document.getElementById('logout-button'), daysLeftEl = document.getElementById('days-left'), userNameSidebar = document.getElementById('user-name-sidebar'), userAvatarEl = document.getElementById('user-avatar'), avgGradeEl = document.getElementById('grades-average'), sidebarNav = document.getElementById('sidebar-nav'), pageTitleEl = document.getElementById('page-title');
+const logoutButton = document.getElementById('logout-button'), daysLeftEl = document.getElementById('days-left'), userNameSidebar = document.getElementById('user-name-sidebar'), userAvatarSidebar = document.getElementById('user-avatar-sidebar'), userAvatarHeader = document.getElementById('user-avatar-header'), avgGradeEl = document.getElementById('grades-average'), sidebarNav = document.getElementById('sidebar-nav'), pageTitleEl = document.getElementById('page-title');
 const playerLevelTitle = document.getElementById('player-level-title'), xpBar = document.getElementById('xp-bar'), xpText = document.getElementById('xp-text');
 const gradesContainer = document.getElementById('grades-container'), qtsScheduleContainer = document.getElementById('qts-schedule-container'), calendarContainer = document.getElementById('calendar'), rankingList = document.getElementById('ranking-list'), achievementsGrid = document.getElementById('achievements-grid');
 const dashboardMissionsList = document.getElementById('dashboard-missions-list'), dashboardAchievementsList = document.getElementById('dashboard-achievements-list');
@@ -28,7 +28,7 @@ const addLinkForm = document.getElementById('add-link-form'), linkTitleInput = d
 const uploadAvatarButton = document.getElementById('upload-avatar-button'), uploadAvatarInput = document.getElementById('upload-avatar-input');
 const addQuestForm = document.getElementById('add-quest-form'), questTextInput = document.getElementById('quest-text-input'), questDifficultySelect = document.getElementById('quest-difficulty-select'), questsList = document.getElementById('quests-list'), clearCompletedQuestsButton = document.getElementById('clear-completed-quests-button');
 const achievementsWidget = document.getElementById('achievements-widget'), achievementsModal = document.getElementById('achievements-modal'), achievementsModalClose = document.getElementById('achievements-modal-close');
-const hamburgerButton = document.getElementById('hamburger-button'), sidebar = document.querySelector('.sidebar');
+const hamburgerButton = document.getElementById('hamburger-button'), sidebar = document.querySelector('.sidebar'), mainContent = document.getElementById('main-content');
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -84,7 +84,13 @@ async function loadUserData(user) {
     
     if (data && data.user_data) {
         userState = data.user_data;
-        if (userState.avatar) userAvatarEl.src = userState.avatar; else userAvatarEl.src = '';
+        if (userState.avatar) {
+            userAvatarSidebar.src = userState.avatar;
+            userAvatarHeader.src = userState.avatar;
+        } else {
+            userAvatarSidebar.src = '';
+            userAvatarHeader.src = '';
+        }
         if (!userState.xp) userState.xp = 0;
         if (!userState.missions) userState.missions = [];
         if (!userState.reminders) userState.reminders = [];
@@ -110,7 +116,8 @@ async function uploadAvatar(file) {
         const dataUrl = await resizeImage(file, 200, 200);
         userState.avatar = dataUrl;
         await saveUserData();
-        userAvatarEl.src = dataUrl;
+        userAvatarSidebar.src = dataUrl;
+        userAvatarHeader.src = dataUrl;
     } catch (error) {
         console.error('Erro ao processar imagem:', error);
         alert('Não foi possível processar a imagem.');
@@ -263,11 +270,19 @@ function handleQTSInput(e) {
 }
 
 function initCalendar() {
-    if (calendarInstance) { calendarInstance.refetchEvents(); return; }
+    if (calendarInstance) {
+        calendarInstance.destroy(); // Destrói a instância anterior para reconfigurar
+    }
+    
+    const isMobile = window.innerWidth <= 768;
+    
     calendarInstance = new FullCalendar.Calendar(calendarContainer, {
-        initialView: 'dayGridMonth', locale: 'pt-br',
-        headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek' },
-        buttonText: { today: 'Hoje', month: 'Mês', week: 'Semana' },
+        locale: 'pt-br',
+        initialView: isMobile ? 'listWeek' : 'dayGridMonth',
+        headerToolbar: isMobile ? 
+            { left: 'prev,next', center: 'title', right: '' } :
+            { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek,listWeek' },
+        buttonText: { today: 'Hoje', month: 'Mês', week: 'Semana', list: 'Lista' },
         events: getCalendarEvents()
     });
     calendarInstance.render();
@@ -483,6 +498,9 @@ function handlePageNavigation(e) {
     pageTitleEl.textContent = e.target.textContent;
     if (targetPageId === 'page-calendar') initCalendar();
     if (targetPageId === 'page-ranking') renderRanking();
+    if (window.innerWidth <= 768) {
+        sidebar.classList.remove('open');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -513,4 +531,9 @@ document.addEventListener('DOMContentLoaded', () => {
     achievementsModalClose.addEventListener('click', () => achievementsModal.classList.add('hidden'));
     achievementsModal.addEventListener('click', (e) => { if (e.target === achievementsModal) achievementsModal.classList.add('hidden'); });
     hamburgerButton.addEventListener('click', () => { sidebar.classList.toggle('open'); });
+    mainContent.addEventListener('click', () => {
+        if (sidebar.classList.contains('open')) {
+            sidebar.classList.remove('open');
+        }
+    });
 });
