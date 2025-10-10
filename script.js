@@ -219,20 +219,36 @@ async function loadDashboardData() {
     renderLinks();
 }
 
-async function renderAdminInfo() {
-    const { data, error } = await sb.from('global_info').select('*').order('created_at', { ascending: false }).limit(5);
-    if (error) {
-        console.error("Erro ao buscar informações do ADM:", error);
-        return;
-    }
-
-    if (!data || data.length === 0) {
+function renderAdminInfo(items) {
+    if (!items || items.length === 0) {
         adminInfoList.innerHTML = '<li><p>Nenhuma informação no momento.</p></li>';
         return;
     }
 
+    // Adiciona a lógica de ordenação aqui
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Zera o tempo para comparar apenas as datas
+
+    items.sort((a, b) => {
+        const isAUpcomingExam = a.type === 'PROVA' && a.due_date && new Date(a.due_date) >= today;
+        const isBUpcomingExam = b.type === 'PROVA' && b.due_date && new Date(b.due_date) >= today;
+
+        // Se 'a' é uma prova futura e 'b' não é, 'a' vem primeiro.
+        if (isAUpcomingExam && !isBUpcomingExam) return -1;
+        // Se 'b' é uma prova futura e 'a' não é, 'b' vem primeiro.
+        if (!isAUpcomingExam && isBUpcomingExam) return 1;
+        
+        // Se ambos são provas futuras, ordena pela data mais próxima.
+        if (isAUpcomingExam && isBUpcomingExam) {
+            return new Date(a.due_date) - new Date(b.due_date);
+        }
+
+        // Para todos os outros casos (links, avisos, etc.), mantém a ordem original (mais recente primeiro).
+        return 0;
+    });
+
     adminInfoList.innerHTML = '';
-    data.forEach(item => {
+    items.forEach(item => {
         const li = document.createElement('li');
         let content = `<strong>${item.title}</strong>`;
         if (item.description) content += `<p>${item.description}</p>`;
