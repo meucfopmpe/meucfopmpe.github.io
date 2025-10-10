@@ -28,7 +28,7 @@ const addLinkForm = document.getElementById('add-link-form'), linkTitleInput = d
 const uploadAvatarButton = document.getElementById('upload-avatar-button'), uploadAvatarInput = document.getElementById('upload-avatar-input');
 const addQuestForm = document.getElementById('add-quest-form'), questTextInput = document.getElementById('quest-text-input'), questDifficultySelect = document.getElementById('quest-difficulty-select'), questsList = document.getElementById('quests-list'), clearCompletedQuestsButton = document.getElementById('clear-completed-quests-button');
 const achievementsWidget = document.getElementById('achievements-widget'), achievementsModal = document.getElementById('achievements-modal'), achievementsModalClose = document.getElementById('achievements-modal-close');
-const hamburgerButton = document.getElementById('hamburger-button'), sidebar = document.querySelector('.sidebar'), mainContent = document.getElementById('main-content'), sidebarOverlay = document.getElementById('sidebar-overlay');
+const hamburgerButton = document.getElementById('hamburger-button'), sidebar = document.querySelector('.sidebar'), sidebarOverlay = document.getElementById('sidebar-overlay');
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -276,11 +276,9 @@ function initCalendar() {
     const isMobile = window.innerWidth <= 768;
     calendarInstance = new FullCalendar.Calendar(calendarContainer, {
         locale: 'pt-br',
-        initialView: isMobile ? 'listWeek' : 'dayGridMonth',
-        headerToolbar: isMobile ? 
-            { left: 'prev,next', center: 'title', right: '' } :
-            { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek,listWeek' },
-        buttonText: { today: 'Hoje', month: 'Mês', week: 'Semana', list: 'Lista' },
+        initialView: 'dayGridMonth', // Força a visão de mês em todas as telas
+        headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek' },
+        buttonText: { today: 'Hoje', month: 'Mês', week: 'Semana' },
         events: getCalendarEvents()
     });
     calendarInstance.render();
