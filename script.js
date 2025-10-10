@@ -85,23 +85,9 @@ async function handleSignUp() {
     if (authError) { signupMessage.textContent = "Erro: Numérica já pode estar em uso."; signupMessage.className = 'error-message'; return; }
     
     if (authData.user) {
-        const today = new Date();
-        const daysPassed = Math.max(0, Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24)));
-        const initialXp = daysPassed * 15;
-
-        const initialState = {
-            grades: Object.fromEntries(subjectList.map(s => [s, 0])),
-            schedule: {}, achievements: [], missions: [], reminders: [], links: [], quests: [], xp: initialXp, avatar: ''
-        };
-        
-        const { error: profileError } = await sb.from('profiles').update({ user_data: initialState }).eq('id', authData.user.id);
-        
-        if (profileError) {
-             signupMessage.textContent = `Erro ao criar perfil: ${profileError.message}`;
-        } else {
-            signupMessage.textContent = 'Sucesso! Redirecionando para login...';
-            setTimeout(() => { signupContainer.classList.add('hidden'); loginContainer.classList.remove('hidden'); signupMessage.textContent = ''; }, 2000);
-        }
+        // A lógica de criar o estado inicial agora está em loadUserData
+        signupMessage.textContent = 'Sucesso! Redirecionando para login...';
+        setTimeout(() => { signupContainer.classList.add('hidden'); loginContainer.classList.remove('hidden'); signupMessage.textContent = ''; }, 2000);
     }
 }
 async function handleLogin() {
@@ -116,10 +102,7 @@ async function handleLogout() { await sb.auth.signOut(); window.location.reload(
 
 async function loadUserData(user) {
     const { data, error } = await sb.from('profiles').select('user_data').eq('id', user.id).single();
-    if (error) {
-        console.error("Erro ao carregar dados do usuário:", error);
-        return;
-    }
+    if (error) console.error("Erro ao carregar dados do usuário:", error);
     
     if (data && data.user_data) {
         userState = data.user_data;
@@ -130,12 +113,6 @@ async function loadUserData(user) {
             userAvatarSidebar.src = '';
             userAvatarHeader.src = '';
         }
-        if (!userState.xp) userState.xp = 0;
-        if (!userState.missions) userState.missions = [];
-        if (!userState.reminders) userState.reminders = [];
-        if (!userState.links) userState.links = [];
-        if (!userState.quests) userState.quests = [];
-        if (!userState.grades || Object.keys(userState.grades).length === 0) userState.grades = Object.fromEntries(subjectList.map(s => [s, 0]));
     } else { 
         const today = new Date();
         const daysPassed = Math.max(0, Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24)));
@@ -146,6 +123,12 @@ async function loadUserData(user) {
         };
         await saveUserData();
     }
+    // Garante que campos novos existam para usuários antigos
+    if (!userState.xp) userState.xp = 0;
+    if (!userState.missions) userState.missions = [];
+    if (!userState.reminders) userState.reminders = [];
+    if (!userState.links) userState.links = [];
+    if (!userState.quests) userState.quests = [];
 }
 async function saveUserData() {
     const { data: { user } } = await sb.auth.getUser();
@@ -219,36 +202,35 @@ async function loadDashboardData() {
     renderLinks();
 }
 
-function renderAdminInfo(items) {
-    if (!items || items.length === 0) {
+async function renderAdminInfo(items) {
+    const { data, error } = await sb.from('global_info').select('*').order('created_at', { ascending: false }).limit(5);
+    if (error) {
+        console.error("Erro ao buscar informações do ADM:", error);
+        return;
+    }
+    if (!adminInfoList) return;
+    if (!data || data.length === 0) {
         adminInfoList.innerHTML = '<li><p>Nenhuma informação no momento.</p></li>';
         return;
     }
 
-    // Adiciona a lógica de ordenação aqui
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Zera o tempo para comparar apenas as datas
+    today.setHours(0, 0, 0, 0);
 
-    items.sort((a, b) => {
-        const isAUpcomingExam = a.type === 'PROVA' && a.due_date && new Date(a.due_date) >= today;
-        const isBUpcomingExam = b.type === 'PROVA' && b.due_date && new Date(b.due_date) >= today;
-
-        // Se 'a' é uma prova futura e 'b' não é, 'a' vem primeiro.
+    data.sort((a, b) => {
+        const parseDate = (dateStr) => dateStr ? new Date(dateStr + 'T00:00:00') : null;
+        const dateA = parseDate(a.due_date);
+        const dateB = parseDate(b.due_date);
+        const isAUpcomingExam = a.type === 'PROVA' && dateA && dateA >= today;
+        const isBUpcomingExam = b.type === 'PROVA' && dateB && dateB >= today;
         if (isAUpcomingExam && !isBUpcomingExam) return -1;
-        // Se 'b' é uma prova futura e 'a' não é, 'b' vem primeiro.
         if (!isAUpcomingExam && isBUpcomingExam) return 1;
-        
-        // Se ambos são provas futuras, ordena pela data mais próxima.
-        if (isAUpcomingExam && isBUpcomingExam) {
-            return new Date(a.due_date) - new Date(b.due_date);
-        }
-
-        // Para todos os outros casos (links, avisos, etc.), mantém a ordem original (mais recente primeiro).
+        if (isAUpcomingExam && isBUpcomingExam) return dateA - dateB;
         return 0;
     });
 
     adminInfoList.innerHTML = '';
-    items.forEach(item => {
+    data.forEach(item => {
         const li = document.createElement('li');
         let content = `<strong>${item.title}</strong>`;
         if (item.description) content += `<p>${item.description}</p>`;
@@ -402,7 +384,7 @@ async function renderRanking() {
     rankingList.innerHTML = 'Carregando ranking...';
     const { data, error } = await sb.from('profiles').select('full_name, user_data, grades_average').order('grades_average', { ascending: false }).limit(50);
     if (error) { rankingList.innerHTML = '<p style="color: var(--sl-error);">Não foi possível carregar o ranking.</p>'; console.error(error); return; }
-    if (data.length === 0) { rankingList.innerHTML = '<p>Ninguém no ranking ainda. Adicione suas notas!</p>'; return; }
+    if (!data || data.length === 0) { rankingList.innerHTML = '<p>Ninguém no ranking ainda. Adicione suas notas!</p>'; return; }
     rankingList.innerHTML = '';
     data.forEach((profile, index) => {
         const item = document.createElement('div');
