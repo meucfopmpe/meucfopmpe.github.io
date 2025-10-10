@@ -50,6 +50,8 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .level-title { text-align: center; font-weight: 700; font-size: 1.2em; color: var(--sl-primary); margin-bottom: 15px; text-shadow: 0 0 5px var(--sl-glow); }
 .countdown { background-color: var(--sl-bg); padding: 10px; text-align: center; font-weight: 600; border-radius: 4px; margin-top: 20px; }
 .countdown span { font-size: 1.2em; color: var(--sl-success); }
+.course-progress { text-align: center; font-weight: 600; margin-top: 10px; font-size: 0.9em; color: var(--sl-text-secondary); }
+.course-progress span { color: var(--sl-primary); font-weight: 700; font-size: 1.1em; }
 .xp-bar-container { width: 100%; height: 8px; background-color: var(--sl-bg); border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
 .xp-bar { width: 5%; height: 100%; background-color: var(--sl-primary); border-radius: 4px; transition: width 0.5s ease; }
 .xp-text { font-size: 0.8em; color: var(--sl-text-secondary); display: block; }
