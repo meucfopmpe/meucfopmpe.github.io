@@ -76,7 +76,10 @@
                         <div class="xp-bar-container"><div id="xp-bar" class="xp-bar"></div></div>
                         <span id="xp-text" class="xp-text">EXP: 0 / 100</span>
                         <div class="countdown">Faltam <span id="days-left">...</span> dias para a formatura</div>
-                        <div id="course-progress-percentage" class="course-progress">...% do curso concluído</div>
+                        <div class="course-progress-container">
+                            <div id="course-progress-bar" class="course-progress-bar"></div>
+                        </div>
+                        <div id="course-progress-text" class="course-progress-text">...% do curso concluído</div>
                     </div>
                     <div class="widget">
                         <h3>PRÓXIMAS MISSÕES</h3>
@@ -174,11 +177,11 @@
         </div>
     </div>
 
-    <div id="day-detail-modal" class="modal hidden">
+    <div id="detail-modal" class="modal hidden">
         <div class="modal-content">
-            <button id="day-detail-modal-close" class="modal-close-button">&times;</button>
-            <h2 id="day-detail-title">Eventos do Dia</h2>
-            <div id="day-detail-body"></div>
+            <button id="detail-modal-close" class="modal-close-button">&times;</button>
+            <h2 id="detail-modal-title">Detalhes</h2>
+            <div id="detail-modal-body"></div>
         </div>
     </div>
 
