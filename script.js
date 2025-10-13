@@ -20,7 +20,7 @@ const signupContainer = document.getElementById('signup-container'), signupButto
 const showSignupLink = document.getElementById('show-signup'), showLoginLink = document.getElementById('show-login');
 const logoutButton = document.getElementById('logout-button'), daysLeftEl = document.getElementById('days-left'), userNameSidebar = document.getElementById('user-name-sidebar'), userAvatarSidebar = document.getElementById('user-avatar-sidebar'), userAvatarHeader = document.getElementById('user-avatar-header'), avgGradeEl = document.getElementById('grades-average'), sidebarNav = document.getElementById('sidebar-nav'), pageTitleEl = document.getElementById('page-title');
 const playerLevelTitle = document.getElementById('player-level-title'), xpBar = document.getElementById('xp-bar'), xpText = document.getElementById('xp-text'), coursePercentageEl = document.getElementById('course-progress-text'), courseProgressBar = document.getElementById('course-progress-bar');
-const gradesContainer = document.getElementById('grades-container'), qtsScheduleContainer = document.getElementById('qts-schedule-container'), calendarContainer = document.getElementById('calendar'), rankingList = document.getElementById('ranking-list'), achievementsGrid = document.getElementById('achievements-grid');
+const gradesContainer = document.getElementById('grades-container'), qtsScheduleContainer = document.getElementById('qts-schedule-container'), calendarContainer = document.getElementById('calendar'), rankingList = document.getElementById('ranking-list'), achievementsGrid = document.getElementById('achievements-grid'), rankingToggle = document.getElementById('ranking-toggle');
 const dashboardMissionsList = document.getElementById('dashboard-missions-list'), dashboardAchievementsList = document.getElementById('dashboard-achievements-list');
 const addMissionForm = document.getElementById('add-mission-form'), missionNameInput = document.getElementById('mission-name-input'), missionDateInput = document.getElementById('mission-date-input'), scheduledMissionsList = document.getElementById('scheduled-missions-list');
 const remindersList = document.getElementById('reminders-list'), reminderInput = document.getElementById('reminder-input'), addReminderButton = document.getElementById('add-reminder-button');
@@ -31,6 +31,7 @@ const achievementsWidget = document.getElementById('achievements-widget'), achie
 const hamburgerButton = document.getElementById('hamburger-button'), sidebar = document.querySelector('.sidebar'), sidebarOverlay = document.getElementById('sidebar-overlay');
 const detailModal = document.getElementById('detail-modal'), detailModalTitle = document.getElementById('detail-modal-title'), detailModalBody = document.getElementById('detail-modal-body'), detailModalClose = document.getElementById('detail-modal-close');
 const adminInfoList = document.getElementById('admin-info-list');
+const saveGradesButton = document.getElementById('save-grades-button'), gradeSearchInput = document.getElementById('grade-search-input');
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -100,12 +101,14 @@ async function handleLogin() {
 async function handleLogout() { await sb.auth.signOut(); window.location.reload(); }
 
 async function loadUserData(user) {
-    const { data, error } = await sb.from('profiles').select('user_data').eq('id', user.id).single();
+    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking').eq('id', user.id).single();
     if (error) {
         console.error("Erro ao carregar dados do usuário:", error);
         return;
     }
     
+    rankingToggle.checked = data.show_in_ranking;
+
     if (data && data.user_data) {
         userState = data.user_data;
         if (userState.avatar) {
@@ -207,19 +210,14 @@ async function loadDashboardData() {
 
 async function renderAdminInfo() {
     const { data, error } = await sb.from('global_info').select('*').order('created_at', { ascending: false }).limit(5);
-    if (error) {
-        console.error("Erro ao buscar informações do ADM:", error);
-        return;
-    }
+    if (error) { console.error("Erro ao buscar informações do ADM:", error); return; }
     if (!adminInfoList) return;
     if (!data || data.length === 0) {
         adminInfoList.innerHTML = '<li><p>Nenhuma informação no momento.</p></li>';
         return;
     }
-
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
     data.sort((a, b) => {
         const parseDate = (dateStr) => dateStr ? new Date(dateStr + 'T00:00:00') : null;
         const dateA = parseDate(a.due_date);
@@ -296,16 +294,12 @@ function updateTimeProgress() {
     const today = new Date();
     const graduationDate = new Date('2026-05-26T00:00:00');
     const totalDays = 365;
-
     const daysLeft = Math.ceil((graduationDate - today) / (1000 * 60 * 60 * 24));
     daysLeftEl.textContent = daysLeft > 0 ? daysLeft : 0;
-
     const daysPassed = Math.max(0, Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24)));
     const percentage = Math.min(100, (daysPassed / totalDays) * 100);
-    
     courseProgressBar.style.width = `${percentage}%`;
     coursePercentageEl.innerHTML = `<span>${percentage.toFixed(1)}%</span> do curso concluído`;
-    
     checkAchievements('time_update', { percentage, days_left: daysLeft });
 }
 
@@ -315,7 +309,6 @@ function renderGrades() {
         const value = userState.grades[subject] || 0;
         gradesContainer.innerHTML += `<div class="grade-item"><span class="grade-item-label" title="${subject}">${subject}</span><input type="number" class="grade-item-input" data-subject="${subject}" value="${value}" min="0" max="10" step="0.1"></div>`;
     });
-    updateGradesAverage();
 }
 function handleGradeChange(e) {
     const subject = e.target.dataset.subject;
@@ -324,8 +317,6 @@ function handleGradeChange(e) {
         userState.grades[subject] = Math.max(0, Math.min(10, nota));
         if (nota > 0) checkAchievements('add_grade');
         if (nota === 10) checkAchievements('perfect_ten');
-        saveUserData();
-        updateGradesAverage();
     }
 }
 async function updateGradesAverage() {
@@ -336,7 +327,7 @@ async function updateGradesAverage() {
     }
     avgGradeEl.innerHTML = `MÉDIA GERAL: <span>${average > 0 ? average.toFixed(2) : 'N/A'}</span>`;
     checkAchievements('avg_update', average);
-    
+    await saveUserData();
     const { data: { user } } = await sb.auth.getUser();
     if(user) await sb.from('profiles').update({ grades_average: average }).eq('id', user.id);
 }
@@ -361,9 +352,7 @@ function handleQTSInput(e) {
 }
 
 function initCalendar() {
-    if (calendarInstance) {
-        calendarInstance.destroy();
-    }
+    if (calendarInstance) { calendarInstance.destroy(); }
     calendarInstance = new FullCalendar.Calendar(calendarContainer, {
         locale: 'pt-br',
         initialView: 'dayGridMonth',
@@ -396,9 +385,9 @@ function getCalendarEvents() {
 
 async function renderRanking() {
     rankingList.innerHTML = 'Carregando ranking...';
-    const { data, error } = await sb.from('profiles').select('full_name, user_data, grades_average').order('grades_average', { ascending: false }).limit(50);
+    const { data, error } = await sb.from('profiles').select('full_name, user_data, grades_average').eq('show_in_ranking', true).order('grades_average', { ascending: false }).limit(50);
     if (error) { rankingList.innerHTML = '<p style="color: var(--sl-error);">Não foi possível carregar o ranking.</p>'; console.error(error); return; }
-    if (!data || data.length === 0) { rankingList.innerHTML = '<p>Ninguém no ranking ainda. Adicione suas notas!</p>'; return; }
+    if (!data || data.length === 0) { rankingList.innerHTML = '<p>Ninguém no ranking ainda ou todos estão privados.</p>'; return; }
     rankingList.innerHTML = '';
     data.forEach((profile, index) => {
         const item = document.createElement('div');
@@ -614,6 +603,24 @@ document.addEventListener('DOMContentLoaded', () => {
             detailModalBody.textContent = label.getAttribute('title');
             detailModal.classList.remove('hidden');
         }
+    });
+    saveGradesButton.addEventListener('click', () => {
+        saveUserData();
+        updateGradesAverage();
+        // Adiciona um feedback visual simples
+        saveGradesButton.textContent = 'Salvo!';
+        setTimeout(() => { saveGradesButton.textContent = 'Salvar Alterações'; }, 1500);
+    });
+    gradeSearchInput.addEventListener('input', () => {
+        const searchTerm = gradeSearchInput.value.toLowerCase();
+        document.querySelectorAll('#grades-container .grade-item').forEach(item => {
+            const subjectName = item.querySelector('.grade-item-label').getAttribute('title').toLowerCase();
+            if (subjectName.includes(searchTerm)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
     });
 
     qtsScheduleContainer.addEventListener('change', handleQTSInput);
