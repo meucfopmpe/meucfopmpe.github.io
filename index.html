@@ -27,7 +27,7 @@
         <div id="signup-container" class="auth-container hidden">
             <h1 class="auth-title">Crie sua Conta</h1>
             <p class="auth-subtitle">Preencha os dados para se cadastrar.</p>
-            <input type="text" id="signup-name" placeholder="Nome de Guerra">
+            <input type="text" id="signup-name" placeholder="Nome Completo">
             <input type="text" id="signup-course-number" placeholder="Numérica do Curso">
             <input type="text" id="signup-platoon" placeholder="Pelotão (somente o número)">
             <input type="password" id="signup-password" placeholder="Senha (mínimo 6 caracteres)" minlength="6">
@@ -118,8 +118,19 @@
             <div id="page-grades" class="page">
                 <div class="grades-header">
                     <h2>Minhas Notas</h2>
-                    <div id="grades-average" class="average-grade"></div>
+                    <input type="text" id="grade-search-input" placeholder="🔎 Buscar matéria...">
+                    <button id="save-grades-button">Salvar Alterações</button>
                 </div>
+                 <div class="grades-subheader">
+                    <div class="privacy-toggle">
+                        <label for="ranking-toggle">Exibir no Ranking:</label>
+                        <label class="switch">
+                            <input type="checkbox" id="ranking-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div id="grades-average" class="average-grade"></div>
+                 </div>
                 <div id="grades-container"></div>
             </div>
 
@@ -193,5 +204,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
-
