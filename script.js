@@ -210,14 +210,19 @@ async function loadDashboardData() {
 
 async function renderAdminInfo() {
     const { data, error } = await sb.from('global_info').select('*').order('created_at', { ascending: false }).limit(5);
-    if (error) { console.error("Erro ao buscar informações do ADM:", error); return; }
+    if (error) {
+        console.error("Erro ao buscar informações do ADM:", error);
+        return;
+    }
     if (!adminInfoList) return;
     if (!data || data.length === 0) {
         adminInfoList.innerHTML = '<li><p>Nenhuma informação no momento.</p></li>';
         return;
     }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
     data.sort((a, b) => {
         const parseDate = (dateStr) => dateStr ? new Date(dateStr + 'T00:00:00') : null;
         const dateA = parseDate(a.due_date);
@@ -294,12 +299,16 @@ function updateTimeProgress() {
     const today = new Date();
     const graduationDate = new Date('2026-05-26T00:00:00');
     const totalDays = 365;
+
     const daysLeft = Math.ceil((graduationDate - today) / (1000 * 60 * 60 * 24));
     daysLeftEl.textContent = daysLeft > 0 ? daysLeft : 0;
+
     const daysPassed = Math.max(0, Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24)));
     const percentage = Math.min(100, (daysPassed / totalDays) * 100);
+    
     courseProgressBar.style.width = `${percentage}%`;
     coursePercentageEl.innerHTML = `<span>${percentage.toFixed(1)}%</span> do curso concluído`;
+    
     checkAchievements('time_update', { percentage, days_left: daysLeft });
 }
 
@@ -315,8 +324,6 @@ function handleGradeChange(e) {
     const nota = parseFloat(e.target.value);
     if (subject && !isNaN(nota)) {
         userState.grades[subject] = Math.max(0, Math.min(10, nota));
-        if (nota > 0) checkAchievements('add_grade');
-        if (nota === 10) checkAchievements('perfect_ten');
     }
 }
 async function updateGradesAverage() {
@@ -327,7 +334,7 @@ async function updateGradesAverage() {
     }
     avgGradeEl.innerHTML = `MÉDIA GERAL: <span>${average > 0 ? average.toFixed(2) : 'N/A'}</span>`;
     checkAchievements('avg_update', average);
-    await saveUserData();
+    
     const { data: { user } } = await sb.auth.getUser();
     if(user) await sb.from('profiles').update({ grades_average: average }).eq('id', user.id);
 }
@@ -352,7 +359,9 @@ function handleQTSInput(e) {
 }
 
 function initCalendar() {
-    if (calendarInstance) { calendarInstance.destroy(); }
+    if (calendarInstance) {
+        calendarInstance.destroy();
+    }
     calendarInstance = new FullCalendar.Calendar(calendarContainer, {
         locale: 'pt-br',
         initialView: 'dayGridMonth',
@@ -605,9 +614,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     saveGradesButton.addEventListener('click', () => {
+        document.querySelectorAll('#grades-container .grade-item-input').forEach(input => {
+            handleGradeChange({ target: input });
+        });
         saveUserData();
         updateGradesAverage();
-        // Adiciona um feedback visual simples
         saveGradesButton.textContent = 'Salvo!';
         setTimeout(() => { saveGradesButton.textContent = 'Salvar Alterações'; }, 1500);
     });
@@ -615,11 +626,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchTerm = gradeSearchInput.value.toLowerCase();
         document.querySelectorAll('#grades-container .grade-item').forEach(item => {
             const subjectName = item.querySelector('.grade-item-label').getAttribute('title').toLowerCase();
-            if (subjectName.includes(searchTerm)) {
-                item.style.display = 'flex';
-            } else {
-                item.style.display = 'none';
-            }
+            item.style.display = subjectName.includes(searchTerm) ? 'flex' : 'none';
         });
     });
 
@@ -665,5 +672,11 @@ document.addEventListener('DOMContentLoaded', () => {
             detailModalBody.textContent = achData.description;
             detailModal.classList.remove('hidden');
         }
+    });
+    rankingToggle.addEventListener('change', async () => {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) return;
+        const { error } = await sb.from('profiles').update({ show_in_ranking: rankingToggle.checked }).eq('id', user.id);
+        if (error) alert("Não foi possível salvar sua preferência de privacidade.");
     });
 });
