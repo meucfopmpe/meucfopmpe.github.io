@@ -324,6 +324,8 @@ function handleGradeChange(e) {
     const nota = parseFloat(e.target.value);
     if (subject && !isNaN(nota)) {
         userState.grades[subject] = Math.max(0, Math.min(10, nota));
+        if (nota > 0) checkAchievements('add_grade');
+        if (nota === 10) checkAchievements('perfect_ten');
     }
 }
 async function updateGradesAverage() {
