@@ -32,6 +32,7 @@ const hamburgerButton = document.getElementById('hamburger-button'), sidebar = d
 const detailModal = document.getElementById('detail-modal'), detailModalTitle = document.getElementById('detail-modal-title'), detailModalBody = document.getElementById('detail-modal-body'), detailModalClose = document.getElementById('detail-modal-close');
 const adminInfoList = document.getElementById('admin-info-list');
 const saveGradesButton = document.getElementById('save-grades-button'), gradeSearchInput = document.getElementById('grade-search-input');
+const gradesProgressCounter = document.getElementById('grades-progress-counter');
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -337,9 +338,7 @@ async function updateGradesAverage() {
         average = grades.reduce((sum, g) => sum + g, 0) / filledCount;
     }
 
-    const percentage = (filledCount / totalCount) * 100;
-    gradesProgressCounter.innerHTML = `<span>${filledCount}</span> / ${totalCount} matérias preenchidas (${percentage.toFixed(1)}%)`;
-
+    gradesProgressCounter.innerHTML = `<span>${filledCount}</span> / ${totalCount} matérias preenchidas (${((filledCount / totalCount) * 100).toFixed(1)}%)`;
     avgGradeEl.innerHTML = `MÉDIA GERAL: <span>${average > 0 ? average.toFixed(2) : 'N/A'}</span>`;
     checkAchievements('avg_update', average);
     
