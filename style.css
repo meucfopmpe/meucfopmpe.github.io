@@ -139,10 +139,8 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
 .discipline-header { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
 .discipline-grade-card, .discipline-form-card { background-color: var(--sl-surface); padding: 20px; border-radius: 8px; border: 1px solid var(--sl-border); }
 .discipline-grade-card { text-align: center; }
-.discipline-grade-card h3 { color: var(--sl-primary); margin-bottom: 15px;}
-.moral-bar-container { width: 100%; height: 20px; background-color: var(--sl-bg); border-radius: 10px; overflow: hidden; border: 1px solid var(--sl-border); }
-.moral-bar { width: 100%; height: 100%; background-color: var(--sl-success); transition: width 0.5s ease, background-color 0.5s ease; }
-.moral-text { font-size: 1.2em; font-weight: 700; margin-top: 10px; }
+.discipline-grade-card h3 { color: var(--sl-primary); }
+#discipline-grade-display { font-size: 5em; font-weight: 700; color: var(--sl-success); line-height: 1.2; }
 .discipline-form-card h3 { color: var(--sl-primary); margin-bottom: 20px; }
 #discipline-log-list .list-item { display: block; }
 #discipline-log-list .log-header { display: flex; justify-content: space-between; align-items: center; font-weight: 600; margin-bottom: 5px; flex-wrap: wrap; gap: 10px;}
