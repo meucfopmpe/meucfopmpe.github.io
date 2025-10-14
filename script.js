@@ -318,14 +318,13 @@ function renderGrades() {
         const value = userState.grades[subject] || 0;
         gradesContainer.innerHTML += `<div class="grade-item"><span class="grade-item-label" title="${subject}">${subject}</span><input type="number" class="grade-item-input" data-subject="${subject}" value="${value}" min="0" max="10" step="0.1"></div>`;
     });
+    updateGradesAverage();
 }
 function handleGradeChange(e) {
     const subject = e.target.dataset.subject;
     const nota = parseFloat(e.target.value);
     if (subject && !isNaN(nota)) {
         userState.grades[subject] = Math.max(0, Math.min(10, nota));
-        if (nota > 0) checkAchievements('add_grade');
-        if (nota === 10) checkAchievements('perfect_ten');
     }
 }
 async function updateGradesAverage() {
