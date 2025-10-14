@@ -72,6 +72,9 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .admin-info-list li p { font-size: 0.9em; color: var(--sl-text-secondary); }
 .admin-info-list li a { color: var(--sl-primary); text-decoration: none; font-weight: bold; }
 .admin-info-list li a:hover { text-decoration: underline; }
+.major-counter-container { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 20px 0; }
+.major-days { font-size: 4em; font-weight: 700; color: var(--sl-success); line-height: 1; }
+.major-counter-container div:last-child { font-size: 1.1em; font-weight: 600; color: var(--sl-text-secondary); }
 
 /* --- PÁGINA DE NOTAS --- */
 .grades-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 20px;}
@@ -131,6 +134,25 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
 .achievement-icon { font-size: 3em; filter: grayscale(1); opacity: 0.5; transition: all 0.3s; }
 .achievement-icon.unlocked { filter: grayscale(0); opacity: 1; text-shadow: 0 0 15px var(--sl-primary); }
 .achievement-title { margin-top: 10px; font-size: 0.9em; font-weight: 600; }
+
+/* --- PÁGINA DE DISCIPLINA --- */
+.discipline-header { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
+.discipline-grade-card, .discipline-form-card { background-color: var(--sl-surface); padding: 20px; border-radius: 8px; border: 1px solid var(--sl-border); }
+.discipline-grade-card { text-align: center; }
+.discipline-grade-card h3 { color: var(--sl-primary); margin-bottom: 15px;}
+#discipline-grade-display { font-size: 5em; font-weight: 700; color: var(--sl-success); line-height: 1.2; }
+.moral-bar-container { width: 100%; height: 20px; background-color: var(--sl-bg); border-radius: 10px; overflow: hidden; border: 1px solid var(--sl-border); }
+.moral-bar { width: 100%; height: 100%; background-color: var(--sl-success); transition: width 0.5s ease; }
+.moral-text { font-size: 1.2em; font-weight: 700; margin-top: 10px; }
+.discipline-form-card h3 { color: var(--sl-primary); margin-bottom: 20px; }
+#discipline-log-list .list-item { display: block; }
+#discipline-log-list .log-header { display: flex; justify-content: space-between; align-items: center; font-weight: 600; margin-bottom: 5px; }
+#discipline-log-list .log-reason { font-size: 0.9em; color: var(--sl-text-secondary); font-style: italic; word-break: break-word; }
+#discipline-log-list .log-type-ELOGIO { color: var(--sl-success); }
+#discipline-log-list .log-type-EXTRACLASSE { color: #FFD700; }
+#discipline-log-list .log-type-PUNIÇÃO_LEVE { color: #FFD700; }
+#discipline-log-list .log-type-PUNIÇÃO_MEDIA { color: #FFA500; }
+#discipline-log-list .log-type-PUNIÇÃO_GRAVE { color: var(--sl-error); }
 
 /* --- ESTILOS PARA MISSÕES, LEMBRETES, LINKS --- */
 .inline-form { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
