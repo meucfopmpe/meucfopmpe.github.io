@@ -38,7 +38,10 @@ const addDisciplineEventForm = document.getElementById('add-discipline-event-for
 const disciplineEventType = document.getElementById('discipline-event-type');
 const disciplineReasonInput = document.getElementById('discipline-reason-input');
 const disciplineLogList = document.getElementById('discipline-log-list');
-const disciplineGradeDisplay = document.getElementById('discipline-grade-display');
+const disciplineSeiInput = document.getElementById('discipline-sei-input');
+const disciplineCompletionDateInput = document.getElementById('discipline-completion-date-input');
+const moralBar = document.getElementById('moral-bar');
+const moralText = document.getElementById('moral-text');
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -111,14 +114,13 @@ async function handleLogin() {
 async function handleLogout() { await sb.auth.signOut(); window.location.reload(); }
 
 async function loadUserData(user) {
-    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking, disciplinary_grade, last_punishment_date').eq('id', user.id).single();
+    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking, last_punishment_date').eq('id', user.id).single();
     if (error) {
         console.error("Erro ao carregar dados do usuário:", error);
         return;
     }
     
     rankingToggle.checked = data.show_in_ranking;
-    userState.disciplinary_grade = data.disciplinary_grade;
     userState.last_punishment_date = data.last_punishment_date;
 
     if (data && data.user_data) {
@@ -147,6 +149,7 @@ async function loadUserData(user) {
     if (!userState.quests) userState.quests = [];
     if (!userState.achievements) userState.achievements = [];
     if (!userState.grades || Object.keys(userState.grades).length === 0) userState.grades = Object.fromEntries(subjectList.map(s => [s, 0]));
+    if (userState.moral === undefined) userState.moral = 100;
 }
 async function saveUserData() {
     const { data: { user } } = await sb.auth.getUser();
@@ -571,8 +574,17 @@ function handleLinkInteraction(e) {
 }
 
 async function renderDisciplinePage() {
-    disciplineGradeDisplay.textContent = (userState.disciplinary_grade !== undefined ? userState.disciplinary_grade : 10.0).toFixed(2);
-    const { data, error } = await sb.from('discipline_log').select('*').order('created_at', { ascending: false });
+    const moral = userState.moral || 100;
+    moralBar.style.width = `${moral}%`;
+    moralText.textContent = `${moral.toFixed(0)}%`;
+    if (moral < 30) moralBar.style.backgroundColor = 'var(--sl-error)';
+    else if (moral < 70) moralBar.style.backgroundColor = '#FFD700';
+    else moralBar.style.backgroundColor = 'var(--sl-success)';
+    
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    
+    const { data, error } = await sb.from('discipline_log').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
     if (error) { console.error('Erro ao buscar histórico disciplinar:', error); return; }
     disciplineLogList.innerHTML = '';
     if (data.length > 0) {
@@ -581,7 +593,11 @@ async function renderDisciplinePage() {
             item.className = 'list-item';
             const eventDate = new Date(log.created_at).toLocaleDateString('pt-BR');
             const eventName = log.event_type.replace(/_/g, ' ').replace('PUNIÇÃO', 'Punição');
-            item.innerHTML = `<div class="log-header"><span class="log-type-${log.event_type}">${eventName}</span><span>${eventDate}</span></div>${log.reason ? `<p class="log-reason">Motivo: ${log.reason}</p>` : ''}`;
+            let details = log.reason ? `<p class="log-reason">Motivo: ${log.reason}</p>` : '';
+            if (log.sei_number) details += `<p class="log-reason">SEI: ${log.sei_number}</p>`;
+            if (log.completion_date) details += `<p class="log-reason">Cumprimento: ${new Date(log.completion_date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>`;
+
+            item.innerHTML = `<div class="log-header"><span class="log-type-${log.event_type}">${eventName}</span><span>${eventDate}</span></div>${details}`;
             disciplineLogList.appendChild(item);
         });
     } else {
@@ -593,28 +609,31 @@ async function handleDisciplineEvent(e) {
     e.preventDefault();
     const eventType = disciplineEventType.value;
     const reason = disciplineReasonInput.value.trim();
+    const sei = disciplineSeiInput.value.trim();
+    const completionDate = disciplineCompletionDateInput.value;
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return;
     
-    const points = { 'ELOGIO': 0.3, 'PUNIÇÃO_LEVE': -0.2, 'PUNIÇÃO_MEDIA': -0.3, 'PUNIÇÃO_GRAVE': -0.5, 'EXTRACLASSE': 0 };
+    const points = { 'ELOGIO': 3, 'PUNIÇÃO_LEVE': -2, 'PUNIÇÃO_MEDIA': -3, 'PUNIÇÃO_GRAVE': -5, 'EXTRACLASSE': 0 };
     
-    const currentGrade = userState.disciplinary_grade !== undefined ? userState.disciplinary_grade : 10.0;
-    const newGrade = Math.max(0, Math.min(10, currentGrade + points[eventType]));
-    userState.disciplinary_grade = newGrade;
+    if (userState.moral === undefined) userState.moral = 100;
+    userState.moral = Math.max(0, Math.min(100, userState.moral + points[eventType]));
     
-    let updatePayload = { disciplinary_grade: newGrade };
-
-    if (eventType.includes('PUNIÇÃO') || eventType === 'EXTRACLASSE') {
+    let updatePayload = {};
+    if (eventType !== 'ELOGIO') {
         const todayStr = new Date().toISOString().split('T')[0];
         updatePayload.last_punishment_date = todayStr;
+        userState.last_punishment_date = todayStr;
     }
 
     await sb.from('profiles').update(updatePayload).eq('id', user.id);
-    await sb.from('discipline_log').insert({ event_type: eventType, reason: reason });
+    await sb.from('discipline_log').insert({ event_type: eventType, reason, sei_number: sei, completion_date: completionDate || null });
 
     if (eventType === 'ELOGIO') checkAchievements('add_elogio');
 
     addDisciplineEventForm.reset();
+    disciplineCompletionDateInput.classList.add('hidden');
+    saveUserData();
     renderDisciplinePage();
     renderDashboard();
 }
@@ -631,7 +650,6 @@ async function updateMajorCounter() {
         const lastPunishment = new Date(data.last_punishment_date);
         daysWithoutPunishment = Math.floor((today - lastPunishment) / (1000 * 60 * 60 * 24));
     } else {
-        // Se a data for nula (primeiro login de usuário antigo), definimos como hoje para zerar
         const todayStr = new Date().toISOString().split('T')[0];
         await sb.from('profiles').update({ last_punishment_date: todayStr }).eq('id', user.id);
         daysWithoutPunishment = 0;
