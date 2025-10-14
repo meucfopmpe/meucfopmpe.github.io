@@ -33,6 +33,12 @@ const detailModal = document.getElementById('detail-modal'), detailModalTitle = 
 const adminInfoList = document.getElementById('admin-info-list');
 const saveGradesButton = document.getElementById('save-grades-button'), gradeSearchInput = document.getElementById('grade-search-input');
 const gradesProgressCounter = document.getElementById('grades-progress-counter');
+const majorDaysCounter = document.getElementById('major-days-counter');
+const disciplineGradeDisplay = document.getElementById('discipline-grade-display');
+const addDisciplineEventForm = document.getElementById('add-discipline-event-form');
+const disciplineEventType = document.getElementById('discipline-event-type');
+const disciplineReasonInput = document.getElementById('discipline-reason-input');
+const disciplineLogList = document.getElementById('discipline-log-list');
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -102,16 +108,18 @@ async function handleLogin() {
 async function handleLogout() { await sb.auth.signOut(); window.location.reload(); }
 
 async function loadUserData(user) {
-    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking').eq('id', user.id).single();
+    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking, disciplinary_grade, last_punishment_date').eq('id', user.id).single();
     if (error) {
         console.error("Erro ao carregar dados do usuário:", error);
         return;
     }
     
     rankingToggle.checked = data.show_in_ranking;
+    userState.disciplinary_grade = data.disciplinary_grade;
+    userState.last_punishment_date = data.last_punishment_date;
 
     if (data && data.user_data) {
-        userState = data.user_data;
+        userState = { ...userState, ...data.user_data };
         if (userState.avatar) {
             userAvatarSidebar.src = userState.avatar;
             userAvatarHeader.src = userState.avatar;
@@ -140,7 +148,8 @@ async function loadUserData(user) {
 async function saveUserData() {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return;
-    const { error } = await sb.from('profiles').update({ user_data: userState }).eq('id', user.id);
+    const { avatar, ...userDataToSave } = userState;
+    const { error } = await sb.from('profiles').update({ user_data: userDataToSave, avatar_url: avatar }).eq('id', user.id);
     if (error) console.error("Erro ao salvar dados do usuário:", error);
 }
 
@@ -207,6 +216,7 @@ async function loadDashboardData() {
     renderScheduledMissions();
     renderReminders();
     renderLinks();
+    renderDisciplinePage();
 }
 
 async function renderAdminInfo() {
@@ -294,6 +304,7 @@ function renderDashboard() {
     } else {
          dashboardAchievementsList.innerHTML = `<div class="achievement-icon locked" title="Nenhuma conquista desbloqueada">?</div>`;
     }
+    updateMajorCounter();
 }
 
 function updateTimeProgress() {
@@ -624,10 +635,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('#grades-container .grade-item-input').forEach(input => {
             handleGradeChange({ target: input });
         });
-        saveUserData();
-        updateGradesAverage();
-        saveGradesButton.textContent = 'Salvo!';
-        setTimeout(() => { saveGradesButton.textContent = 'Salvar Alterações'; }, 1500);
+        saveUserData().then(() => {
+            updateGradesAverage();
+            saveGradesButton.textContent = 'Salvo!';
+            setTimeout(() => { saveGradesButton.textContent = 'Salvar Alterações'; }, 1500);
+        });
     });
     gradeSearchInput.addEventListener('input', () => {
         const searchTerm = gradeSearchInput.value.toLowerCase();
@@ -686,4 +698,5 @@ document.addEventListener('DOMContentLoaded', () => {
         const { error } = await sb.from('profiles').update({ show_in_ranking: rankingToggle.checked }).eq('id', user.id);
         if (error) alert("Não foi possível salvar sua preferência de privacidade.");
     });
+    addDisciplineEventForm.addEventListener('submit', handleDisciplineEvent);
 });
