@@ -147,6 +147,7 @@ async function loadUserData(user) {
     if (!userState.quests) userState.quests = [];
     if (!userState.achievements) userState.achievements = [];
     if (!userState.grades || Object.keys(userState.grades).length === 0) userState.grades = Object.fromEntries(subjectList.map(s => [s, 0]));
+    if (userState.moral === undefined) userState.moral = 100;
 }
 async function saveUserData() {
     const { data: { user } } = await sb.auth.getUser();
@@ -571,11 +572,11 @@ function handleLinkInteraction(e) {
 }
 
 async function renderDisciplinePage() {
-    const moral = userState.moral || 100;
-    moralBar.style.width = `${moral}%`;
-    moralText.textContent = `${moral.toFixed(0)}%`;
-    if (moral < 30) moralBar.style.backgroundColor = 'var(--sl-error)';
-    else if (moral < 70) moralBar.style.backgroundColor = '#FFD700';
+    if (userState.moral === undefined) userState.moral = 100;
+    moralBar.style.width = `${userState.moral}%`;
+    moralText.textContent = `${userState.moral.toFixed(0)}%`;
+    if (userState.moral < 30) moralBar.style.backgroundColor = 'var(--sl-error)';
+    else if (userState.moral < 70) moralBar.style.backgroundColor = '#FFD700';
     else moralBar.style.backgroundColor = 'var(--sl-success)';
     
     const { data: { user } } = await sb.auth.getUser();
