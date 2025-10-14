@@ -40,8 +40,7 @@ const disciplineReasonInput = document.getElementById('discipline-reason-input')
 const disciplineLogList = document.getElementById('discipline-log-list');
 const disciplineSeiInput = document.getElementById('discipline-sei-input');
 const disciplineCompletionDateInput = document.getElementById('discipline-completion-date-input');
-const moralBar = document.getElementById('moral-bar');
-const moralText = document.getElementById('moral-text');
+const disciplineGradeDisplay = document.getElementById('discipline-grade-display');
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -114,13 +113,14 @@ async function handleLogin() {
 async function handleLogout() { await sb.auth.signOut(); window.location.reload(); }
 
 async function loadUserData(user) {
-    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking, last_punishment_date').eq('id', user.id).single();
+    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking, disciplinary_grade, last_punishment_date').eq('id', user.id).single();
     if (error) {
         console.error("Erro ao carregar dados do usuário:", error);
         return;
     }
     
     rankingToggle.checked = data.show_in_ranking;
+    userState.disciplinary_grade = data.disciplinary_grade;
     userState.last_punishment_date = data.last_punishment_date;
 
     if (data && data.user_data) {
@@ -149,6 +149,7 @@ async function loadUserData(user) {
     if (!userState.quests) userState.quests = [];
     if (!userState.achievements) userState.achievements = [];
     if (!userState.grades || Object.keys(userState.grades).length === 0) userState.grades = Object.fromEntries(subjectList.map(s => [s, 0]));
+    if (userState.moral === undefined) userState.moral = 100;
 }
 async function saveUserData() {
     const { data: { user } } = await sb.auth.getUser();
@@ -226,19 +227,14 @@ async function loadDashboardData() {
 
 async function renderAdminInfo() {
     const { data, error } = await sb.from('global_info').select('*').order('created_at', { ascending: false }).limit(5);
-    if (error) {
-        console.error("Erro ao buscar informações do ADM:", error);
-        return;
-    }
+    if (error) { console.error("Erro ao buscar informações do ADM:", error); return; }
     if (!adminInfoList) return;
     if (!data || data.length === 0) {
         adminInfoList.innerHTML = '<li><p>Nenhuma informação no momento.</p></li>';
         return;
     }
-
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
     data.sort((a, b) => {
         const parseDate = (dateStr) => dateStr ? new Date(dateStr + 'T00:00:00') : null;
         const dateA = parseDate(a.due_date);
@@ -250,7 +246,6 @@ async function renderAdminInfo() {
         if (isAUpcomingExam && isBUpcomingExam) return dateA - dateB;
         return 0;
     });
-
     adminInfoList.innerHTML = '';
     data.forEach(item => {
         const li = document.createElement('li');
@@ -276,18 +271,9 @@ function renderDashboard() {
 
     const today = new Date();
     today.setHours(0,0,0,0);
-    
-    const scheduled = (userState.missions || [])
-        .map(m => ({ date: new Date(m.date + 'T00:00:00'), text: m.name, type: 'Serviço' }));
-
-    const dailies = (userState.quests || [])
-        .filter(q => !q.completed)
-        .map(q => ({ date: today, text: q.text, type: 'Diária' }));
-
-    const allTasks = [...scheduled, ...dailies]
-        .filter(task => task.date >= today)
-        .sort((a, b) => a.date - b.date)
-        .slice(0, 4);
+    const scheduled = (userState.missions || []).map(m => ({ date: new Date(m.date + 'T00:00:00'), text: m.name, type: 'Serviço' }));
+    const dailies = (userState.quests || []).filter(q => !q.completed).map(q => ({ date: today, text: q.text, type: 'Diária' }));
+    const allTasks = [...scheduled, ...dailies].filter(task => task.date >= today).sort((a, b) => a.date - b.date).slice(0, 4);
     
     dashboardMissionsList.innerHTML = '';
     if (allTasks.length > 0) {
@@ -316,16 +302,12 @@ function updateTimeProgress() {
     const today = new Date();
     const graduationDate = new Date('2026-05-26T00:00:00');
     const totalDays = 365;
-
     const daysLeft = Math.ceil((graduationDate - today) / (1000 * 60 * 60 * 24));
     daysLeftEl.textContent = daysLeft > 0 ? daysLeft : 0;
-
     const daysPassed = Math.max(0, Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24)));
     const percentage = Math.min(100, (daysPassed / totalDays) * 100);
-    
     courseProgressBar.style.width = `${percentage}%`;
     coursePercentageEl.innerHTML = `<span>${percentage.toFixed(1)}%</span> do curso concluído`;
-    
     checkAchievements('time_update', { percentage, days_left: daysLeft });
 }
 
@@ -349,11 +331,9 @@ async function updateGradesAverage(save = true) {
     let average = 0;
     const filledCount = grades.length;
     const totalCount = subjectList.length;
-
     if (filledCount > 0) {
         average = grades.reduce((sum, g) => sum + g, 0) / filledCount;
     }
-
     gradesProgressCounter.innerHTML = `<span>${filledCount}</span> / ${totalCount} matérias preenchidas (${((filledCount / totalCount) * 100).toFixed(1)}%)`;
     avgGradeEl.innerHTML = `MÉDIA GERAL: <span>${average > 0 ? average.toFixed(2) : 'N/A'}</span>`;
     checkAchievements('avg_update', average);
@@ -385,9 +365,7 @@ function handleQTSInput(e) {
 }
 
 function initCalendar() {
-    if (calendarInstance) {
-        calendarInstance.destroy();
-    }
+    if (calendarInstance) { calendarInstance.destroy(); }
     calendarInstance = new FullCalendar.Calendar(calendarContainer, {
         locale: 'pt-br',
         initialView: 'dayGridMonth',
@@ -595,6 +573,24 @@ function handleLinkInteraction(e) {
     }
 }
 
+function updateMajorCounter() {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    let daysWithoutPunishment;
+    const { data: { user } } = sb.auth.getUser().then(async user => {
+        if (!user || !user.data.user) return;
+        const { data } = await sb.from('profiles').select('last_punishment_date').eq('id', user.data.user.id).single();
+        if (data && data.last_punishment_date) {
+            const lastPunishment = new Date(data.last_punishment_date);
+            daysWithoutPunishment = Math.floor((today - lastPunishment) / (1000 * 60 * 60 * 24));
+        } else {
+            daysWithoutPunishment = Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24));
+        }
+        majorDaysCounter.textContent = daysWithoutPunishment >= 0 ? daysWithoutPunishment : 0;
+        checkAchievements('time_update', { days_without_punishment: daysWithoutPunishment });
+    });
+}
+
 async function renderDisciplinePage() {
     if (userState.moral === undefined) userState.moral = 100;
     moralBar.style.width = `${userState.moral}%`;
@@ -608,7 +604,6 @@ async function renderDisciplinePage() {
     
     const { data, error } = await sb.from('discipline_log').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
     if (error) { console.error('Erro ao buscar histórico disciplinar:', error); return; }
-
     disciplineLogList.innerHTML = '';
     if (data.length > 0) {
         data.forEach(log => {
@@ -658,24 +653,6 @@ async function handleDisciplineEvent(e) {
     saveUserData();
     renderDisciplinePage();
     renderDashboard();
-}
-
-function updateMajorCounter() {
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    let daysWithoutPunishment;
-    const { data: { user } } = sb.auth.getUser().then(async user => {
-        if (!user || !user.data.user) return;
-        const { data } = await sb.from('profiles').select('last_punishment_date').eq('id', user.data.user.id).single();
-        if (data && data.last_punishment_date) {
-            const lastPunishment = new Date(data.last_punishment_date);
-            daysWithoutPunishment = Math.floor((today - lastPunishment) / (1000 * 60 * 60 * 24));
-        } else {
-            daysWithoutPunishment = Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24));
-        }
-        majorDaysCounter.textContent = daysWithoutPunishment >= 0 ? daysWithoutPunishment : 0;
-        checkAchievements('time_update', { days_without_punishment: daysWithoutPunishment });
-    });
 }
 
 // =======================================================
