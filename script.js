@@ -39,10 +39,6 @@ const disciplineEventType = document.getElementById('discipline-event-type');
 const disciplineReasonInput = document.getElementById('discipline-reason-input');
 const disciplineLogList = document.getElementById('discipline-log-list');
 const disciplineGradeDisplay = document.getElementById('discipline-grade-display');
-const disciplineSeiInput = document.getElementById('discipline-sei-input');
-const disciplineCompletionDateInput = document.getElementById('discipline-completion-date-input');
-const moralBar = document.getElementById('moral-bar');
-const moralText = document.getElementById('moral-text');
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -115,13 +111,14 @@ async function handleLogin() {
 async function handleLogout() { await sb.auth.signOut(); window.location.reload(); }
 
 async function loadUserData(user) {
-    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking, last_punishment_date').eq('id', user.id).single();
+    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking, disciplinary_grade, last_punishment_date').eq('id', user.id).single();
     if (error) {
         console.error("Erro ao carregar dados do usuário:", error);
         return;
     }
     
     rankingToggle.checked = data.show_in_ranking;
+    userState.disciplinary_grade = data.disciplinary_grade;
     userState.last_punishment_date = data.last_punishment_date;
 
     if (data && data.user_data) {
@@ -150,7 +147,6 @@ async function loadUserData(user) {
     if (!userState.quests) userState.quests = [];
     if (!userState.achievements) userState.achievements = [];
     if (!userState.grades || Object.keys(userState.grades).length === 0) userState.grades = Object.fromEntries(subjectList.map(s => [s, 0]));
-    if (userState.moral === undefined) userState.moral = 100;
 }
 async function saveUserData() {
     const { data: { user } } = await sb.auth.getUser();
@@ -576,7 +572,10 @@ function handleLinkInteraction(e) {
 
 async function renderDisciplinePage() {
     disciplineGradeDisplay.textContent = (userState.disciplinary_grade !== undefined ? userState.disciplinary_grade : 10.0).toFixed(2);
-    const { data, error } = await sb.from('discipline_log').select('*').order('created_at', { ascending: false });
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    
+    const { data, error } = await sb.from('discipline_log').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
     if (error) { console.error('Erro ao buscar histórico disciplinar:', error); return; }
     disciplineLogList.innerHTML = '';
     if (data.length > 0) {
