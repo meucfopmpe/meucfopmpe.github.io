@@ -34,13 +34,14 @@ const adminInfoList = document.getElementById('admin-info-list');
 const saveGradesButton = document.getElementById('save-grades-button'), gradeSearchInput = document.getElementById('grade-search-input');
 const gradesProgressCounter = document.getElementById('grades-progress-counter');
 const majorDaysCounter = document.getElementById('major-days-counter');
-const disciplineGradeDisplay = document.getElementById('discipline-grade-display');
 const addDisciplineEventForm = document.getElementById('add-discipline-event-form');
 const disciplineEventType = document.getElementById('discipline-event-type');
 const disciplineReasonInput = document.getElementById('discipline-reason-input');
 const disciplineLogList = document.getElementById('discipline-log-list');
 const disciplineSeiInput = document.getElementById('discipline-sei-input');
 const disciplineCompletionDateInput = document.getElementById('discipline-completion-date-input');
+const moralBar = document.getElementById('moral-bar');
+const moralText = document.getElementById('moral-text');
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -73,12 +74,12 @@ const achievementsData = {
     PROGRESS_25: { name: "Início da Jornada", icon: "🌄", description: "Conclua 25% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 25 },
     PROGRESS_50: { name: "Meio Caminho", icon: "🏃", description: "Conclua 50% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 50 },
     PROGRESS_75: { name: "Reta Final", icon: "🏁", description: "Conclua 75% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 75 },
-    TOP_10: { name: "Top 10", icon: "🏅", description: "Fique entre os 10 melhores no ranking (funcionalidade futura).", condition: () => false },
-    TOP_3: { name: "Pódio", icon: "🥉", description: "Fique entre os 3 melhores no ranking (funcionalidade futura).", condition: () => false },
-    FIRST_PLACE: { name: "Xerife", icon: "🥇", description: "Alcance o 1º lugar no ranking (funcionalidade futura).", condition: () => false },
-    ALL_ACHIEVEMENTS: { name: "Monarca", icon: "👑", description: "Desbloqueie todas as outras conquistas.", condition: (state) => (state.achievements || []).length >= Object.keys(achievementsData).length - 1 },
-    NIGHT_OWL: { name: "Coruja", icon: "🦉", description: "Agende um serviço que comece após as 18h.", condition: (state, type, data) => type === 'add_mission' && new Date(data.date).getUTCHours() >= 18 },
-    COURSE_COMPLETE: { name: "Oficial Formado", icon: "🎓", description: "Conclua os 365 dias do curso.", condition: (state, type, data) => type === 'time_update' && data.days_left <= 0 },
+    SOBREVIVENTE: { name: "Sobrevivente", icon: "😅", description: "Passe 7 dias seguidos sem ser notado(a).", condition: (state, type, data) => type === 'time_update' && data.days_without_punishment >= 7 },
+    FANTASMA: { name: "Fantasma", icon: "👻", description: "Passe 15 dias seguidos sem ser notado(a).", condition: (state, type, data) => type === 'time_update' && data.days_without_punishment >= 15 },
+    INTOCAVEL: { name: "Intocável", icon: "🛡️", description: "Passe 30 dias seguidos sem ser notado(a).", condition: (state, type, data) => type === 'time_update' && data.days_without_punishment >= 30 },
+    MOITA: { name: "Moita", icon: "🌳", description: "Passe 60 dias seguidos sem ser notado(a).", condition: (state, type, data) => type === 'time_update' && data.days_without_punishment >= 60 },
+    FIRST_ELOGIO: { name: "Reconhecimento", icon: "🌟", description: "Receba seu primeiro elogio.", condition: (state, type) => type === 'add_elogio' },
+    RESILIENTE: { name: "Resiliente", icon: "💪", description: "Cumpra uma punição de extraclasse.", condition: (state, type) => type === 'complete_extraclasse' },
 };
 
 // =======================================================
@@ -95,6 +96,10 @@ async function handleSignUp() {
     if (authError) { signupMessage.textContent = "Erro: Numérica já pode estar em uso."; signupMessage.className = 'error-message'; return; }
     
     if (authData.user) {
+        // Define a data da última punição como a data do cadastro para iniciar o contador em 0.
+        const todayStr = new Date().toISOString().split('T')[0];
+        await sb.from('profiles').update({ last_punishment_date: todayStr }).eq('id', authData.user.id);
+        
         signupMessage.textContent = 'Sucesso! Redirecionando para login...';
         setTimeout(() => { signupContainer.classList.add('hidden'); loginContainer.classList.remove('hidden'); signupMessage.textContent = ''; }, 2000);
     }
@@ -110,14 +115,13 @@ async function handleLogin() {
 async function handleLogout() { await sb.auth.signOut(); window.location.reload(); }
 
 async function loadUserData(user) {
-    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking, disciplinary_grade, last_punishment_date').eq('id', user.id).single();
+    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking, last_punishment_date').eq('id', user.id).single();
     if (error) {
         console.error("Erro ao carregar dados do usuário:", error);
         return;
     }
     
     rankingToggle.checked = data.show_in_ranking;
-    userState.disciplinary_grade = data.disciplinary_grade;
     userState.last_punishment_date = data.last_punishment_date;
 
     if (data && data.user_data) {
@@ -135,7 +139,7 @@ async function loadUserData(user) {
         const initialXp = daysPassed * 15;
         userState = {
             grades: Object.fromEntries(subjectList.map(s => [s, 0])),
-            schedule: {}, achievements: [], missions: [], reminders: [], links: [], quests: [], xp: initialXp, avatar: ''
+            schedule: {}, achievements: [], missions: [], reminders: [], links: [], quests: [], xp: initialXp, avatar: '', moral: 100
         };
         await saveUserData();
     }
@@ -146,12 +150,13 @@ async function loadUserData(user) {
     if (!userState.quests) userState.quests = [];
     if (!userState.achievements) userState.achievements = [];
     if (!userState.grades || Object.keys(userState.grades).length === 0) userState.grades = Object.fromEntries(subjectList.map(s => [s, 0]));
+    if (userState.moral === undefined) userState.moral = 100;
 }
 async function saveUserData() {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return;
-    const { avatar, ...userDataToSave } = userState;
-    const { error } = await sb.from('profiles').update({ user_data: userDataToSave, avatar_url: avatar }).eq('id', user.id);
+    const { avatar, ...userDataToSave } = userState; // Desestrutura para não salvar a URL do avatar dentro do JSON
+    const { error } = await sb.from('profiles').update({ user_data: userDataToSave }).eq('id', user.id);
     if (error) console.error("Erro ao salvar dados do usuário:", error);
 }
 
@@ -223,19 +228,14 @@ async function loadDashboardData() {
 
 async function renderAdminInfo() {
     const { data, error } = await sb.from('global_info').select('*').order('created_at', { ascending: false }).limit(5);
-    if (error) {
-        console.error("Erro ao buscar informações do ADM:", error);
-        return;
-    }
+    if (error) { console.error("Erro ao buscar informações do ADM:", error); return; }
     if (!adminInfoList) return;
     if (!data || data.length === 0) {
         adminInfoList.innerHTML = '<li><p>Nenhuma informação no momento.</p></li>';
         return;
     }
-
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
     data.sort((a, b) => {
         const parseDate = (dateStr) => dateStr ? new Date(dateStr + 'T00:00:00') : null;
         const dateA = parseDate(a.due_date);
@@ -247,7 +247,6 @@ async function renderAdminInfo() {
         if (isAUpcomingExam && isBUpcomingExam) return dateA - dateB;
         return 0;
     });
-
     adminInfoList.innerHTML = '';
     data.forEach(item => {
         const li = document.createElement('li');
@@ -259,7 +258,6 @@ async function renderAdminInfo() {
         adminInfoList.appendChild(li);
     });
 }
-
 
 function renderDashboard() {
     updateTimeProgress();
@@ -273,18 +271,9 @@ function renderDashboard() {
 
     const today = new Date();
     today.setHours(0,0,0,0);
-    
-    const scheduled = (userState.missions || [])
-        .map(m => ({ date: new Date(m.date + 'T00:00:00'), text: m.name, type: 'Serviço' }));
-
-    const dailies = (userState.quests || [])
-        .filter(q => !q.completed)
-        .map(q => ({ date: today, text: q.text, type: 'Diária' }));
-
-    const allTasks = [...scheduled, ...dailies]
-        .filter(task => task.date >= today)
-        .sort((a, b) => a.date - b.date)
-        .slice(0, 4);
+    const scheduled = (userState.missions || []).map(m => ({ date: new Date(m.date + 'T00:00:00'), text: m.name, type: 'Serviço' }));
+    const dailies = (userState.quests || []).filter(q => !q.completed).map(q => ({ date: today, text: q.text, type: 'Diária' }));
+    const allTasks = [...scheduled, ...dailies].filter(task => task.date >= today).sort((a, b) => a.date - b.date).slice(0, 4);
     
     dashboardMissionsList.innerHTML = '';
     if (allTasks.length > 0) {
@@ -313,16 +302,12 @@ function updateTimeProgress() {
     const today = new Date();
     const graduationDate = new Date('2026-05-26T00:00:00');
     const totalDays = 365;
-
     const daysLeft = Math.ceil((graduationDate - today) / (1000 * 60 * 60 * 24));
     daysLeftEl.textContent = daysLeft > 0 ? daysLeft : 0;
-
     const daysPassed = Math.max(0, Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24)));
     const percentage = Math.min(100, (daysPassed / totalDays) * 100);
-    
     courseProgressBar.style.width = `${percentage}%`;
     coursePercentageEl.innerHTML = `<span>${percentage.toFixed(1)}%</span> do curso concluído`;
-    
     checkAchievements('time_update', { percentage, days_left: daysLeft });
 }
 
@@ -332,7 +317,7 @@ function renderGrades() {
         const value = userState.grades[subject] || 0;
         gradesContainer.innerHTML += `<div class="grade-item"><span class="grade-item-label" title="${subject}">${subject}</span><input type="number" class="grade-item-input" data-subject="${subject}" value="${value}" min="0" max="10" step="0.1"></div>`;
     });
-    updateGradesAverage();
+    updateGradesAverage(false); // Não salva, apenas calcula e renderiza
 }
 function handleGradeChange(e) {
     const subject = e.target.dataset.subject;
@@ -341,22 +326,23 @@ function handleGradeChange(e) {
         userState.grades[subject] = Math.max(0, Math.min(10, nota));
     }
 }
-async function updateGradesAverage() {
+async function updateGradesAverage(save = true) {
     const grades = Object.values(userState.grades).filter(g => typeof g === 'number' && g > 0);
     let average = 0;
     const filledCount = grades.length;
     const totalCount = subjectList.length;
-
     if (filledCount > 0) {
         average = grades.reduce((sum, g) => sum + g, 0) / filledCount;
     }
-
     gradesProgressCounter.innerHTML = `<span>${filledCount}</span> / ${totalCount} matérias preenchidas (${((filledCount / totalCount) * 100).toFixed(1)}%)`;
     avgGradeEl.innerHTML = `MÉDIA GERAL: <span>${average > 0 ? average.toFixed(2) : 'N/A'}</span>`;
     checkAchievements('avg_update', average);
     
-    const { data: { user } } = await sb.auth.getUser();
-    if(user) await sb.from('profiles').update({ grades_average: average }).eq('id', user.id);
+    if(save){
+        await saveUserData();
+        const { data: { user } } = await sb.auth.getUser();
+        if(user) await sb.from('profiles').update({ grades_average: average }).eq('id', user.id);
+    }
 }
 
 function renderQTSSchedule() {
@@ -589,14 +575,28 @@ function handleLinkInteraction(e) {
     }
 }
 
-async function renderDisciplinePage() {
-    const moral = userState.moral || 100;
-    moralBar.style.width = `${moral}%`;
-    moralText.textContent = `${moral.toFixed(0)}%`;
-    if (moral < 30) moralBar.style.backgroundColor = 'var(--sl-error)';
-    else if (moral < 70) moralBar.style.backgroundColor = '#FFD700';
-    else moralBar.style.backgroundColor = 'var(--sl-success)';
+function updateMajorCounter() {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    let daysWithoutPunishment;
+    if (userState.last_punishment_date) {
+        const lastPunishment = new Date(userState.last_punishment_date);
+        daysWithoutPunishment = Math.floor((today - lastPunishment) / (1000 * 60 * 60 * 24));
+    } else {
+        daysWithoutPunishment = Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24));
+    }
+    majorDaysCounter.textContent = daysWithoutPunishment >= 0 ? daysWithoutPunishment : 0;
+    checkAchievements('time_update', { days_without_punishment: daysWithoutPunishment });
+}
 
+async function renderDisciplinePage() {
+    if (userState.moral === undefined) userState.moral = 100;
+    moralBar.style.width = `${userState.moral}%`;
+    moralText.textContent = `${userState.moral.toFixed(0)}%`;
+    if (userState.moral < 30) moralBar.style.backgroundColor = 'var(--sl-error)';
+    else if (userState.moral < 70) moralBar.style.backgroundColor = '#FFD700';
+    else moralBar.style.backgroundColor = 'var(--sl-success)';
+    
     const { data, error } = await sb.from('discipline_log').select('*').order('created_at', { ascending: false });
     if (error) { console.error('Erro ao buscar histórico disciplinar:', error); return; }
     disciplineLogList.innerHTML = '';
@@ -629,12 +629,13 @@ async function handleDisciplineEvent(e) {
     
     const points = { 'ELOGIO': 3, 'PUNIÇÃO_LEVE': -2, 'PUNIÇÃO_MEDIA': -3, 'PUNIÇÃO_GRAVE': -5, 'EXTRACLASSE': 0 };
     
-    if (!userState.moral) userState.moral = 100;
+    if (userState.moral === undefined) userState.moral = 100;
     userState.moral = Math.max(0, Math.min(100, userState.moral + points[eventType]));
     
     let updatePayload = {};
     if (eventType !== 'ELOGIO') {
         const todayStr = new Date().toISOString().split('T')[0];
+        userState.last_punishment_date = todayStr;
         updatePayload.last_punishment_date = todayStr;
     }
 
@@ -648,23 +649,6 @@ async function handleDisciplineEvent(e) {
     saveUserData();
     renderDisciplinePage();
     renderDashboard();
-}
-
-function updateMajorCounter() {
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    let daysWithoutPunishment;
-    const { data: profile } = sb.auth.getUser().then(async user => {
-        const { data } = await sb.from('profiles').select('last_punishment_date').eq('id', user.data.user.id).single();
-        if (data && data.last_punishment_date) {
-            const lastPunishment = new Date(data.last_punishment_date + 'T00:00:00');
-            daysWithoutPunishment = Math.floor((today - lastPunishment) / (1000 * 60 * 60 * 24));
-        } else {
-            daysWithoutPunishment = Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24));
-        }
-        majorDaysCounter.textContent = daysWithoutPunishment >= 0 ? daysWithoutPunishment : 0;
-        checkAchievements('time_update', { days_without_punishment: daysWithoutPunishment });
-    });
 }
 
 // =======================================================
@@ -717,7 +701,7 @@ document.addEventListener('DOMContentLoaded', () => {
             handleGradeChange({ target: input });
         });
         saveUserData().then(() => {
-            updateGradesAverage();
+            updateGradesAverage(true); // Agora salva a média
             saveGradesButton.textContent = 'Salvo!';
             setTimeout(() => { saveGradesButton.textContent = 'Salvar Alterações'; }, 1500);
         });
