@@ -38,8 +38,6 @@ const addDisciplineEventForm = document.getElementById('add-discipline-event-for
 const disciplineEventType = document.getElementById('discipline-event-type');
 const disciplineReasonInput = document.getElementById('discipline-reason-input');
 const disciplineLogList = document.getElementById('discipline-log-list');
-const disciplineSeiInput = document.getElementById('discipline-sei-input');
-const disciplineCompletionDateInput = document.getElementById('discipline-completion-date-input');
 const disciplineGradeDisplay = document.getElementById('discipline-grade-display');
 
 // =======================================================
@@ -573,24 +571,6 @@ function handleLinkInteraction(e) {
     }
 }
 
-function updateMajorCounter() {
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    let daysWithoutPunishment;
-    const { data: { user } } = sb.auth.getUser().then(async user => {
-        if (!user || !user.data.user) return;
-        const { data } = await sb.from('profiles').select('last_punishment_date').eq('id', user.data.user.id).single();
-        if (data && data.last_punishment_date) {
-            const lastPunishment = new Date(data.last_punishment_date);
-            daysWithoutPunishment = Math.floor((today - lastPunishment) / (1000 * 60 * 60 * 24));
-        } else {
-            daysWithoutPunishment = Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24));
-        }
-        majorDaysCounter.textContent = daysWithoutPunishment >= 0 ? daysWithoutPunishment : 0;
-        checkAchievements('time_update', { days_without_punishment: daysWithoutPunishment });
-    });
-}
-
 async function renderDisciplinePage() {
     if (userState.moral === undefined) userState.moral = 100;
     moralBar.style.width = `${userState.moral}%`;
@@ -653,6 +633,24 @@ async function handleDisciplineEvent(e) {
     saveUserData();
     renderDisciplinePage();
     renderDashboard();
+}
+
+async function updateMajorCounter() {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    let daysWithoutPunishment;
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    
+    const { data } = await sb.from('profiles').select('last_punishment_date').eq('id', user.id).single();
+    if (data && data.last_punishment_date) {
+        const lastPunishment = new Date(data.last_punishment_date);
+        daysWithoutPunishment = Math.floor((today - lastPunishment) / (1000 * 60 * 60 * 24));
+    } else {
+        daysWithoutPunishment = Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24));
+    }
+    majorDaysCounter.textContent = daysWithoutPunishment >= 0 ? daysWithoutPunishment : 0;
+    checkAchievements('time_update', { days_without_punishment: daysWithoutPunishment });
 }
 
 // =======================================================
