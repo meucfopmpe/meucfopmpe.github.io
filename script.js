@@ -74,12 +74,12 @@ const achievementsData = {
     PROGRESS_25: { name: "Início da Jornada", icon: "🌄", description: "Conclua 25% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 25 },
     PROGRESS_50: { name: "Meio Caminho", icon: "🏃", description: "Conclua 50% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 50 },
     PROGRESS_75: { name: "Reta Final", icon: "🏁", description: "Conclua 75% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 75 },
-    SOBREVIVENTE: { name: "Sobrevivente", icon: "😅", description: "Passe 7 dias seguidos sem ser notado(a).", condition: (state, type, data) => type === 'time_update' && data.days_without_punishment >= 7 },
-    FANTASMA: { name: "Fantasma", icon: "👻", description: "Passe 15 dias seguidos sem ser notado(a).", condition: (state, type, data) => type === 'time_update' && data.days_without_punishment >= 15 },
-    INTOCAVEL: { name: "Intocável", icon: "🛡️", description: "Passe 30 dias seguidos sem ser notado(a).", condition: (state, type, data) => type === 'time_update' && data.days_without_punishment >= 30 },
-    MOITA: { name: "Moita", icon: "🌳", description: "Passe 60 dias seguidos sem ser notado(a).", condition: (state, type, data) => type === 'time_update' && data.days_without_punishment >= 60 },
-    FIRST_ELOGIO: { name: "Reconhecimento", icon: "🌟", description: "Receba seu primeiro elogio.", condition: (state, type) => type === 'add_elogio' },
-    RESILIENTE: { name: "Resiliente", icon: "💪", description: "Cumpra uma punição de extraclasse.", condition: (state, type) => type === 'complete_extraclasse' },
+    TOP_10: { name: "Top 10", icon: "🏅", description: "Fique entre os 10 melhores no ranking (funcionalidade futura).", condition: () => false },
+    TOP_3: { name: "Pódio", icon: "🥉", description: "Fique entre os 3 melhores no ranking (funcionalidade futura).", condition: () => false },
+    FIRST_PLACE: { name: "Xerife", icon: "🥇", description: "Alcance o 1º lugar no ranking (funcionalidade futura).", condition: () => false },
+    ALL_ACHIEVEMENTS: { name: "Monarca", icon: "👑", description: "Desbloqueie todas as outras conquistas.", condition: (state) => (state.achievements || []).length >= Object.keys(achievementsData).length - 1 },
+    NIGHT_OWL: { name: "Coruja", icon: "🦉", description: "Agende um serviço que comece após as 18h.", condition: (state, type, data) => type === 'add_mission' && new Date(data.date).getUTCHours() >= 18 },
+    COURSE_COMPLETE: { name: "Oficial Formado", icon: "🎓", description: "Conclua os 365 dias do curso.", condition: (state, type, data) => type === 'time_update' && data.days_left <= 0 },
 };
 
 // =======================================================
@@ -96,10 +96,6 @@ async function handleSignUp() {
     if (authError) { signupMessage.textContent = "Erro: Numérica já pode estar em uso."; signupMessage.className = 'error-message'; return; }
     
     if (authData.user) {
-        // Define a data da última punição como a data do cadastro para iniciar o contador em 0.
-        const todayStr = new Date().toISOString().split('T')[0];
-        await sb.from('profiles').update({ last_punishment_date: todayStr }).eq('id', authData.user.id);
-        
         signupMessage.textContent = 'Sucesso! Redirecionando para login...';
         setTimeout(() => { signupContainer.classList.add('hidden'); loginContainer.classList.remove('hidden'); signupMessage.textContent = ''; }, 2000);
     }
@@ -155,7 +151,7 @@ async function loadUserData(user) {
 async function saveUserData() {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return;
-    const { avatar, ...userDataToSave } = userState; // Desestrutura para não salvar a URL do avatar dentro do JSON
+    const { ...userDataToSave } = userState; // Salva tudo, incluindo avatar, dentro do JSON
     const { error } = await sb.from('profiles').update({ user_data: userDataToSave }).eq('id', user.id);
     if (error) console.error("Erro ao salvar dados do usuário:", error);
 }
@@ -259,6 +255,7 @@ async function renderAdminInfo() {
     });
 }
 
+
 function renderDashboard() {
     updateTimeProgress();
     const level = Math.floor((userState.xp || 0) / 100) + 1;
@@ -317,7 +314,7 @@ function renderGrades() {
         const value = userState.grades[subject] || 0;
         gradesContainer.innerHTML += `<div class="grade-item"><span class="grade-item-label" title="${subject}">${subject}</span><input type="number" class="grade-item-input" data-subject="${subject}" value="${value}" min="0" max="10" step="0.1"></div>`;
     });
-    updateGradesAverage(false); // Não salva, apenas calcula e renderiza
+    updateGradesAverage(false);
 }
 function handleGradeChange(e) {
     const subject = e.target.dataset.subject;
@@ -365,9 +362,7 @@ function handleQTSInput(e) {
 }
 
 function initCalendar() {
-    if (calendarInstance) {
-        calendarInstance.destroy();
-    }
+    if (calendarInstance) { calendarInstance.destroy(); }
     calendarInstance = new FullCalendar.Calendar(calendarContainer, {
         locale: 'pt-br',
         initialView: 'dayGridMonth',
@@ -575,20 +570,6 @@ function handleLinkInteraction(e) {
     }
 }
 
-function updateMajorCounter() {
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    let daysWithoutPunishment;
-    if (userState.last_punishment_date) {
-        const lastPunishment = new Date(userState.last_punishment_date);
-        daysWithoutPunishment = Math.floor((today - lastPunishment) / (1000 * 60 * 60 * 24));
-    } else {
-        daysWithoutPunishment = Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24));
-    }
-    majorDaysCounter.textContent = daysWithoutPunishment >= 0 ? daysWithoutPunishment : 0;
-    checkAchievements('time_update', { days_without_punishment: daysWithoutPunishment });
-}
-
 async function renderDisciplinePage() {
     if (userState.moral === undefined) userState.moral = 100;
     moralBar.style.width = `${userState.moral}%`;
@@ -635,7 +616,6 @@ async function handleDisciplineEvent(e) {
     let updatePayload = {};
     if (eventType !== 'ELOGIO') {
         const todayStr = new Date().toISOString().split('T')[0];
-        userState.last_punishment_date = todayStr;
         updatePayload.last_punishment_date = todayStr;
     }
 
@@ -649,6 +629,23 @@ async function handleDisciplineEvent(e) {
     saveUserData();
     renderDisciplinePage();
     renderDashboard();
+}
+
+function updateMajorCounter() {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    let daysWithoutPunishment;
+    const { data: { user } } = sb.auth.getUser().then(async user => {
+        const { data } = await sb.from('profiles').select('last_punishment_date').eq('id', user.data.user.id).single();
+        if (data && data.last_punishment_date) {
+            const lastPunishment = new Date(data.last_punishment_date);
+            daysWithoutPunishment = Math.floor((today - lastPunishment) / (1000 * 60 * 60 * 24));
+        } else {
+            daysWithoutPunishment = Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24));
+        }
+        majorDaysCounter.textContent = daysWithoutPunishment >= 0 ? daysWithoutPunishment : 0;
+        checkAchievements('time_update', { days_without_punishment: daysWithoutPunishment });
+    });
 }
 
 // =======================================================
@@ -701,7 +698,7 @@ document.addEventListener('DOMContentLoaded', () => {
             handleGradeChange({ target: input });
         });
         saveUserData().then(() => {
-            updateGradesAverage(true); // Agora salva a média
+            updateGradesAverage(true);
             saveGradesButton.textContent = 'Salvo!';
             setTimeout(() => { saveGradesButton.textContent = 'Salvar Alterações'; }, 1500);
         });
