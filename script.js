@@ -330,9 +330,16 @@ function handleGradeChange(e) {
 async function updateGradesAverage() {
     const grades = Object.values(userState.grades).filter(g => typeof g === 'number' && g > 0);
     let average = 0;
-    if (grades.length > 0) {
-        average = grades.reduce((sum, g) => sum + g, 0) / grades.length;
+    const filledCount = grades.length;
+    const totalCount = subjectList.length;
+
+    if (filledCount > 0) {
+        average = grades.reduce((sum, g) => sum + g, 0) / filledCount;
     }
+
+    const percentage = (filledCount / totalCount) * 100;
+    gradesProgressCounter.innerHTML = `<span>${filledCount}</span> / ${totalCount} matérias preenchidas (${percentage.toFixed(1)}%)`;
+
     avgGradeEl.innerHTML = `MÉDIA GERAL: <span>${average > 0 ? average.toFixed(2) : 'N/A'}</span>`;
     checkAchievements('avg_update', average);
     
