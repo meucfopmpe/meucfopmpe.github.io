@@ -108,20 +108,25 @@
             <div id="page-discipline" class="page">
                 <div class="discipline-header">
                     <div class="discipline-grade-card">
-                        <h3>Sua Nota de Disciplina</h3>
-                        <div id="discipline-grade-display">10.00</div>
+                        <h3>Barra de Moral</h3>
+                        <div class="moral-bar-container">
+                            <div id="moral-bar" class="moral-bar"></div>
+                        </div>
+                        <div id="moral-text" class="moral-text">100%</div>
                     </div>
                     <div class="discipline-form-card">
                         <h3>Registrar Evento Disciplinar</h3>
                         <form id="add-discipline-event-form" class="inline-form">
                             <select id="discipline-event-type">
-                                <option value="ELOGIO">Elogio (+0.3)</option>
-                                <option value="PUNIÇÃO_LEVE">Punição Leve (-0.2)</option>
-                                <option value="PUNIÇÃO_MEDIA">Punição Média (-0.3)</option>
-                                <option value="PUNIÇÃO_GRAVE">Punição Grave (-0.5)</option>
-                                <option value="EXTRACLASSE">Extraclasse (não afeta nota)</option>
+                                <option value="ELOGIO">Elogio (+3%)</option>
+                                <option value="PUNIÇÃO_LEVE">Punição Leve (-2%)</option>
+                                <option value="PUNIÇÃO_MEDIA">Punição Média (-3%)</option>
+                                <option value="PUNIÇÃO_GRAVE">Punição Grave (-5%)</option>
+                                <option value="EXTRACLASSE">Extraclasse (não afeta moral)</option>
                             </select>
                             <input type="text" id="discipline-reason-input" placeholder="Motivo/Descrição (opcional)...">
+                            <input type="text" id="discipline-sei-input" placeholder="Nº do SEI (opcional)...">
+                            <input type="date" id="discipline-completion-date-input" class="hidden" title="Data de Cumprimento da Extraclasse">
                             <button type="submit">Registrar</button>
                         </form>
                     </div>
