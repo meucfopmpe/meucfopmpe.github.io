@@ -628,7 +628,7 @@ async function updateMajorCounter() {
     let daysWithoutPunishment;
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return;
-    
+
     const { data } = await sb.from('profiles').select('last_punishment_date').eq('id', user.id).single();
     if (data && data.last_punishment_date) {
         const lastPunishment = new Date(data.last_punishment_date);
