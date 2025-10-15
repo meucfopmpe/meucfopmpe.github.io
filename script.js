@@ -735,7 +735,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebarOverlay.classList.add('hidden');
     });
 
-    detailModalClose.addEventListener('click', () => detailModal.classList.add('hidden');
+    detailModalClose.addEventListener('click', () => detailModal.classList.add('hidden'));
     detailModal.addEventListener('click', (e) => { if (e.target === detailModal) detailModal.classList.add('hidden'); });
     achievementsGrid.addEventListener('click', (e) => {
         const achievementElement = e.target.closest('.achievement');
