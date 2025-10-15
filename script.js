@@ -151,7 +151,7 @@ async function loadUserData(user) {
 async function saveUserData() {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return;
-    const { avatar, ...userDataToSave } = userState;
+    const { ...userDataToSave } = userState;
     const { error } = await sb.from('profiles').update({ user_data: userDataToSave }).eq('id', user.id);
     if (error) console.error("Erro ao salvar dados do usuário:", error);
 }
@@ -219,7 +219,6 @@ async function loadDashboardData() {
     renderScheduledMissions();
     renderReminders();
     renderLinks();
-    renderDisciplinePage();
 }
 
 async function renderAdminInfo() {
