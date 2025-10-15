@@ -613,7 +613,7 @@ async function handleDisciplineEvent(e) {
     }
 
     await sb.from('profiles').update(updatePayload).eq('id', user.id);
-    await sb.from('discipline_log').insert({ event_type: eventType, reason: reason });
+    await sb.from('discipline_log').insert({ user_id: user.id, event_type: eventType, reason: reason });
 
     if (eventType === 'ELOGIO') checkAchievements('add_elogio');
 
