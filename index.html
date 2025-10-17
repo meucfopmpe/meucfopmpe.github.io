@@ -6,6 +6,7 @@
     <title>Plataforma do Cadete</title>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -82,7 +83,7 @@
                         </div>
                         <div class="course-progress-container"><div id="course-progress-bar" class="course-progress-bar"></div></div>
                         <div id="course-progress-text" class="course-progress-text">...% do curso concluído</div>
-                        <h4 class="sub-widget-title clickable" id="achievements-widget">Últimas Conquistas</h4>
+                        <h4 class="sub-widget-title clickable" id="achievements-widget-title">Últimas Conquistas</h4>
                         <div id="dashboard-achievements-list" class="dashboard-achievements clickable"></div>
                     </div>
                     <div class="widget">
@@ -135,6 +136,9 @@
                     <div id="grades-average" class="average-grade"></div>
                  </div>
                  <div id="grades-progress-counter" class="grades-progress"></div>
+                 <div class="chart-container">
+                    <canvas id="grades-chart"></canvas>
+                 </div>
                 <div id="grades-container"></div>
             </div>
 
