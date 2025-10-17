@@ -9,7 +9,7 @@ const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let userState = {}; // Objeto para guardar os dados do usuário logado
 let calendarInstance;
-let statsChartInstance;
+let editingLinkId = null; // Variável para controlar a edição de links
 
 // =======================================================
 // 2. ELEMENTOS DO DOM
@@ -18,10 +18,10 @@ const authPage = document.getElementById('auth-page'), appPage = document.getEle
 const loginContainer = document.getElementById('login-container'), loginButton = document.getElementById('login-button'), loginEmailInput = document.getElementById('login-email'), loginPasswordInput = document.getElementById('login-password'), loginError = document.getElementById('login-error');
 const signupContainer = document.getElementById('signup-container'), signupButton = document.getElementById('signup-button'), signupNameInput = document.getElementById('signup-name'), signupCourseNumberInput = document.getElementById('signup-course-number'), signupPlatoonInput = document.getElementById('signup-platoon'), signupPasswordInput = document.getElementById('signup-password'), signupMessage = document.getElementById('signup-message');
 const showSignupLink = document.getElementById('show-signup'), showLoginLink = document.getElementById('show-login');
-const logoutButton = document.getElementById('logout-button'), daysLeftEl = document.getElementById('days-left'), userNameSidebar = document.getElementById('user-name-sidebar'), userAvatarSidebar = document.getElementById('user-avatar-sidebar'), userAvatarHeader = document.getElementById('user-avatar-header'), avgGradeEl = document.getElementById('grades-average'), sidebarNav = document.getElementById('sidebar-nav'), pageTitleEl = document.getElementById('page-title');
+const logoutButton = document.getElementById('logout-button'), daysLeftEl = document.getElementById('days-left'), daysPassedEl = document.getElementById('days-passed'), userNameSidebar = document.getElementById('user-name-sidebar'), userAvatarSidebar = document.getElementById('user-avatar-sidebar'), userAvatarHeader = document.getElementById('user-avatar-header'), avgGradeEl = document.getElementById('grades-average'), sidebarNav = document.getElementById('sidebar-nav'), pageTitleEl = document.getElementById('page-title');
 const playerLevelTitle = document.getElementById('player-level-title'), xpBar = document.getElementById('xp-bar'), xpText = document.getElementById('xp-text'), coursePercentageEl = document.getElementById('course-progress-text'), courseProgressBar = document.getElementById('course-progress-bar');
 const gradesContainer = document.getElementById('grades-container'), qtsScheduleContainer = document.getElementById('qts-schedule-container'), calendarContainer = document.getElementById('calendar'), rankingList = document.getElementById('ranking-list'), achievementsGrid = document.getElementById('achievements-grid'), rankingToggle = document.getElementById('ranking-toggle');
-const dashboardMissionsList = document.getElementById('dashboard-missions-list'), dashboardAchievementsList = document.getElementById('dashboard-achievements-list');
+const dashboardMissionsList = document.getElementById('dashboard-missions-list'), dashboardAchievementsList = document.getElementById('dashboard-achievements-list'), dashboardRemindersList = document.getElementById('dashboard-reminders-list');
 const addMissionForm = document.getElementById('add-mission-form'), missionNameInput = document.getElementById('mission-name-input'), missionDateInput = document.getElementById('mission-date-input'), scheduledMissionsList = document.getElementById('scheduled-missions-list');
 const remindersList = document.getElementById('reminders-list'), reminderInput = document.getElementById('reminder-input'), addReminderButton = document.getElementById('add-reminder-button');
 const addLinkForm = document.getElementById('add-link-form'), linkTitleInput = document.getElementById('link-title-input'), linkValueInput = document.getElementById('link-value-input'), linkTypeInput = document.getElementById('link-type-input'), linksList = document.getElementById('links-list');
@@ -33,12 +33,6 @@ const detailModal = document.getElementById('detail-modal'), detailModalTitle = 
 const adminInfoList = document.getElementById('admin-info-list');
 const saveGradesButton = document.getElementById('save-grades-button'), gradeSearchInput = document.getElementById('grade-search-input');
 const gradesProgressCounter = document.getElementById('grades-progress-counter');
-const majorDaysCounter = document.getElementById('major-days-counter');
-const addDisciplineEventForm = document.getElementById('add-discipline-event-form');
-const disciplineEventType = document.getElementById('discipline-event-type');
-const disciplineReasonInput = document.getElementById('discipline-reason-input');
-const disciplineLogList = document.getElementById('discipline-log-list');
-const disciplineGradeDisplay = document.getElementById('discipline-grade-display');
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -47,36 +41,13 @@ const COURSE_START_DATE = new Date('2025-05-26T00:00:00');
 const subjectList = ["Sistema de Segurança Pública", "Teoria Geral da Administração", "Gestão Pública Geral Aplicada", "Gestão de Pessoas, Comando e Liderança", "Gestão de Logística, Orçamento e Finanças Públicas", "Fundamentos da Polícia Comunitária", "Psicologia Aplicada", "Análise Criminal e Estatística", "Qualidade do Atendimento aos Grupos Vulneráveis", "Direitos Humanos Aplicados à Atividade Policial Militar", "Gerenciamento de Crises", "Saúde Mental e Qualidade de Vida", "Treinamento Físico Militar I", "Treinamento Físico Militar II", "Gestão de Processos no Sistema Eletrônico", "Tecnologia da Informação e Comunicação", "Comunicação, Mídias Sociais e Cerimonial Militar", "Inteligência e Sistema de Informação", "Ética, Cidadania e Relações Interpessoais", "Ordem Unida I", "Ordem Unida II", "Instrução Geral", "Defesa Pessoal Policial I", "Defesa Pessoal Policial II", "Uso Diferenciado da Força", "Pronto Socorrismo", "Atendimento Pré-Hospitalar Tático", "Planejamento Operacional e Especializado", "Elaboração de Projetos e Captação de Recursos", "Planejamento Estratégico", "Gestão Por Resultados e Avaliação de Políticas Públicas", "Trabalho de Comando e Estado Maior", "Polícia Judiciária Militar", "Direito Administrativo Disciplinar Militar", "Direito Penal e Processual Penal Militar", "Legislação Policial Militar e Organizacional", "Procedimento em Ocorrência", "Economia Aplicada ao Setor Público", "História da PMPE", "Abordagem a Pessoas", "Abordagem a Veículos", "Abordagem a Edificações", "Patrulhamento Urbano", "Armamento e Munição", "Tiro Policial", "Tiro Defensivo (Método Giraldi)", "Ações Básicas de Apoio Aéreo", "Manobras Acadêmicas I", "Manobras Acadêmicas II", "Metodologia da Pesquisa Científica", "Teoria e Prática do Ensino", "Trabalho de Conclusão de Curso"];
 const qtsTimes = ['08:00-09:40', '10:00-11:40', '13:40-15:20', '15:40-17:20', '17:30-19:10'];
 const achievementsData = {
-    LEVEL_5: { name: "Recruta", icon: "🔰", description: "Alcance o Nível 5 de cadete.", condition: (state) => Math.floor((state.xp || 0) / 100) + 1 >= 5 },
-    LEVEL_10: { name: "Cadete Antigo", icon: "⭐", description: "Alcance o Nível 10 de cadete.", condition: (state) => Math.floor((state.xp || 0) / 100) + 1 >= 10 },
-    LEVEL_20: { name: "Veterano", icon: "🎖️", description: "Alcance o Nível 20 de cadete.", condition: (state) => Math.floor((state.xp || 0) / 100) + 1 >= 20 },
-    LEVEL_30: { name: "Elite", icon: "💀", description: "Alcance o Nível 30 de cadete.", condition: (state) => Math.floor((state.xp || 0) / 100) + 1 >= 30 },
-    LEVEL_50: { name: "Lendário", icon: "🏆", description: "Alcance o Nível 50 de cadete.", condition: (state) => Math.floor((state.xp || 0) / 100) + 1 >= 50 },
-    FIRST_QUEST: { name: "Primeira Missão", icon: "⚔️", description: "Complete sua primeira missão diária.", condition: (state, type) => type === 'complete_quest' },
-    HARD_QUEST: { name: "Desafiante", icon: "🔥", description: "Complete uma missão diária na dificuldade Difícil.", condition: (state, type, data) => type === 'complete_quest' && data.difficulty === 'hard' },
-    TEN_QUESTS: { name: "Combatente", icon: "💪", description: "Complete 10 missões diárias.", condition: (state) => (state.quests || []).filter(q => q.completed).length >= 10 },
-    FIFTY_QUESTS: { name: "Guerreiro", icon: "💥", description: "Complete 50 missões diárias.", condition: (state) => (state.quests || []).filter(q => q.completed).length >= 50 },
-    FIRST_GRADE: { name: "Estudante", icon: "📖", description: "Adicione sua primeira nota no sistema.", condition: (state, type) => type === 'add_grade' },
-    ALL_GRADES: { name: "Caxias", icon: "📚", description: "Preencha as notas de todas as matérias.", condition: (state) => subjectList.every(s => (state.grades[s] || 0) > 0) },
-    PERFECT_TEN: { name: "Nota Máxima", icon: "🔟", description: "Obtenha uma nota 10 em qualquer matéria.", condition: (state) => Object.values(state.grades).includes(10) },
-    AVG_EIGHT: { name: "Acima da Média", icon: "📈", description: "Alcance uma média geral de 8.0 ou mais.", condition: (state, type, avg) => type === 'avg_update' && avg >= 8 },
-    AVG_NINE_FIVE: { name: "Intelecto Superior", icon: "💡", description: "Alcance uma média geral de 9.5 ou mais.", condition: (state, type, avg) => type === 'avg_update' && avg >= 9.5 },
-    SCHEDULE_COMPLETE: { name: "Planejador", icon: "📋", description: "Preencha todos os horários do seu QTS.", condition: (state, type) => { if (type !== 'save_schedule') return false; const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex']; return days.every(d => qtsTimes.every(t => state.schedule?.[d]?.[t]?.length > 0)); }},
-    FIRST_SERVICE: { name: "Primeiro Serviço", icon: "🛡️", description: "Agende seu primeiro serviço no calendário.", condition: (state, type) => type === 'add_mission' },
-    FIVE_SERVICES: { name: "Sempre Presente", icon: "📅", description: "Agende 5 serviços diferentes.", condition: (state) => (state.missions || []).length >= 5 },
-    TEN_SERVICES: { name: "Pilar da Turma", icon: "🏛️", description: "Agende 10 serviços diferentes.", condition: (state) => (state.missions || []).length >= 10 },
-    FIRST_REMINDER: { name: "Organizado", icon: "📝", description: "Adicione seu primeiro lembrete.", condition: (state, type) => type === 'add_reminder' },
-    TEN_REMINDERS: { name: "Mestre dos Lembretes", icon: "🧠", description: "Crie 10 lembretes.", condition: (state) => (state.reminders || []).length >= 10 },
-    FIRST_LINK: { name: "Conectado", icon: "🔗", description: "Salve seu primeiro Link ou processo SEI.", condition: (state, type) => type === 'add_link' },
-    PROGRESS_25: { name: "Início da Jornada", icon: "🌄", description: "Conclua 25% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 25 },
-    PROGRESS_50: { name: "Meio Caminho", icon: "🏃", description: "Conclua 50% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 50 },
-    PROGRESS_75: { name: "Reta Final", icon: "🏁", description: "Conclua 75% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 75 },
-    TOP_10: { name: "Top 10", icon: "🏅", description: "Fique entre os 10 melhores no ranking (funcionalidade futura).", condition: () => false },
-    TOP_3: { name: "Pódio", icon: "🥉", description: "Fique entre os 3 melhores no ranking (funcionalidade futura).", condition: () => false },
-    FIRST_PLACE: { name: "Xerife", icon: "🥇", description: "Alcance o 1º lugar no ranking (funcionalidade futura).", condition: () => false },
-    ALL_ACHIEVEMENTS: { name: "Monarca", icon: "👑", description: "Desbloqueie todas as outras conquistas.", condition: (state) => (state.achievements || []).length >= Object.keys(achievementsData).length - 1 },
-    NIGHT_OWL: { name: "Coruja", icon: "🦉", description: "Agende um serviço que comece após as 18h.", condition: (state, type, data) => type === 'add_mission' && new Date(data.date).getUTCHours() >= 18 },
-    COURSE_COMPLETE: { name: "Oficial Formado", icon: "🎓", description: "Conclua os 365 dias do curso.", condition: (state, type, data) => type === 'time_update' && data.days_left <= 0 },
+    MAPOM: { name: "MAPOM", icon: "🗺️", description: "Concluir o Módulo de Adaptação Policial-Militar.", condition: (state) => false },
+    ESPADIM: { name: "Espadim", icon: "🗡️", description: "Receber o Espadim Tiradentes.", condition: (state) => false },
+    PROGRESS_50: { name: "Meio Caminho", icon: "🏃", description: "Concluir 50% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 50 },
+    HUNDRED_DAYS: { name: "Festa dos 100 Dias", icon: "🎉", description: "Celebrar a contagem regressiva de 100 dias para a formatura.", condition: (state, type, data) => type === 'time_update' && data.days_left <= 100 },
+    ECUMENICO: { name: "Culto Ecumênico", icon: "🙏", description: "Participar do culto ecumênico de formatura.", condition: (state) => false },
+    INSTRUCTION_END: { name: "Fim das Instruções", icon: "🏁", description: "Completar o último dia de instruções acadêmicas.", condition: (state) => false },
+    COURSE_COMPLETE: { name: "Oficial Formado", icon: "🎓", description: "Concluir os 365 dias do curso.", condition: (state, type, data) => type === 'time_update' && data.days_left <= 0 },
 };
 
 // =======================================================
@@ -93,9 +64,6 @@ async function handleSignUp() {
     if (authError) { signupMessage.textContent = "Erro: Numérica já pode estar em uso."; signupMessage.className = 'error-message'; return; }
     
     if (authData.user) {
-        const todayStr = new Date().toISOString().split('T')[0];
-        await sb.from('profiles').update({ last_punishment_date: todayStr }).eq('id', authData.user.id);
-        
         signupMessage.textContent = 'Sucesso! Redirecionando para login...';
         setTimeout(() => { signupContainer.classList.add('hidden'); loginContainer.classList.remove('hidden'); signupMessage.textContent = ''; }, 2000);
     }
@@ -111,25 +79,16 @@ async function handleLogin() {
 async function handleLogout() { await sb.auth.signOut(); window.location.reload(); }
 
 async function loadUserData(user) {
-    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking, disciplinary_grade, last_punishment_date').eq('id', user.id).single();
+    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking').eq('id', user.id).single();
     if (error) {
         console.error("Erro ao carregar dados do usuário:", error);
         return;
     }
     
     rankingToggle.checked = data.show_in_ranking;
-    userState.disciplinary_grade = data.disciplinary_grade;
-    userState.last_punishment_date = data.last_punishment_date;
 
     if (data && data.user_data) {
-        userState = { ...userState, ...data.user_data };
-        if (userState.avatar) {
-            userAvatarSidebar.src = userState.avatar;
-            userAvatarHeader.src = userState.avatar;
-        } else {
-            userAvatarSidebar.src = '';
-            userAvatarHeader.src = '';
-        }
+        userState = data.user_data;
     } else { 
         const today = new Date();
         const daysPassed = Math.max(0, Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24)));
@@ -140,6 +99,15 @@ async function loadUserData(user) {
         };
         await saveUserData();
     }
+
+    if (userState.avatar) {
+        userAvatarSidebar.src = userState.avatar;
+        userAvatarHeader.src = userState.avatar;
+    } else {
+        userAvatarSidebar.src = '';
+        userAvatarHeader.src = '';
+    }
+    
     if (!userState.xp) userState.xp = 0;
     if (!userState.missions) userState.missions = [];
     if (!userState.reminders) userState.reminders = [];
@@ -151,8 +119,7 @@ async function loadUserData(user) {
 async function saveUserData() {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return;
-    const { ...userDataToSave } = userState;
-    const { error } = await sb.from('profiles').update({ user_data: userDataToSave }).eq('id', user.id);
+    const { error } = await sb.from('profiles').update({ user_data: userState }).eq('id', user.id);
     if (error) console.error("Erro ao salvar dados do usuário:", error);
 }
 
@@ -209,8 +176,6 @@ async function loadDashboardData() {
     }
     
     await loadUserData(user);
-    
-    renderAdminInfo();
     renderDashboard();
 }
 
@@ -274,6 +239,16 @@ function renderDashboard() {
         dashboardMissionsList.innerHTML = '<li><span>Nenhuma missão futura agendada.</span></li>';
     }
 
+    dashboardRemindersList.innerHTML = '';
+    const last3Reminders = (userState.reminders || []).slice(0, 3);
+    if (last3Reminders.length > 0) {
+        last3Reminders.forEach(r => {
+            dashboardRemindersList.innerHTML += `<li><span>${r.text}</span></li>`;
+        });
+    } else {
+        dashboardRemindersList.innerHTML = '<li><span>Nenhum lembrete ativo.</span></li>';
+    }
+
     dashboardAchievementsList.innerHTML = '';
     const last3Achievements = (userState.achievements || []).slice(-3);
     if (last3Achievements.length > 0) {
@@ -284,7 +259,6 @@ function renderDashboard() {
     } else {
          dashboardAchievementsList.innerHTML = `<div class="achievement-icon locked" title="Nenhuma conquista desbloqueada">?</div>`;
     }
-    updateMajorCounter();
 }
 
 function updateTimeProgress() {
@@ -292,8 +266,9 @@ function updateTimeProgress() {
     const graduationDate = new Date('2026-05-26T00:00:00');
     const totalDays = 365;
     const daysLeft = Math.ceil((graduationDate - today) / (1000 * 60 * 60 * 24));
-    daysLeftEl.textContent = daysLeft > 0 ? daysLeft : 0;
     const daysPassed = Math.max(0, Math.floor((today - COURSE_START_DATE) / (1000 * 60 * 60 * 24)));
+    daysLeftEl.textContent = daysLeft > 0 ? daysLeft : 0;
+    daysPassedEl.textContent = daysPassed >= 0 ? daysPassed : 0;
     const percentage = Math.min(100, (daysPassed / totalDays) * 100);
     courseProgressBar.style.width = `${percentage}%`;
     coursePercentageEl.innerHTML = `<span>${percentage.toFixed(1)}%</span> do curso concluído`;
@@ -562,78 +537,6 @@ function handleLinkInteraction(e) {
     }
 }
 
-async function renderDisciplinePage() {
-    disciplineGradeDisplay.textContent = (userState.disciplinary_grade !== undefined ? userState.disciplinary_grade : 10.0).toFixed(2);
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) return;
-    
-    const { data, error } = await sb.from('discipline_log').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-    if (error) { console.error('Erro ao buscar histórico disciplinar:', error); return; }
-    disciplineLogList.innerHTML = '';
-    if (data.length > 0) {
-        data.forEach(log => {
-            const item = document.createElement('div');
-            item.className = 'list-item';
-            const eventDate = new Date(log.created_at).toLocaleDateString('pt-BR');
-            const eventName = log.event_type.replace(/_/g, ' ').replace('PUNIÇÃO', 'Punição');
-            item.innerHTML = `<div class="log-header"><span class="log-type-${log.event_type}">${eventName}</span><span>${eventDate}</span></div>${log.reason ? `<p class="log-reason">Motivo: ${log.reason}</p>` : ''}`;
-            disciplineLogList.appendChild(item);
-        });
-    } else {
-        disciplineLogList.innerHTML = '<p>Nenhum evento disciplinar registrado.</p>';
-    }
-}
-
-async function handleDisciplineEvent(e) {
-    e.preventDefault();
-    const eventType = disciplineEventType.value;
-    const reason = disciplineReasonInput.value.trim();
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) return;
-    
-    const points = { 'ELOGIO': 0.3, 'PUNIÇÃO_LEVE': -0.2, 'PUNIÇÃO_MEDIA': -0.3, 'PUNIÇÃO_GRAVE': -0.5, 'EXTRACLASSE': 0 };
-    
-    const currentGrade = userState.disciplinary_grade !== undefined ? userState.disciplinary_grade : 10.0;
-    const newGrade = Math.max(0, Math.min(10, currentGrade + points[eventType]));
-    userState.disciplinary_grade = newGrade;
-    
-    let updatePayload = { disciplinary_grade: newGrade };
-
-    if (eventType.includes('PUNIÇÃO') || eventType === 'EXTRACLASSE') {
-        const todayStr = new Date().toISOString().split('T')[0];
-        updatePayload.last_punishment_date = todayStr;
-    }
-
-    await sb.from('profiles').update(updatePayload).eq('id', user.id);
-    await sb.from('discipline_log').insert({ event_type: eventType, reason: reason });
-
-    if (eventType === 'ELOGIO') checkAchievements('add_elogio');
-
-    addDisciplineEventForm.reset();
-    renderDisciplinePage();
-    renderDashboard();
-}
-
-async function updateMajorCounter() {
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    let daysWithoutPunishment;
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) return;
-
-    const { data } = await sb.from('profiles').select('last_punishment_date').eq('id', user.id).single();
-    if (data && data.last_punishment_date) {
-        const lastPunishment = new Date(data.last_punishment_date);
-        daysWithoutPunishment = Math.floor((today - lastPunishment) / (1000 * 60 * 60 * 24));
-    } else {
-        const todayStr = new Date().toISOString().split('T')[0];
-        await sb.from('profiles').update({ last_punishment_date: todayStr }).eq('id', user.id);
-        daysWithoutPunishment = 0;
-    }
-    majorDaysCounter.textContent = daysWithoutPunishment >= 0 ? daysWithoutPunishment : 0;
-    checkAchievements('time_update', { days_without_punishment: daysWithoutPunishment });
-}
-
 // =======================================================
 // 6. CONTROLE DE INTERFACE E EVENT LISTENERS
 // =======================================================
@@ -655,7 +558,6 @@ function handlePageNavigation(e) {
     pageTitleEl.textContent = e.target.textContent;
     if (targetPageId === 'page-calendar') initCalendar();
     if (targetPageId === 'page-ranking') renderRanking();
-    if (targetPageId === 'page-discipline') renderDisciplinePage();
     if (window.innerWidth <= 768) {
         sidebar.classList.remove('open');
         sidebarOverlay.classList.add('hidden');
@@ -746,5 +648,4 @@ document.addEventListener('DOMContentLoaded', () => {
         const { error } = await sb.from('profiles').update({ show_in_ranking: rankingToggle.checked }).eq('id', user.id);
         if (error) alert("Não foi possível salvar sua preferência de privacidade.");
     });
-    addDisciplineEventForm.addEventListener('submit', handleDisciplineEvent);
 });
