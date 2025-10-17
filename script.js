@@ -102,7 +102,6 @@ async function loadUserData(user) {
     }
     
     rankingToggle.checked = userState.show_in_ranking !== false;
-
     if (userState.avatar) {
         userAvatarSidebar.src = userState.avatar;
         userAvatarHeader.src = userState.avatar;
@@ -204,7 +203,6 @@ async function renderAdminInfo() {
     });
 }
 
-
 function renderDashboard() {
     updateTimeProgress();
     const level = Math.floor((userState.xp || 0) / 100) + 1;
@@ -302,6 +300,7 @@ async function updateGradesAverage(save = true) {
         if(user) await sb.from('profiles').update({ grades_average: average }).eq('id', user.id);
     }
 }
+
 function renderGradesChart() {
     const ctx = document.getElementById('grades-chart').getContext('2d');
     const gradesWithValues = Object.entries(userState.grades).filter(([, score]) => score > 0);
@@ -329,19 +328,10 @@ function renderGradesChart() {
                 y: {
                     beginAtZero: true,
                     max: 10,
-                    ticks: { 
-                        color: '#8A94B6',
-                        stepSize: 2 // Ajuda a definir os intervalos no eixo
-                    },
-                    grid: {
-                        color: 'rgba(57, 66, 105, 0.5)'
-                    }
+                    ticks: { color: '#8A94B6' }
                 },
                 x: {
-                    ticks: { color: '#8A94B6' },
-                    grid: {
-                        color: 'rgba(57, 66, 105, 0.2)' // Cor das linhas de grade do eixo X (mais sutil)
-                    }
+                    ticks: { color: '#8A94B6' }
                 }
             },
             plugins: {
@@ -657,6 +647,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         saveUserData().then(() => {
             updateGradesAverage(true);
+            renderGradesChart();
             saveGradesButton.textContent = 'Salvo!';
             setTimeout(() => { saveGradesButton.textContent = 'Salvar Alterações'; }, 1500);
         });
