@@ -28,6 +28,7 @@ const remindersList = document.getElementById('reminders-list'), reminderInput =
 const addLinkForm = document.getElementById('add-link-form'), linkTitleInput = document.getElementById('link-title-input'), linkValueInput = document.getElementById('link-value-input'), linkTypeInput = document.getElementById('link-type-input'), linksList = document.getElementById('links-list');
 const uploadAvatarButton = document.getElementById('upload-avatar-button'), uploadAvatarInput = document.getElementById('upload-avatar-input');
 const addQuestForm = document.getElementById('add-quest-form'), questTextInput = document.getElementById('quest-text-input'), questDifficultySelect = document.getElementById('quest-difficulty-select'), questsList = document.getElementById('quests-list'), clearCompletedQuestsButton = document.getElementById('clear-completed-quests-button');
+const achievementsWidget = document.getElementById('achievements-widget');
 const achievementsModal = document.getElementById('achievements-modal'), achievementsModalClose = document.getElementById('achievements-modal-close');
 const hamburgerButton = document.getElementById('hamburger-button'), sidebar = document.querySelector('.sidebar'), sidebarOverlay = document.getElementById('sidebar-overlay');
 const detailModal = document.getElementById('detail-modal'), detailModalTitle = document.getElementById('detail-modal-title'), detailModalBody = document.getElementById('detail-modal-body'), detailModalClose = document.getElementById('detail-modal-close');
@@ -101,6 +102,7 @@ async function loadUserData(user) {
     }
     
     rankingToggle.checked = userState.show_in_ranking !== false;
+
     if (userState.avatar) {
         userAvatarSidebar.src = userState.avatar;
         userAvatarHeader.src = userState.avatar;
@@ -339,7 +341,7 @@ function renderGradesChart() {
                     callbacks: {
                         title: function(context) {
                             const index = context[0].dataIndex;
-                            return gradesWithValues[index][0]; // Mostra o nome completo da matéria no tooltip
+                            return gradesWithValues[index][0];
                         }
                     }
                 }
@@ -671,11 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
     questsList.addEventListener('change', handleQuestInteraction);
     clearCompletedQuestsButton.addEventListener('click', clearCompletedQuests);
     
-    document.getElementById('achievements-widget-title').addEventListener('click', () => {
-        renderAchievements();
-        achievementsModal.classList.remove('hidden');
-    });
-    document.getElementById('dashboard-achievements-list').addEventListener('click', () => {
+    achievementsWidget.addEventListener('click', () => {
         renderAchievements();
         achievementsModal.classList.remove('hidden');
     });
