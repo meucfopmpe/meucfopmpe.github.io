@@ -170,7 +170,6 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
 .modal-close-button { position: absolute; top: 10px; right: 15px; color: var(--sl-text-secondary); background: none; border: none; font-size: 2.5em; line-height: 1; cursor: pointer; width: auto; }
 .clickable { cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; }
 .clickable:hover { transform: translateY(-5px); box-shadow: 0 5px 25px var(--sl-glow); }
-#dashboard-achievements-list.clickable { padding: 10px; border-radius: 8px; margin-top: 10px; }
 
 /* --- MEDIA QUERY PARA CELULARES --- */
 @media (max-width: 768px) {
