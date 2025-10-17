@@ -28,7 +28,6 @@ const remindersList = document.getElementById('reminders-list'), reminderInput =
 const addLinkForm = document.getElementById('add-link-form'), linkTitleInput = document.getElementById('link-title-input'), linkValueInput = document.getElementById('link-value-input'), linkTypeInput = document.getElementById('link-type-input'), linksList = document.getElementById('links-list');
 const uploadAvatarButton = document.getElementById('upload-avatar-button'), uploadAvatarInput = document.getElementById('upload-avatar-input');
 const addQuestForm = document.getElementById('add-quest-form'), questTextInput = document.getElementById('quest-text-input'), questDifficultySelect = document.getElementById('quest-difficulty-select'), questsList = document.getElementById('quests-list'), clearCompletedQuestsButton = document.getElementById('clear-completed-quests-button');
-const achievementsWidgetTitle = document.getElementById('achievements-widget-title');
 const achievementsModal = document.getElementById('achievements-modal'), achievementsModalClose = document.getElementById('achievements-modal-close');
 const hamburgerButton = document.getElementById('hamburger-button'), sidebar = document.querySelector('.sidebar'), sidebarOverlay = document.getElementById('sidebar-overlay');
 const detailModal = document.getElementById('detail-modal'), detailModalTitle = document.getElementById('detail-modal-title'), detailModalBody = document.getElementById('detail-modal-body'), detailModalClose = document.getElementById('detail-modal-close');
@@ -44,14 +43,14 @@ const subjectList = ["Sistema de Segurança Pública", "Teoria Geral da Administ
 const qtsTimes = ['08:00-09:40', '10:00-11:40', '13:40-15:20', '15:40-17:20', '17:30-19:10'];
 const achievementsData = {
     ASP26: { name: "Aspirante 2026", icon: "⭐", description: "Fazer parte da turma de Aspirantes de 2026.", condition: () => true },
-    MAPOM: { name: "MAPOM", icon: "🗺️", description: "Concluir o Módulo de Adaptação Policial-Militar.", condition: (state) => false },
-    ESPADIM: { name: "Espadim", icon: "🗡️", description: "Receber o Espadim Tiradentes.", condition: (state) => false },
+    MAPOM: { name: "MAPOM", icon: "🗺️", description: "Concluir o Módulo de Adaptação Policial-Militar.", condition: () => false },
+    ESPADIM: { name: "Espadim", icon: "🗡️", description: "Receber o Espadim Tiradentes.", condition: () => false },
     PROGRESS_50: { name: "50% do Curso", icon: "🏃", description: "Concluir 50% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 50 },
     HUNDRED_DAYS: { name: "Festa dos 100 Dias", icon: "🎉", description: "Celebrar a contagem regressiva de 100 dias para a formatura.", condition: (state, type, data) => type === 'time_update' && data.days_left <= 100 },
-    ECUMENICO: { name: "Culto Ecumênico", icon: "🙏", description: "Participar do culto ecumênico de formatura.", condition: (state) => false },
-    INSTRUCTION_END: { name: "Fim das Instruções", icon: "🏁", description: "Completar o último dia de instruções acadêmicas.", condition: (state) => false },
+    ECUMENICO: { name: "Culto Ecumênico", icon: "🙏", description: "Participar do culto ecumênico de formatura.", condition: () => false },
+    INSTRUCTION_END: { name: "Fim das Instruções", icon: "🏁", description: "Completar o último dia de instruções acadêmicas.", condition: () => false },
     FIRST_QUEST: { name: "Primeira Missão", icon: "⚔️", description: "Complete sua primeira missão diária.", condition: (state, type) => type === 'complete_quest' },
-    FIRST_GRADE: { name: "Estudante", icon: "📖", description: "Adicione sua primeira nota no sistema.", condition: (state, type) => type === 'add_grade' },
+    FIRST_GRADE: { name: "Estudante", icon: "📖", description: "Adicione sua primeira nota no sistema.", condition: (state) => Object.values(state.grades).some(g => g > 0) },
     FIRST_SERVICE: { name: "Primeiro Serviço", icon: "🛡️", description: "Agende seu primeiro serviço no calendário.", condition: (state, type) => type === 'add_mission' },
     COURSE_COMPLETE: { name: "Oficial Formado", icon: "🎓", description: "Concluir os 365 dias do curso.", condition: (state, type, data) => type === 'time_update' && data.days_left <= 0 },
 };
@@ -117,6 +116,7 @@ async function loadUserData(user) {
     if (!userState.quests) userState.quests = [];
     if (!userState.achievements) userState.achievements = [];
     if (!userState.grades || Object.keys(userState.grades).length === 0) userState.grades = Object.fromEntries(subjectList.map(s => [s, 0]));
+    checkAchievements();
 }
 async function saveUserData() {
     const { data: { user } } = await sb.auth.getUser();
@@ -240,7 +240,7 @@ function renderDashboard() {
     }
 
     dashboardAchievementsList.innerHTML = '';
-    const last3Achievements = (userState.achievements || []).slice(-3);
+    const last3Achievements = (userState.achievements || []).slice(-3).reverse();
     if (last3Achievements.length > 0) {
         last3Achievements.forEach(key => {
             const ach = achievementsData[key];
@@ -272,12 +272,14 @@ function renderGrades() {
         gradesContainer.innerHTML += `<div class="grade-item"><span class="grade-item-label" title="${subject}">${subject}</span><input type="number" class="grade-item-input" data-subject="${subject}" value="${value}" min="0" max="10" step="0.1"></div>`;
     });
     updateGradesAverage(false);
+    renderGradesChart();
 }
 function handleGradeChange(e) {
     const subject = e.target.dataset.subject;
     const nota = parseFloat(e.target.value);
     if (subject && !isNaN(nota)) {
         userState.grades[subject] = Math.max(0, Math.min(10, nota));
+        checkAchievements('add_grade');
     }
 }
 async function updateGradesAverage(save = true) {
@@ -298,6 +300,54 @@ async function updateGradesAverage(save = true) {
         if(user) await sb.from('profiles').update({ grades_average: average }).eq('id', user.id);
     }
 }
+function renderGradesChart() {
+    const ctx = document.getElementById('grades-chart').getContext('2d');
+    const gradesWithValues = Object.entries(userState.grades).filter(([, score]) => score > 0);
+    
+    if (gradesChartInstance) {
+        gradesChartInstance.destroy();
+    }
+    
+    gradesChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: gradesWithValues.map(([subject]) => subject.substring(0, 15) + '...'),
+            datasets: [{
+                label: 'Notas',
+                data: gradesWithValues.map(([, score]) => score),
+                backgroundColor: 'rgba(0, 175, 255, 0.6)',
+                borderColor: 'rgba(0, 175, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 10,
+                    ticks: { color: '#8A94B6' }
+                },
+                x: {
+                    ticks: { color: '#8A94B6' }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            const index = context[0].dataIndex;
+                            return gradesWithValues[index][0]; // Mostra o nome completo da matéria no tooltip
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
 
 function renderQTSSchedule() {
     qtsScheduleContainer.innerHTML = `<div class="qts-cell qts-header"></div>` + ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'].map(day => `<div class="qts-cell qts-header">${day}</div>`).join('');
@@ -621,11 +671,11 @@ document.addEventListener('DOMContentLoaded', () => {
     questsList.addEventListener('change', handleQuestInteraction);
     clearCompletedQuestsButton.addEventListener('click', clearCompletedQuests);
     
-    achievementsWidgetTitle.addEventListener('click', () => {
+    document.getElementById('achievements-widget-title').addEventListener('click', () => {
         renderAchievements();
         achievementsModal.classList.remove('hidden');
     });
-    dashboardAchievementsList.addEventListener('click', () => {
+    document.getElementById('dashboard-achievements-list').addEventListener('click', () => {
         renderAchievements();
         achievementsModal.classList.remove('hidden');
     });
