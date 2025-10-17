@@ -9,6 +9,7 @@ const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let userState = {}; // Objeto para guardar os dados do usuário logado
 let calendarInstance;
+let gradesChartInstance;
 let editingLinkId = null; // Variável para controlar a edição de links
 
 // =======================================================
@@ -27,7 +28,8 @@ const remindersList = document.getElementById('reminders-list'), reminderInput =
 const addLinkForm = document.getElementById('add-link-form'), linkTitleInput = document.getElementById('link-title-input'), linkValueInput = document.getElementById('link-value-input'), linkTypeInput = document.getElementById('link-type-input'), linksList = document.getElementById('links-list');
 const uploadAvatarButton = document.getElementById('upload-avatar-button'), uploadAvatarInput = document.getElementById('upload-avatar-input');
 const addQuestForm = document.getElementById('add-quest-form'), questTextInput = document.getElementById('quest-text-input'), questDifficultySelect = document.getElementById('quest-difficulty-select'), questsList = document.getElementById('quests-list'), clearCompletedQuestsButton = document.getElementById('clear-completed-quests-button');
-const achievementsWidget = document.getElementById('achievements-widget'), achievementsModal = document.getElementById('achievements-modal'), achievementsModalClose = document.getElementById('achievements-modal-close');
+const achievementsWidgetTitle = document.getElementById('achievements-widget-title');
+const achievementsModal = document.getElementById('achievements-modal'), achievementsModalClose = document.getElementById('achievements-modal-close');
 const hamburgerButton = document.getElementById('hamburger-button'), sidebar = document.querySelector('.sidebar'), sidebarOverlay = document.getElementById('sidebar-overlay');
 const detailModal = document.getElementById('detail-modal'), detailModalTitle = document.getElementById('detail-modal-title'), detailModalBody = document.getElementById('detail-modal-body'), detailModalClose = document.getElementById('detail-modal-close');
 const adminInfoList = document.getElementById('admin-info-list');
@@ -41,12 +43,16 @@ const COURSE_START_DATE = new Date('2025-05-26T00:00:00');
 const subjectList = ["Sistema de Segurança Pública", "Teoria Geral da Administração", "Gestão Pública Geral Aplicada", "Gestão de Pessoas, Comando e Liderança", "Gestão de Logística, Orçamento e Finanças Públicas", "Fundamentos da Polícia Comunitária", "Psicologia Aplicada", "Análise Criminal e Estatística", "Qualidade do Atendimento aos Grupos Vulneráveis", "Direitos Humanos Aplicados à Atividade Policial Militar", "Gerenciamento de Crises", "Saúde Mental e Qualidade de Vida", "Treinamento Físico Militar I", "Treinamento Físico Militar II", "Gestão de Processos no Sistema Eletrônico", "Tecnologia da Informação e Comunicação", "Comunicação, Mídias Sociais e Cerimonial Militar", "Inteligência e Sistema de Informação", "Ética, Cidadania e Relações Interpessoais", "Ordem Unida I", "Ordem Unida II", "Instrução Geral", "Defesa Pessoal Policial I", "Defesa Pessoal Policial II", "Uso Diferenciado da Força", "Pronto Socorrismo", "Atendimento Pré-Hospitalar Tático", "Planejamento Operacional e Especializado", "Elaboração de Projetos e Captação de Recursos", "Planejamento Estratégico", "Gestão Por Resultados e Avaliação de Políticas Públicas", "Trabalho de Comando e Estado Maior", "Polícia Judiciária Militar", "Direito Administrativo Disciplinar Militar", "Direito Penal e Processual Penal Militar", "Legislação Policial Militar e Organizacional", "Procedimento em Ocorrência", "Economia Aplicada ao Setor Público", "História da PMPE", "Abordagem a Pessoas", "Abordagem a Veículos", "Abordagem a Edificações", "Patrulhamento Urbano", "Armamento e Munição", "Tiro Policial", "Tiro Defensivo (Método Giraldi)", "Ações Básicas de Apoio Aéreo", "Manobras Acadêmicas I", "Manobras Acadêmicas II", "Metodologia da Pesquisa Científica", "Teoria e Prática do Ensino", "Trabalho de Conclusão de Curso"];
 const qtsTimes = ['08:00-09:40', '10:00-11:40', '13:40-15:20', '15:40-17:20', '17:30-19:10'];
 const achievementsData = {
-    MAPOM: { name: "MAPOM", icon: "🗺️", description: "Concluir o Módulo de Adaptação Policial-Militar.", condition: () => false }, // Condição a ser definida
-    ESPADIM: { name: "Espadim", icon: "🗡️", description: "Receber o Espadim Tiradentes.", condition: () => false }, // Condição a ser definida
-    PROGRESS_50: { name: "Meio Caminho", icon: "🏃", description: "Concluir 50% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 50 },
+    ASP26: { name: "Aspirante 2026", icon: "⭐", description: "Fazer parte da turma de Aspirantes de 2026.", condition: () => true },
+    MAPOM: { name: "MAPOM", icon: "🗺️", description: "Concluir o Módulo de Adaptação Policial-Militar.", condition: (state) => false },
+    ESPADIM: { name: "Espadim", icon: "🗡️", description: "Receber o Espadim Tiradentes.", condition: (state) => false },
+    PROGRESS_50: { name: "50% do Curso", icon: "🏃", description: "Concluir 50% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 50 },
     HUNDRED_DAYS: { name: "Festa dos 100 Dias", icon: "🎉", description: "Celebrar a contagem regressiva de 100 dias para a formatura.", condition: (state, type, data) => type === 'time_update' && data.days_left <= 100 },
-    ECUMENICO: { name: "Culto Ecumênico", icon: "🙏", description: "Participar do culto ecumênico de formatura.", condition: () => false }, // Condição a ser definida
-    INSTRUCTION_END: { name: "Fim das Instruções", icon: "🏁", description: "Completar o último dia de instruções acadêmicas.", condition: () => false }, // Condição a ser definida
+    ECUMENICO: { name: "Culto Ecumênico", icon: "🙏", description: "Participar do culto ecumênico de formatura.", condition: (state) => false },
+    INSTRUCTION_END: { name: "Fim das Instruções", icon: "🏁", description: "Completar o último dia de instruções acadêmicas.", condition: (state) => false },
+    FIRST_QUEST: { name: "Primeira Missão", icon: "⚔️", description: "Complete sua primeira missão diária.", condition: (state, type) => type === 'complete_quest' },
+    FIRST_GRADE: { name: "Estudante", icon: "📖", description: "Adicione sua primeira nota no sistema.", condition: (state, type) => type === 'add_grade' },
+    FIRST_SERVICE: { name: "Primeiro Serviço", icon: "🛡️", description: "Agende seu primeiro serviço no calendário.", condition: (state, type) => type === 'add_mission' },
     COURSE_COMPLETE: { name: "Oficial Formado", icon: "🎓", description: "Concluir os 365 dias do curso.", condition: (state, type, data) => type === 'time_update' && data.days_left <= 0 },
 };
 
@@ -79,14 +85,9 @@ async function handleLogin() {
 async function handleLogout() { await sb.auth.signOut(); window.location.reload(); }
 
 async function loadUserData(user) {
-    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking').eq('id', user.id).single();
-    if (error) {
-        console.error("Erro ao carregar dados do usuário:", error);
-        return;
-    }
+    const { data, error } = await sb.from('profiles').select('user_data').eq('id', user.id).single();
+    if (error) { console.error("Erro ao carregar dados do usuário:", error); return; }
     
-    rankingToggle.checked = data.show_in_ranking;
-
     if (data && data.user_data) {
         userState = data.user_data;
     } else { 
@@ -95,11 +96,12 @@ async function loadUserData(user) {
         const initialXp = daysPassed * 15;
         userState = {
             grades: Object.fromEntries(subjectList.map(s => [s, 0])),
-            schedule: {}, achievements: [], missions: [], reminders: [], links: [], quests: [], xp: initialXp, avatar: ''
+            schedule: {}, achievements: [], missions: [], reminders: [], links: [], quests: [], xp: initialXp, avatar: '', show_in_ranking: true
         };
         await saveUserData();
     }
     
+    rankingToggle.checked = userState.show_in_ranking !== false;
     if (userState.avatar) {
         userAvatarSidebar.src = userState.avatar;
         userAvatarHeader.src = userState.avatar;
@@ -107,7 +109,7 @@ async function loadUserData(user) {
         userAvatarSidebar.src = '';
         userAvatarHeader.src = '';
     }
-
+    
     if (!userState.xp) userState.xp = 0;
     if (!userState.missions) userState.missions = [];
     if (!userState.reminders) userState.reminders = [];
@@ -199,6 +201,7 @@ async function renderAdminInfo() {
         adminInfoList.appendChild(li);
     });
 }
+
 
 function renderDashboard() {
     updateTimeProgress();
@@ -618,7 +621,11 @@ document.addEventListener('DOMContentLoaded', () => {
     questsList.addEventListener('change', handleQuestInteraction);
     clearCompletedQuestsButton.addEventListener('click', clearCompletedQuests);
     
-    achievementsWidget.addEventListener('click', () => {
+    achievementsWidgetTitle.addEventListener('click', () => {
+        renderAchievements();
+        achievementsModal.classList.remove('hidden');
+    });
+    dashboardAchievementsList.addEventListener('click', () => {
         renderAchievements();
         achievementsModal.classList.remove('hidden');
     });
