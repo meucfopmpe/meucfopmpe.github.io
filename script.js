@@ -28,7 +28,8 @@ const remindersList = document.getElementById('reminders-list'), reminderInput =
 const addLinkForm = document.getElementById('add-link-form'), linkTitleInput = document.getElementById('link-title-input'), linkValueInput = document.getElementById('link-value-input'), linkTypeInput = document.getElementById('link-type-input'), linksList = document.getElementById('links-list');
 const uploadAvatarButton = document.getElementById('upload-avatar-button'), uploadAvatarInput = document.getElementById('upload-avatar-input');
 const addQuestForm = document.getElementById('add-quest-form'), questTextInput = document.getElementById('quest-text-input'), questDifficultySelect = document.getElementById('quest-difficulty-select'), questsList = document.getElementById('quests-list'), clearCompletedQuestsButton = document.getElementById('clear-completed-quests-button');
-const achievementsWidget = document.getElementById('achievements-widget'), achievementsModal = document.getElementById('achievements-modal'), achievementsModalClose = document.getElementById('achievements-modal-close');
+const achievementsWidget = document.getElementById('achievements-widget');
+const achievementsModal = document.getElementById('achievements-modal'), achievementsModalClose = document.getElementById('achievements-modal-close');
 const hamburgerButton = document.getElementById('hamburger-button'), sidebar = document.querySelector('.sidebar'), sidebarOverlay = document.getElementById('sidebar-overlay');
 const detailModal = document.getElementById('detail-modal'), detailModalTitle = document.getElementById('detail-modal-title'), detailModalBody = document.getElementById('detail-modal-body'), detailModalClose = document.getElementById('detail-modal-close');
 const adminInfoList = document.getElementById('admin-info-list');
@@ -42,12 +43,16 @@ const COURSE_START_DATE = new Date('2025-05-26T00:00:00');
 const subjectList = ["Sistema de Segurança Pública", "Teoria Geral da Administração", "Gestão Pública Geral Aplicada", "Gestão de Pessoas, Comando e Liderança", "Gestão de Logística, Orçamento e Finanças Públicas", "Fundamentos da Polícia Comunitária", "Psicologia Aplicada", "Análise Criminal e Estatística", "Qualidade do Atendimento aos Grupos Vulneráveis", "Direitos Humanos Aplicados à Atividade Policial Militar", "Gerenciamento de Crises", "Saúde Mental e Qualidade de Vida", "Treinamento Físico Militar I", "Treinamento Físico Militar II", "Gestão de Processos no Sistema Eletrônico", "Tecnologia da Informação e Comunicação", "Comunicação, Mídias Sociais e Cerimonial Militar", "Inteligência e Sistema de Informação", "Ética, Cidadania e Relações Interpessoais", "Ordem Unida I", "Ordem Unida II", "Instrução Geral", "Defesa Pessoal Policial I", "Defesa Pessoal Policial II", "Uso Diferenciado da Força", "Pronto Socorrismo", "Atendimento Pré-Hospitalar Tático", "Planejamento Operacional e Especializado", "Elaboração de Projetos e Captação de Recursos", "Planejamento Estratégico", "Gestão Por Resultados e Avaliação de Políticas Públicas", "Trabalho de Comando e Estado Maior", "Polícia Judiciária Militar", "Direito Administrativo Disciplinar Militar", "Direito Penal e Processual Penal Militar", "Legislação Policial Militar e Organizacional", "Procedimento em Ocorrência", "Economia Aplicada ao Setor Público", "História da PMPE", "Abordagem a Pessoas", "Abordagem a Veículos", "Abordagem a Edificações", "Patrulhamento Urbano", "Armamento e Munição", "Tiro Policial", "Tiro Defensivo (Método Giraldi)", "Ações Básicas de Apoio Aéreo", "Manobras Acadêmicas I", "Manobras Acadêmicas II", "Metodologia da Pesquisa Científica", "Teoria e Prática do Ensino", "Trabalho de Conclusão de Curso"];
 const qtsTimes = ['08:00-09:40', '10:00-11:40', '13:40-15:20', '15:40-17:20', '17:30-19:10'];
 const achievementsData = {
-    MAPOM: { name: "MAPOM", icon: "🗺️", description: "Concluir o Módulo de Adaptação Policial-Militar.", condition: (state) => false },
-    ESPADIM: { name: "Espadim", icon: "🗡️", description: "Receber o Espadim Tiradentes.", condition: (state) => false },
-    PROGRESS_50: { name: "Meio Caminho", icon: "🏃", description: "Concluir 50% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 50 },
+    ASP26: { name: "Aspirante 2026", icon: "⭐", description: "Fazer parte da turma de Aspirantes de 2026.", condition: () => true },
+    MAPOM: { name: "MAPOM", icon: "🗺️", description: "Concluir o Módulo de Adaptação Policial-Militar.", condition: () => false },
+    ESPADIM: { name: "Espadim", icon: "🗡️", description: "Receber o Espadim Tiradentes.", condition: () => false },
+    PROGRESS_50: { name: "50% do Curso", icon: "🏃", description: "Concluir 50% do curso.", condition: (state, type, data) => type === 'time_update' && data.percentage >= 50 },
     HUNDRED_DAYS: { name: "Festa dos 100 Dias", icon: "🎉", description: "Celebrar a contagem regressiva de 100 dias para a formatura.", condition: (state, type, data) => type === 'time_update' && data.days_left <= 100 },
-    ECUMENICO: { name: "Culto Ecumênico", icon: "🙏", description: "Participar do culto ecumênico de formatura.", condition: (state) => false },
-    INSTRUCTION_END: { name: "Fim das Instruções", icon: "🏁", description: "Completar o último dia de instruções acadêmicas.", condition: (state) => false },
+    ECUMENICO: { name: "Culto Ecumênico", icon: "🙏", description: "Participar do culto ecumênico de formatura.", condition: () => false },
+    INSTRUCTION_END: { name: "Fim das Instruções", icon: "🏁", description: "Completar o último dia de instruções acadêmicas.", condition: () => false },
+    FIRST_QUEST: { name: "Primeira Missão", icon: "⚔️", description: "Complete sua primeira missão diária.", condition: (state, type) => type === 'complete_quest' },
+    FIRST_GRADE: { name: "Estudante", icon: "📖", description: "Adicione sua primeira nota no sistema.", condition: (state) => Object.values(state.grades).some(g => g > 0) },
+    FIRST_SERVICE: { name: "Primeiro Serviço", icon: "🛡️", description: "Agende seu primeiro serviço no calendário.", condition: (state, type) => type === 'add_mission' },
     COURSE_COMPLETE: { name: "Oficial Formado", icon: "🎓", description: "Concluir os 365 dias do curso.", condition: (state, type, data) => type === 'time_update' && data.days_left <= 0 },
 };
 
@@ -80,14 +85,9 @@ async function handleLogin() {
 async function handleLogout() { await sb.auth.signOut(); window.location.reload(); }
 
 async function loadUserData(user) {
-    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking').eq('id', user.id).single();
-    if (error) {
-        console.error("Erro ao carregar dados do usuário:", error);
-        return;
-    }
+    const { data, error } = await sb.from('profiles').select('user_data').eq('id', user.id).single();
+    if (error) { console.error("Erro ao carregar dados do usuário:", error); return; }
     
-    rankingToggle.checked = data.show_in_ranking;
-
     if (data && data.user_data) {
         userState = data.user_data;
     } else { 
@@ -96,11 +96,12 @@ async function loadUserData(user) {
         const initialXp = daysPassed * 15;
         userState = {
             grades: Object.fromEntries(subjectList.map(s => [s, 0])),
-            schedule: {}, achievements: [], missions: [], reminders: [], links: [], quests: [], xp: initialXp, avatar: ''
+            schedule: {}, achievements: [], missions: [], reminders: [], links: [], quests: [], xp: initialXp, avatar: '', show_in_ranking: true
         };
         await saveUserData();
     }
-
+    
+    rankingToggle.checked = userState.show_in_ranking !== false;
     if (userState.avatar) {
         userAvatarSidebar.src = userState.avatar;
         userAvatarHeader.src = userState.avatar;
@@ -116,6 +117,7 @@ async function loadUserData(user) {
     if (!userState.quests) userState.quests = [];
     if (!userState.achievements) userState.achievements = [];
     if (!userState.grades || Object.keys(userState.grades).length === 0) userState.grades = Object.fromEntries(subjectList.map(s => [s, 0]));
+    checkAchievements();
 }
 async function saveUserData() {
     const { data: { user } } = await sb.auth.getUser();
@@ -178,6 +180,7 @@ async function loadDashboardData() {
     
     await loadUserData(user);
     renderDashboard();
+    renderAdminInfo();
 }
 
 async function renderAdminInfo() {
@@ -188,19 +191,6 @@ async function renderAdminInfo() {
         adminInfoList.innerHTML = '<li><p>Nenhuma informação no momento.</p></li>';
         return;
     }
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    data.sort((a, b) => {
-        const parseDate = (dateStr) => dateStr ? new Date(dateStr + 'T00:00:00') : null;
-        const dateA = parseDate(a.due_date);
-        const dateB = parseDate(b.due_date);
-        const isAUpcomingExam = a.type === 'PROVA' && dateA && dateA >= today;
-        const isBUpcomingExam = b.type === 'PROVA' && dateB && dateB >= today;
-        if (isAUpcomingExam && !isBUpcomingExam) return -1;
-        if (!isAUpcomingExam && isBUpcomingExam) return 1;
-        if (isAUpcomingExam && isBUpcomingExam) return dateA - dateB;
-        return 0;
-    });
     adminInfoList.innerHTML = '';
     data.forEach(item => {
         const li = document.createElement('li');
@@ -212,7 +202,6 @@ async function renderAdminInfo() {
         adminInfoList.appendChild(li);
     });
 }
-
 
 function renderDashboard() {
     updateTimeProgress();
@@ -241,7 +230,7 @@ function renderDashboard() {
     }
 
     dashboardRemindersList.innerHTML = '';
-    const last3Reminders = (userState.reminders || []).slice(0, 3);
+    const last3Reminders = (userState.reminders || []).filter(r => !r.completed).slice(0, 3);
     if (last3Reminders.length > 0) {
         last3Reminders.forEach(r => {
             dashboardRemindersList.innerHTML += `<li><span>${r.text}</span></li>`;
@@ -251,7 +240,7 @@ function renderDashboard() {
     }
 
     dashboardAchievementsList.innerHTML = '';
-    const last3Achievements = (userState.achievements || []).slice(-3);
+    const last3Achievements = (userState.achievements || []).slice(-3).reverse();
     if (last3Achievements.length > 0) {
         last3Achievements.forEach(key => {
             const ach = achievementsData[key];
@@ -283,12 +272,14 @@ function renderGrades() {
         gradesContainer.innerHTML += `<div class="grade-item"><span class="grade-item-label" title="${subject}">${subject}</span><input type="number" class="grade-item-input" data-subject="${subject}" value="${value}" min="0" max="10" step="0.1"></div>`;
     });
     updateGradesAverage(false);
+    renderGradesChart();
 }
 function handleGradeChange(e) {
     const subject = e.target.dataset.subject;
     const nota = parseFloat(e.target.value);
     if (subject && !isNaN(nota)) {
         userState.grades[subject] = Math.max(0, Math.min(10, nota));
+        checkAchievements('add_grade');
     }
 }
 async function updateGradesAverage(save = true) {
@@ -326,7 +317,6 @@ function handleQTSInput(e) {
     if (!userState.schedule[day]) userState.schedule[day] = {};
     userState.schedule[day][time] = e.target.value.trim().toUpperCase();
     saveUserData();
-    checkAchievements('save_schedule');
 }
 
 function initCalendar() {
@@ -337,37 +327,41 @@ function initCalendar() {
         headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek' },
         buttonText: { today: 'Hoje', month: 'Mês', week: 'Semana' },
         events: getCalendarEvents(),
-        dateClick: function(info) {
-            const missionsForDay = (userState.missions || []).filter(m => m.date === info.dateStr);
-            if (missionsForDay.length > 0) {
-                detailModalTitle.textContent = `Serviços para ${info.date.toLocaleDateString('pt-BR')}`;
-                detailModalBody.innerHTML = '<ul>' + missionsForDay.map(m => `<li>${m.name}</li>`).join('') + '</ul>';
-                detailModal.classList.remove('hidden');
-            }
+        eventClick: function(info) {
+            detailModalTitle.textContent = info.event.title;
+            detailModalBody.innerHTML = `<strong>Data:</strong> ${info.event.start.toLocaleDateString('pt-BR')}`;
+            detailModal.classList.remove('hidden');
         }
     });
     calendarInstance.render();
 }
 function getCalendarEvents() {
-    const events = [
-        { title: 'Início do Curso', start: '2025-05-26', color: 'var(--sl-success)'}, 
-        { title: 'Fim do Curso', start: '2026-05-26', color: 'var(--sl-success)'}
-    ];
-    if (userState.missions) {
-        userState.missions.forEach(mission => {
-            events.push({ title: mission.name, start: mission.date, color: 'var(--sl-error)' });
-        });
-    }
+    const eventColors = { 'plantão': '#E57373', 'guarda': '#64B5F6', 'auxiliar': '#FFF176', 'default': 'var(--sl-primary)' };
+    const events = (userState.missions || []).map(mission => {
+        const nameLower = mission.name.toLowerCase();
+        let color = eventColors.default;
+        for (const key in eventColors) {
+            if (nameLower.includes(key)) {
+                color = eventColors[key];
+                break;
+            }
+        }
+        return { title: mission.name, start: mission.date, color: color };
+    });
     return events;
 }
 
 async function renderRanking() {
     rankingList.innerHTML = 'Carregando ranking...';
-    const { data, error } = await sb.from('profiles').select('full_name, user_data, grades_average').eq('show_in_ranking', true).order('grades_average', { ascending: false }).limit(50);
+    const { data: profiles, error } = await sb.from('profiles').select('full_name, user_data, grades_average').order('grades_average', { ascending: false }).limit(50);
     if (error) { rankingList.innerHTML = '<p style="color: var(--sl-error);">Não foi possível carregar o ranking.</p>'; console.error(error); return; }
-    if (!data || data.length === 0) { rankingList.innerHTML = '<p>Ninguém no ranking ainda ou todos estão privados.</p>'; return; }
+    
+    const filteredProfiles = profiles.filter(p => p.user_data?.show_in_ranking !== false);
+
+    if (filteredProfiles.length === 0) { rankingList.innerHTML = '<p>Ninguém no ranking ainda ou todos estão privados.</p>'; return; }
+    
     rankingList.innerHTML = '';
-    data.forEach((profile, index) => {
+    filteredProfiles.forEach((profile, index) => {
         const item = document.createElement('div');
         item.className = 'ranking-item';
         const avatarSrc = profile.user_data?.avatar || 'https://i.imgur.com/K3wY2mn.png';
@@ -393,11 +387,7 @@ function checkAchievements(eventType, data) {
             stateChanged = true;
         }
     }
-    if(stateChanged) {
-        saveUserData();
-        renderAchievements();
-        renderDashboard();
-    }
+    if(stateChanged) saveUserData();
 }
 
 function addXp(amount) {
@@ -434,13 +424,11 @@ function handleQuestInteraction(e) {
     if (e.target.type !== 'checkbox') return;
     const index = e.target.dataset.index;
     const quest = userState.quests[index];
-    if (!quest || !e.target.checked) return;
-    if(!quest.completed) {
-        quest.completed = true;
-        addXp(quest.xp);
-        checkAchievements('complete_quest', quest);
-        saveUserData();
-    }
+    if (!quest || quest.completed) return;
+    quest.completed = true;
+    addXp(quest.xp);
+    checkAchievements('complete_quest', quest);
+    saveUserData();
     e.target.closest('.quest-item').classList.add('completed');
 }
 function clearCompletedQuests() {
@@ -512,7 +500,7 @@ function renderLinks() {
         let content = link.type === 'link'
             ? `<a href="${link.value}" target="_blank" rel="noopener noreferrer">${link.title} 🔗</a><span>${link.value}</span>`
             : `<div>${link.title} 📄</div><span>SEI: ${link.value}</span>`;
-        item.innerHTML = `<div class="link-item-info">${content}</div><button data-index="${index}">X</button>`;
+        item.innerHTML = `<div class="link-item-info">${content}</div><div class="link-buttons"><button class="edit-link-btn" data-index="${index}">✏️</button><button data-index="${index}">X</button></div>`;
         linksList.appendChild(item);
     });
 }
@@ -523,7 +511,14 @@ function addLink(e) {
     if (title && value) {
         if (type === 'link' && !value.startsWith('http')) value = `https://${value}`;
         if (!userState.links) userState.links = [];
-        userState.links.push({ title, value, type });
+        
+        if (editingLinkId !== null) {
+            userState.links[editingLinkId] = { title, value, type };
+            editingLinkId = null;
+        } else {
+            userState.links.push({ title, value, type });
+        }
+        
         addLinkForm.reset();
         checkAchievements('add_link');
         saveUserData();
@@ -531,8 +526,16 @@ function addLink(e) {
     }
 }
 function handleLinkInteraction(e) {
-    if (e.target.tagName === 'BUTTON') {
-        userState.links.splice(e.target.dataset.index, 1);
+    if (e.target.tagName !== 'BUTTON') return;
+    const index = e.target.dataset.index;
+    if (e.target.classList.contains('edit-link-btn')) {
+        const link = userState.links[index];
+        linkTitleInput.value = link.title;
+        linkValueInput.value = link.value;
+        linkTypeInput.value = link.type;
+        editingLinkId = index;
+    } else {
+        userState.links.splice(index, 1);
         saveUserData();
         renderLinks();
     }
@@ -557,8 +560,15 @@ function handlePageNavigation(e) {
     document.getElementById(targetPageId).classList.add('active');
     e.target.classList.add('active');
     pageTitleEl.textContent = e.target.textContent;
+    
+    if (targetPageId === 'page-grades') renderGrades();
+    if (targetPageId === 'page-schedule') renderQTSSchedule();
     if (targetPageId === 'page-calendar') initCalendar();
     if (targetPageId === 'page-ranking') renderRanking();
+    if (targetPageId === 'page-daily-quests') renderQuests();
+    if (targetPageId === 'page-reminders') renderReminders();
+    if (targetPageId === 'page-links') renderLinks();
+
     if (window.innerWidth <= 768) {
         sidebar.classList.remove('open');
         sidebarOverlay.classList.add('hidden');
@@ -588,6 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         saveUserData().then(() => {
             updateGradesAverage(true);
+            renderGradesChart();
             saveGradesButton.textContent = 'Salvo!';
             setTimeout(() => { saveGradesButton.textContent = 'Salvar Alterações'; }, 1500);
         });
@@ -643,10 +654,8 @@ document.addEventListener('DOMContentLoaded', () => {
             detailModal.classList.remove('hidden');
         }
     });
-    rankingToggle.addEventListener('change', async () => {
-        const { data: { user } } = await sb.auth.getUser();
-        if (!user) return;
-        const { error } = await sb.from('profiles').update({ show_in_ranking: rankingToggle.checked }).eq('id', user.id);
-        if (error) alert("Não foi possível salvar sua preferência de privacidade.");
+    rankingToggle.addEventListener('change', () => {
+        userState.show_in_ranking = rankingToggle.checked;
+        saveUserData();
     });
 });
