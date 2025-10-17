@@ -35,6 +35,8 @@ const detailModal = document.getElementById('detail-modal'), detailModalTitle = 
 const adminInfoList = document.getElementById('admin-info-list');
 const saveGradesButton = document.getElementById('save-grades-button'), gradeSearchInput = document.getElementById('grade-search-input');
 const gradesProgressCounter = document.getElementById('grades-progress-counter');
+const documentsGrid = document.getElementById('documents-grid');
+const documentSearchInput = document.getElementById('document-search-input');
 
 // =======================================================
 // 3. DADOS ESTÁTICOS
@@ -85,8 +87,11 @@ async function handleLogin() {
 async function handleLogout() { await sb.auth.signOut(); window.location.reload(); }
 
 async function loadUserData(user) {
-    const { data, error } = await sb.from('profiles').select('user_data').eq('id', user.id).single();
-    if (error) { console.error("Erro ao carregar dados do usuário:", error); return; }
+    const { data, error } = await sb.from('profiles').select('user_data, show_in_ranking').eq('id', user.id).single();
+    if (error) {
+        console.error("Erro ao carregar dados do usuário:", error);
+        return;
+    }
     
     if (data && data.user_data) {
         userState = data.user_data;
@@ -102,18 +107,14 @@ async function loadUserData(user) {
     }
     
     rankingToggle.checked = userState.show_in_ranking !== false;
-
-   
-    const placeholderAvatar = 'https://i.imgur.com/xpkhft4.png'; // URL da imagem genérica
-
     if (userState.avatar) {
         userAvatarSidebar.src = userState.avatar;
         userAvatarHeader.src = userState.avatar;
     } else {
+        const placeholderAvatar = 'https://i.imgur.com/xpkhft4.png';
         userAvatarSidebar.src = placeholderAvatar;
         userAvatarHeader.src = placeholderAvatar;
     }
-
     
     if (!userState.xp) userState.xp = 0;
     if (!userState.missions) userState.missions = [];
@@ -207,7 +208,6 @@ async function renderAdminInfo() {
         adminInfoList.appendChild(li);
     });
 }
-
 
 function renderDashboard() {
     updateTimeProgress();
@@ -306,6 +306,7 @@ async function updateGradesAverage(save = true) {
         if(user) await sb.from('profiles').update({ grades_average: average }).eq('id', user.id);
     }
 }
+
 function renderGradesChart() {
     const ctx = document.getElementById('grades-chart').getContext('2d');
     const gradesWithValues = Object.entries(userState.grades).filter(([, score]) => score > 0);
@@ -333,10 +334,19 @@ function renderGradesChart() {
                 y: {
                     beginAtZero: true,
                     max: 10,
-                    ticks: { color: '#8A94B6' }
+                    ticks: { 
+                        color: '#8A94B6',
+                        stepSize: 2
+                    },
+                    grid: {
+                        color: 'rgba(57, 66, 105, 0.5)'
+                    }
                 },
                 x: {
-                    ticks: { color: '#8A94B6' }
+                    ticks: { color: '#8A94B6' },
+                    grid: {
+                        color: 'rgba(57, 66, 105, 0.2)'
+                    }
                 }
             },
             plugins: {
@@ -418,7 +428,7 @@ async function renderRanking() {
     filteredProfiles.forEach((profile, index) => {
         const item = document.createElement('div');
         item.className = 'ranking-item';
-        const avatarSrc = profile.user_data?.avatar || 'https://i.imgur.com/xpkhft4.png';
+        const avatarSrc = profile.user_data?.avatar || 'https://i.imgur.com/K3wY2mn.png';
         item.innerHTML = `<div class="ranking-pos">${index + 1}</div><img class="ranking-avatar" src="${avatarSrc}"><div class="ranking-info"><div class="ranking-name">${profile.full_name || 'Anônimo'}</div></div><div class="ranking-avg">${profile.grades_average ? profile.grades_average.toFixed(2) : '0.00'}</div>`;
         rankingList.appendChild(item);
     });
@@ -609,36 +619,19 @@ function handlePageNavigation(e) {
     if (e.target.tagName !== 'A') return;
     const targetPageId = e.target.dataset.page;
     if (!targetPageId) return;
-
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     document.getElementById(targetPageId).classList.add('active');
     e.target.classList.add('active');
     pageTitleEl.textContent = e.target.textContent;
-
-    // Lógica de renderização das páginas
+    
     if (targetPageId === 'page-grades') renderGrades();
     if (targetPageId === 'page-schedule') renderQTSSchedule();
     if (targetPageId === 'page-calendar') initCalendar();
+    if (targetPageId === 'page-ranking') renderRanking();
     if (targetPageId === 'page-daily-quests') renderQuests();
     if (targetPageId === 'page-reminders') renderReminders();
     if (targetPageId === 'page-links') renderLinks();
-
-    // Lógica condicional para o Ranking
-    if (targetPageId === 'page-ranking') {
-        if (userState.show_in_ranking) {
-            renderRanking();
-        } else {
-            const rankingList = document.getElementById('ranking-list');
-            rankingList.innerHTML = `
-                <div class="ranking-private-container">
-                    <h3>Ranking Privado</h3>
-                    <p>Para ver o ranking da turma, você precisa permitir que seu perfil seja exibido.</p>
-                    <p>Vá para a página "Minhas Notas" e ative a opção "Exibir no Ranking".</p>
-                </div>
-            `;
-        }
-    }
 
     if (window.innerWidth <= 768) {
         sidebar.classList.remove('open');
@@ -669,6 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         saveUserData().then(() => {
             updateGradesAverage(true);
+            renderGradesChart();
             saveGradesButton.textContent = 'Salvo!';
             setTimeout(() => { saveGradesButton.textContent = 'Salvar Alterações'; }, 1500);
         });
