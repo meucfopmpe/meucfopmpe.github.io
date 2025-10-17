@@ -418,7 +418,7 @@ async function renderRanking() {
     filteredProfiles.forEach((profile, index) => {
         const item = document.createElement('div');
         item.className = 'ranking-item';
-        const avatarSrc = profile.user_data?.avatar || 'https://i.imgur.com/K3wY2mn.png';
+        const avatarSrc = profile.user_data?.avatar || 'https://i.imgur.com/xpkhft4.png';
         item.innerHTML = `<div class="ranking-pos">${index + 1}</div><img class="ranking-avatar" src="${avatarSrc}"><div class="ranking-info"><div class="ranking-name">${profile.full_name || 'Anônimo'}</div></div><div class="ranking-avg">${profile.grades_average ? profile.grades_average.toFixed(2) : '0.00'}</div>`;
         rankingList.appendChild(item);
     });
