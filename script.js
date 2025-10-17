@@ -329,10 +329,19 @@ function renderGradesChart() {
                 y: {
                     beginAtZero: true,
                     max: 10,
-                    ticks: { color: '#8A94B6' }
+                    ticks: { 
+                        color: '#8A94B6',
+                        stepSize: 2 // Força a exibição de mais rótulos, como 0, 2, 4...
+                    },
+                    grid: {
+                        color: 'rgba(57, 66, 105, 0.5)' // Cor das linhas de grade do eixo Y
+                    }
                 },
                 x: {
-                    ticks: { color: '#8A94B6' }
+                    ticks: { color: '#8A94B6' },
+                    grid: {
+                        color: 'rgba(57, 66, 105, 0.2)' // Cor das linhas de grade do eixo X (mais sutil)
+                    }
                 }
             },
             plugins: {
