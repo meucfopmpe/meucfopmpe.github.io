@@ -331,10 +331,10 @@ function renderGradesChart() {
                     max: 10,
                     ticks: { 
                         color: '#8A94B6',
-                        stepSize: 2 // Força a exibição de mais rótulos, como 0, 2, 4...
+                        stepSize: 2 // Ajuda a definir os intervalos no eixo
                     },
                     grid: {
-                        color: 'rgba(57, 66, 105, 0.5)' // Cor das linhas de grade do eixo Y
+                        color: 'rgba(57, 66, 105, 0.5)'
                     }
                 },
                 x: {
