@@ -169,7 +169,6 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
 .list-header-container { display: flex; justify-content: space-between; align-items: center; }
 #clear-completed-quests-button { width: auto; padding: 5px 15px; font-size: 0.8em; background-color: var(--sl-surface); border: 1px solid var(--sl-border); color: var(--sl-text-secondary); }
 #clear-completed-quests-button:hover { background-color: var(--sl-error); border-color: var(--sl-error); color: var(--sl-bg); }
-.edit-link-btn { width: 40px; height: 30px; font-size: 1.2em; background-color: var(--sl-bg); border: 1px solid var(--sl-border); color: var(--sl-primary); }
 
 /* --- ESTILOS PARA O AVATAR --- */
 #profile-pic-container { position: relative; width: 125px; height: 125px; margin: 0 auto 10px auto; }
