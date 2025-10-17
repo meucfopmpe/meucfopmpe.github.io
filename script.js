@@ -605,19 +605,36 @@ function handlePageNavigation(e) {
     if (e.target.tagName !== 'A') return;
     const targetPageId = e.target.dataset.page;
     if (!targetPageId) return;
+
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     document.getElementById(targetPageId).classList.add('active');
     e.target.classList.add('active');
     pageTitleEl.textContent = e.target.textContent;
-    
+
+    // Lógica de renderização das páginas
     if (targetPageId === 'page-grades') renderGrades();
     if (targetPageId === 'page-schedule') renderQTSSchedule();
     if (targetPageId === 'page-calendar') initCalendar();
-    if (targetPageId === 'page-ranking') renderRanking();
     if (targetPageId === 'page-daily-quests') renderQuests();
     if (targetPageId === 'page-reminders') renderReminders();
     if (targetPageId === 'page-links') renderLinks();
+
+    // Lógica condicional para o Ranking
+    if (targetPageId === 'page-ranking') {
+        if (userState.show_in_ranking) {
+            renderRanking();
+        } else {
+            const rankingList = document.getElementById('ranking-list');
+            rankingList.innerHTML = `
+                <div class="ranking-private-container">
+                    <h3>Ranking Privado</h3>
+                    <p>Para ver o ranking da turma, você precisa permitir que seu perfil seja exibido.</p>
+                    <p>Vá para a página "Minhas Notas" e ative a opção "Exibir no Ranking".</p>
+                </div>
+            `;
+        }
+    }
 
     if (window.innerWidth <= 768) {
         sidebar.classList.remove('open');
