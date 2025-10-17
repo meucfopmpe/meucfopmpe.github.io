@@ -138,6 +138,45 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
 .achievement-icon.unlocked { filter: grayscale(0); opacity: 1; text-shadow: 0 0 15px var(--sl-primary); }
 .achievement-title { margin-top: 10px; font-size: 0.9em; font-weight: 600; }
 
+/* --- PÁGINA DE DOCUMENTOS --- */
+#document-search-input {
+    width: 100%;
+    margin-bottom: 30px;
+}
+.documents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+.document-card {
+    background-color: var(--sl-surface);
+    border: 1px solid var(--sl-border);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--sl-text-primary);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.document-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 25px var(--sl-glow);
+}
+.document-card-icon {
+    font-size: 3em;
+    margin-bottom: 15px;
+}
+.document-card-title {
+    font-weight: 700;
+    font-size: 1.1em;
+    margin-bottom: 5px;
+}
+.document-card-description {
+    font-size: 0.9em;
+    color: var(--sl-text-secondary);
+    line-height: 1.4;
+}
+
 /* --- ESTILOS PARA MISSÕES, LEMBRETES, LINKS --- */
 .inline-form { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
 .inline-form input, .inline-form select { flex-grow: 1; min-width: 150px; }
@@ -180,22 +219,4 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
     .main-header { display: grid; grid-template-columns: auto 1fr auto; }
     .page { padding: 15px; }
     .dashboard-grid { gap: 15px; }
-}
-
-/* --- ESTILO PARA BLOQUEIO DO RANKING --- */
-.ranking-private-container {
-    text-align: center;
-    padding: 40px;
-    background-color: var(--sl-surface);
-    border: 1px solid var(--sl-border);
-    border-radius: 8px;
-    margin: 20px;
-}
-.ranking-private-container h3 {
-    color: var(--sl-primary);
-    margin-bottom: 15px;
-}
-.ranking-private-container p {
-    color: var(--sl-text-secondary);
-    line-height: 1.6;
 }
