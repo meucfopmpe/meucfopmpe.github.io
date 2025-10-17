@@ -67,7 +67,10 @@
             <header class="main-header">
                 <button id="hamburger-button" class="hamburger-button">☰</button>
                 <h1 id="page-title">Painel Principal</h1>
-                <img id="user-avatar-header" class="header-avatar" alt="Avatar">
+                <div id="streak-counter-widget" class="streak-widget clickable">
+                    <span id="streak-icon">🔥</span>
+                    <span id="streak-days">0</span>
+                </div>
             </header>
             
             <div id="page-dashboard" class="page active">
@@ -83,10 +86,10 @@
                         </div>
                         <div class="course-progress-container"><div id="course-progress-bar" class="course-progress-bar"></div></div>
                         <div id="course-progress-text" class="course-progress-text">...% do curso concluído</div>
-                    </div>
-                    <div id="achievements-widget" class="widget clickable">
-                        <h3>ÚLTIMAS CONQUISTAS</h3>
-                        <div id="dashboard-achievements-list" class="dashboard-achievements"></div>
+                        <div id="achievements-widget" class="clickable">
+                            <h4 class="sub-widget-title">Últimas Conquistas</h4>
+                            <div id="dashboard-achievements-list" class="dashboard-achievements"></div>
+                        </div>
                     </div>
                     <div class="widget">
                         <h3>PRÓXIMAS MISSÕES</h3>
@@ -208,6 +211,25 @@
             <button id="detail-modal-close" class="modal-close-button">&times;</button>
             <h2 id="detail-modal-title">Detalhes</h2>
             <div id="detail-modal-body"></div>
+        </div>
+    </div>
+
+    <div id="streak-modal" class="modal hidden">
+        <div class="modal-content">
+            <button id="streak-modal-close" class="modal-close-button">&times;</button>
+            <h2>Contador de Dias</h2>
+            <p class="helper-text">Esta é sua sequência de dias sem ser anotado. Se a sequência for quebrada, clique no botão para zerar o contador.</p>
+            <div class="streak-info-grid">
+                <div>
+                    <span>Sequência Atual</span>
+                    <strong id="current-streak-display">0 dias</strong>
+                </div>
+                <div>
+                    <span>Seu Recorde</span>
+                    <strong id="record-streak-display">0 dias</strong>
+                </div>
+            </div>
+            <button id="reset-streak-button">Fui Anotado (Zerar)</button>
         </div>
     </div>
 
