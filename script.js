@@ -624,7 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
     questsList.addEventListener('change', handleQuestInteraction);
     clearCompletedQuestsButton.addEventListener('click', clearCompletedQuests);
     
-    achievementsWidget.addEventListener('click', () => {
+    document.getElementById('achievements-widget').addEventListener('click', () => {
         renderAchievements();
         achievementsModal.classList.remove('hidden');
     });
