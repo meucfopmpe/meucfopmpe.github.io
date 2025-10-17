@@ -103,13 +103,17 @@ async function loadUserData(user) {
     
     rankingToggle.checked = userState.show_in_ranking !== false;
 
+   
+    const placeholderAvatar = 'https://imgur.com/a/0pTMxfz'; // URL da imagem genérica
+
     if (userState.avatar) {
         userAvatarSidebar.src = userState.avatar;
         userAvatarHeader.src = userState.avatar;
     } else {
-        userAvatarSidebar.src = '';
-        userAvatarHeader.src = '';
+        userAvatarSidebar.src = placeholderAvatar;
+        userAvatarHeader.src = placeholderAvatar;
     }
+
     
     if (!userState.xp) userState.xp = 0;
     if (!userState.missions) userState.missions = [];
