@@ -102,6 +102,7 @@ async function loadUserData(user) {
     }
     
     rankingToggle.checked = userState.show_in_ranking !== false;
+
     if (userState.avatar) {
         userAvatarSidebar.src = userState.avatar;
         userAvatarHeader.src = userState.avatar;
@@ -203,6 +204,7 @@ async function renderAdminInfo() {
     });
 }
 
+
 function renderDashboard() {
     updateTimeProgress();
     const level = Math.floor((userState.xp || 0) / 100) + 1;
@@ -300,6 +302,54 @@ async function updateGradesAverage(save = true) {
         if(user) await sb.from('profiles').update({ grades_average: average }).eq('id', user.id);
     }
 }
+function renderGradesChart() {
+    const ctx = document.getElementById('grades-chart').getContext('2d');
+    const gradesWithValues = Object.entries(userState.grades).filter(([, score]) => score > 0);
+    
+    if (gradesChartInstance) {
+        gradesChartInstance.destroy();
+    }
+    
+    gradesChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: gradesWithValues.map(([subject]) => subject.substring(0, 15) + '...'),
+            datasets: [{
+                label: 'Notas',
+                data: gradesWithValues.map(([, score]) => score),
+                backgroundColor: 'rgba(0, 175, 255, 0.6)',
+                borderColor: 'rgba(0, 175, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 10,
+                    ticks: { color: '#8A94B6' }
+                },
+                x: {
+                    ticks: { color: '#8A94B6' }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            const index = context[0].dataIndex;
+                            return gradesWithValues[index][0];
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
 
 function renderQTSSchedule() {
     qtsScheduleContainer.innerHTML = `<div class="qts-cell qts-header"></div>` + ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'].map(day => `<div class="qts-cell qts-header">${day}</div>`).join('');
@@ -598,7 +648,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         saveUserData().then(() => {
             updateGradesAverage(true);
-            renderGradesChart();
             saveGradesButton.textContent = 'Salvo!';
             setTimeout(() => { saveGradesButton.textContent = 'Salvar Alterações'; }, 1500);
         });
@@ -624,7 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
     questsList.addEventListener('change', handleQuestInteraction);
     clearCompletedQuestsButton.addEventListener('click', clearCompletedQuests);
     
-    document.getElementById('achievements-widget').addEventListener('click', () => {
+    achievementsWidget.addEventListener('click', () => {
         renderAchievements();
         achievementsModal.classList.remove('hidden');
     });
