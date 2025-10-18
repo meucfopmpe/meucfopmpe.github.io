@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const email = `${courseNumber}@cfo.pmpe`;
         const { data: authData, error: authError } = await sb.auth.signUp({ email, password, options: { data: { full_name: fullName, course_number: courseNumber, platoon: platoon } } });
-
+    
         if (authError) { signupMessage.textContent = "Erro: Numérica já pode estar em uso."; signupMessage.className = 'error-message'; return; }
         
         if (authData.user) {
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (data.user) { showApp(); loadDashboardData(); }
     }
     async function handleLogout() { await sb.auth.signOut(); window.location.reload(); }
-
+    
     async function loadUserData(user) {
         const { data, error } = await sb.from('profiles').select('user_data').eq('id', user.id).single();
         if (error) { console.error("Erro ao carregar dados do usuário:", error); return; }
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const { error } = await sb.from('profiles').update({ user_data: userState }).eq('id', user.id);
         if (error) console.error("Erro ao salvar dados do usuário:", error);
     }
-
+    
     async function uploadAvatar(file) {
         try {
             const dataUrl = await resizeImage(file, 200, 200);
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Não foi possível processar a imagem.');
         }
     }
-
+    
     function resizeImage(file, maxWidth, maxHeight) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.onerror = reject;
         });
     }
-
+    
     // =======================================================
     // 5. FUNÇÕES DE RENDERIZAÇÃO E LÓGICA DO PAINEL
     // =======================================================
@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDashboard();
         renderAdminInfo();
     }
-
+    
     async function renderAdminInfo() {
         const { data, error } = await sb.from('global_info').select('*').order('created_at', { ascending: false }).limit(5);
         if (error) { console.error("Erro ao buscar informações do ADM:", error); return; }
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
             adminInfoList.appendChild(li);
         });
     }
-
+    
     function renderDashboard() {
         updateTimeProgress();
         const level = Math.floor((userState.xp || 0) / 100) + 1;
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playerLevelTitle.textContent = `NÍVEL ${level} - ${title}`;
         xpText.textContent = `EXP: ${currentExp} / ${expForNextLevel}`;
         xpBar.style.width = `${currentExp}%`;
-
+    
         const today = new Date();
         today.setHours(0,0,0,0);
         const scheduled = (userState.missions || []).map(m => ({ date: new Date(m.date + 'T00:00:00'), text: m.name, type: 'Serviço' }));
@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             dashboardMissionsList.innerHTML = '<li><span>Nenhuma missão futura agendada.</span></li>';
         }
-
+    
         dashboardRemindersList.innerHTML = '';
         const last3Reminders = (userState.reminders || []).filter(r => !r.completed).slice(0, 3);
         if (last3Reminders.length > 0) {
@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             dashboardRemindersList.innerHTML = '<li><span>Nenhum lembrete ativo.</span></li>';
         }
-
+    
         dashboardAchievementsList.innerHTML = '';
         const last3Achievements = (userState.achievements || []).slice(-3).reverse();
         if (last3Achievements.length > 0) {
@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
              dashboardAchievementsList.innerHTML = `<div class="achievement-icon locked" title="Nenhuma conquista desbloqueada">?</div>`;
         }
     }
-
+    
     function updateTimeProgress() {
         const today = new Date();
         const graduationDate = new Date('2026-05-26T00:00:00');
@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
         coursePercentageEl.innerHTML = `<span>${percentage.toFixed(1)}%</span> do curso concluído`;
         checkAchievements('time_update', { percentage, days_left: daysLeft });
     }
-
+    
     function renderGrades() {
         gradesContainer.innerHTML = '';
         subjectList.sort().forEach(subject => {
@@ -306,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(user) await sb.from('profiles').update({ grades_average: average }).eq('id', user.id);
         }
     }
-
+    
     function renderGradesChart() {
         const ctx = document.getElementById('grades-chart').getContext('2d');
         const gradesWithValues = Object.entries(userState.grades).filter(([, score]) => score > 0);
@@ -363,8 +363,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-
+    
+    
     function renderQTSSchedule() {
         qtsScheduleContainer.innerHTML = `<div class="qts-cell qts-header"></div>` + ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'].map(day => `<div class="qts-cell qts-header">${day}</div>`).join('');
         qtsTimes.forEach(time => {
@@ -382,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
         userState.schedule[day][time] = e.target.value.trim().toUpperCase();
         saveUserData();
     }
-
+    
     function initCalendar() {
         if (calendarInstance) { calendarInstance.destroy(); }
         calendarInstance = new FullCalendar.Calendar(calendarContainer, {
@@ -414,14 +414,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         return events;
     }
-
+    
     async function renderRanking() {
         rankingList.innerHTML = 'Carregando ranking...';
         const { data: profiles, error } = await sb.from('profiles').select('full_name, user_data, grades_average').order('grades_average', { ascending: false }).limit(50);
         if (error) { rankingList.innerHTML = '<p style="color: var(--sl-error);">Não foi possível carregar o ranking.</p>'; console.error(error); return; }
         
         const filteredProfiles = profiles.filter(p => p.user_data?.show_in_ranking !== false);
-
+    
         if (filteredProfiles.length === 0) { rankingList.innerHTML = '<p>Ninguém no ranking ainda ou todos estão privados.</p>'; return; }
         
         rankingList.innerHTML = '';
@@ -433,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rankingList.appendChild(item);
         });
     }
-
+    
     function renderAchievements() {
         achievementsGrid.innerHTML = '';
         for (const key in achievementsData) {
@@ -453,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if(stateChanged) saveUserData();
     }
-
+    
     function addXp(amount) {
         if (!userState.xp) userState.xp = 0;
         userState.xp += amount;
@@ -461,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveUserData();
         renderDashboard();
     }
-
+    
     function renderQuests() {
         questsList.innerHTML = '';
         if (!userState.quests) return;
@@ -501,7 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveUserData();
         renderQuests();
     }
-
+    
     function renderScheduledMissions() {
         scheduledMissionsList.innerHTML = '';
         if (!userState.missions) return;
@@ -524,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (calendarInstance) calendarInstance.refetchEvents();
         }
     }
-
+    
     function renderReminders() {
         remindersList.innerHTML = '';
         if (!userState.reminders) return;
@@ -554,7 +554,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveUserData();
         renderReminders();
     }
-
+    
     function renderLinks() {
         linksList.innerHTML = '';
         if (!userState.links) return;
@@ -604,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderLinks();
         }
     }
-
+    
     // =======================================================
     // 6. CONTROLE DE INTERFACE E EVENT LISTENERS
     // =======================================================
@@ -638,7 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sidebarOverlay.classList.add('hidden');
         }
     }
-
+    
     checkSession();
     loginButton.addEventListener('click', handleLogin);
     signupButton.addEventListener('click', handleSignUp);
