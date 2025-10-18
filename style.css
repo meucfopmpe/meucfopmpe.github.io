@@ -238,5 +238,67 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
   .doc-card .doc-title { font-size: 14px; }
 }
 
+/* --- ESTILOS PARA MISSÕES, LEMBRETES, LINKS --- */
+.inline-form { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+.inline-form input, .inline-form select { flex-grow: 1; min-width: 150px; }
+.inline-form button { width: auto; padding: 0 20px; flex-shrink: 0; }
+.inline-form input[type="date"] { color-scheme: dark; }
+.styled-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.styled-list li, .styled-list .list-item { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; background-color: var(--sl-surface); padding: 15px; border-radius: 4px; border: 1px solid var(--sl-border); gap: 10px; }
+.styled-list button { width: 40px; height: 30px; padding: 0; background-color: var(--sl-bg); border: 1px solid var(--sl-border); color: var(--sl-error); font-size: 1em; }
+.styled-list .completed span { text-decoration: line-through; color: var(--sl-text-secondary); }
+.link-item a { color: var(--sl-primary); text-decoration: none; font-weight: 600; }
+.link-item-info { word-break: break-all; }
+.link-item-info span { color: var(--sl-text-secondary); font-size: 0.9em; margin-left: 10px; }
+.quest-xp { font-weight: bold; color: var(--sl-success); }
+.list-header-container { display: flex; justify-content: space-between; align-items: center; }
+#clear-completed-quests-button { width: auto; padding: 5px 15px; font-size: 0.8em; background-color: var(--sl-surface); border: 1px solid var(--sl-border); color: var(--sl-text-secondary); }
+#clear-completed-quests-button:hover { background-color: var(--sl-error); border-color: var(--sl-error); color: var(--sl-bg); }
+.edit-link-btn { width: 40px; height: 30px; font-size: 1.2em; background-color: var(--sl-bg); border: 1px solid var(--sl-border); color: var(--sl-primary); }
+
+/* --- ESTILOS PARA O AVATAR --- */
+#profile-pic-container { position: relative; width: 125px; height: 125px; margin: 0 auto 10px auto; }
+#user-avatar-sidebar { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--sl-border); object-fit: cover; background-color: var(--sl-bg); }
+#upload-avatar-button { position: absolute; bottom: 5px; right: 5px; width: 32px; height: 32px; padding: 0; font-size: 1.2em; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--sl-bg); cursor: pointer; }
+
+/* --- ESTILOS PARA O MODAL --- */
+.modal { position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(10, 15, 30, 0.8); display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+.modal-content { position: relative; background-color: var(--sl-surface); padding: 30px; border: 1px solid var(--sl-border); border-radius: 8px; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; }
+#detail-modal-body { line-height: 1.6; }
+#day-detail-body ul { list-style: none; margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+#day-detail-body li { background-color: var(--sl-bg); padding: 10px; border-radius: 4px; border-left: 3px solid var(--sl-primary); color: var(--sl-text-primary); }
+.modal-close-button { position: absolute; top: 10px; right: 15px; color: var(--sl-text-secondary); background: none; border: none; font-size: 2.5em; line-height: 1; cursor: pointer; width: auto; }
+.clickable { cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.clickable:hover { transform: translateY(-5px); box-shadow: 0 5px 25px var(--sl-glow); }
+
+/* --- MEDIA QUERY PARA CELULARES --- */
+@media (max-width: 768px) {
+    .sidebar { position: fixed; left: 0; top: 0; height: 100%; z-index: 2000; transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .hamburger-button { display: block; }
+    .header-avatar { display: block; }
+    .main-header { display: grid; grid-template-columns: auto 1fr auto; }
+    .page { padding: 15px; }
+    .dashboard-grid { gap: 15px; }
+}
+
+/* --- ESTILO PARA BLOQUEIO DO RANKING --- */
+.ranking-private-container {
+    text-align: center;
+    padding: 40px;
+    background-color: var(--sl-surface);
+    border: 1px solid var(--sl-border);
+    border-radius: 8px;
+    margin: 20px;
+}
+.ranking-private-container h3 {
+    color: var(--sl-primary);
+    margin-bottom: 15px;
+}
+.ranking-private-container p {
+    color: var(--sl-text-secondary);
+    line-height: 1.6;
+}
+
 /* keep the rest of your site's styles unchanged below this line */
 /* ... (other CSS already present in your file) ... */
