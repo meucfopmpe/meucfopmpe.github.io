@@ -370,6 +370,18 @@ async function renderDocuments(searchTerm = '') {
         noLink.textContent = 'Sem link disponível';
         item.appendChild(noLink);
       }
+        // tornar todo o card clicável para abrir o arquivo (mesma URL do .doc-link)
+        if (href) {
+          // permitir foco por teclado
+          item.tabIndex = 0;
+          item.style.cursor = 'pointer';
+        
+          // clique com o mouse abre em nova aba
+          item.addEventListener('click', () => {
+            window.open(href, '_blank');
+          });
+        
+          
 
       documentsGrid.appendChild(item);
     });
