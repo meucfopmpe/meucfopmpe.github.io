@@ -624,12 +624,41 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.tagName !== 'A') return;
         const targetPageId = e.target.dataset.page;
         if (!targetPageId) return;
+    
+        // Lógica condicional para o Ranking
+        if (targetPageId === 'page-ranking' && !userState.show_in_ranking) {
+            const rankingPage = document.getElementById('page-ranking');
+            const rankingList = document.getElementById('ranking-list');
+            
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            
+            rankingPage.classList.add('active');
+            e.target.classList.add('active');
+            pageTitleEl.textContent = e.target.textContent;
+    
+            rankingList.innerHTML = `
+                <div class="ranking-private-container">
+                    <h3>Acesso Restrito</h3>
+                    <p>Para visualizar o ranking da turma, você precisa permitir que seu perfil seja exibido.</p>
+                    <p>Vá para a página "Minhas Notas" e ative a opção "Exibir no Ranking".</p>
+                </div>
+            `;
+            
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.add('hidden');
+            }
+            return; // Interrompe a função aqui para não renderizar o ranking
+        }
+    
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         document.getElementById(targetPageId).classList.add('active');
         e.target.classList.add('active');
         pageTitleEl.textContent = e.target.textContent;
-        
+    
+        // Renderiza o conteúdo específico da página clicada
         if (targetPageId === 'page-grades') renderGrades();
         if (targetPageId === 'page-schedule') renderQTSSchedule();
         if (targetPageId === 'page-calendar') initCalendar();
@@ -637,13 +666,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (targetPageId === 'page-daily-quests') renderQuests();
         if (targetPageId === 'page-reminders') renderReminders();
         if (targetPageId === 'page-links') renderLinks();
-
+        if (targetPageId === 'page-documents') renderDocuments();
+    
         if (window.innerWidth <= 768) {
             sidebar.classList.remove('open');
             sidebarOverlay.classList.add('hidden');
         }
     }
-
     checkSession();
     loginButton.addEventListener('click', handleLogin);
     signupButton.addEventListener('click', handleSignUp);
