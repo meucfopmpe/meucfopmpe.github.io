@@ -312,11 +312,16 @@ async function renderDocuments(searchTerm = '') {
       item.className = 'doc-card';
 
       // escolha do ícone - se for PDF usar emoji /📄/ ou imagem
-      const ext = (doc.file_path || doc.url || '').split('.').pop()?.toLowerCase() || '';
-      let icon = '📄';
-      if (ext === 'pdf') icon = '📄';
-      else if (['png','jpg','jpeg','gif','svg'].includes(ext)) icon = '🖼️';
-      else if (['doc','docx'].includes(ext)) icon = '📝';
+        
+        const ext = (doc.file_path || doc.url || '').split('.').pop()?.toLowerCase() || '';
+        let icon = '📄';
+        if (ext === 'pdf') icon = '📄';
+        else if (['png','jpg','jpeg','gif','svg'].includes(ext)) icon = '🖼️';
+        else if (['doc','docx'].includes(ext)) icon = '📝';
+        const iconEl = document.createElement('div');
+        iconEl.className = 'doc-icon';
+        iconEl.textContent = icon; // já calculado no seu código
+        item.appendChild(iconEl);
 
       // montar href (prioriza url, depois file_path via storage pública)
       let href = null;
@@ -329,6 +334,10 @@ async function renderDocuments(searchTerm = '') {
       // título e descrição (fallback)
       const title = doc.title || (doc.file_path ? doc.file_path : `Documento ${doc.id || ''}`);
       const desc = doc.description || '';
+      const titleEl = document.createElement('div');
+      titleEl.className = 'doc-title';
+      titleEl.textContent = title;
+      item.appendChild(titleEl);
 
       // conteúdo do card (uso de criação de elementos para evitar HTML inseguro)
       const iconEl = document.createElement('div');
@@ -370,6 +379,18 @@ async function renderDocuments(searchTerm = '') {
         noLink.textContent = 'Sem link disponível';
         item.appendChild(noLink);
       }
+        
+        if (href) {
+          const linkWrap = document.createElement('a');
+          linkWrap.className = 'doc-card-link';
+          linkWrap.href = href;
+          linkWrap.target = '_blank';
+          linkWrap.rel = 'noopener noreferrer';
+          linkWrap.appendChild(item);
+          documentsGrid.appendChild(linkWrap);
+        } else {
+          documentsGrid.appendChild(item);
+        }
 
       documentsGrid.appendChild(item);
     });
