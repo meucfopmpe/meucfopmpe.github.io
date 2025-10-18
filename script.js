@@ -269,6 +269,139 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
         coursePercentageEl.innerHTML = `<span>${percentage.toFixed(1)}%</span> do curso concluído`;
         checkAchievements('time_update', { percentage, days_left: daysLeft });
     }
+
+        // --- Renderização de DOCUMENTOS GLOBAIS ---
+    const STORAGE_BUCKET_FOR_DOCUMENTS = 'documents'; // <-- altere se o seu bucket tiver outro nome
+    
+    async function renderDocuments(searchTerm = '') {
+        if (!documentsGrid) {
+            console.warn('[renderDocuments] #documents-grid não encontrado no DOM.');
+            return;
+        }
+    
+        documentsGrid.innerHTML = '<div class="loading">Carregando documentos...</div>';
+    
+        try {
+            // Monta query - seleciona campos comuns; ajuste conforme seu schema
+            let query = sb.from('documents').select('id, title, description, url, file_path, created_at');
+    
+            // Se houver termo de busca, aplica filtro ilike em title (case-insensitive)
+            if (searchTerm && searchTerm.length > 0) {
+                // ilike é útil para buscas parciais (substitua por eq/se necessário)
+                query = query.ilike('title', `%${searchTerm}%`);
+            }
+    
+            // ordena por criado mais recente
+            query = query.order('created_at', { ascending: false }).limit(200);
+    
+            const { data, error } = await query;
+    
+            console.log('[renderDocuments] resposta:', { data, error, searchTerm });
+    
+            if (error) {
+                console.error('Erro ao buscar documents:', error);
+                documentsGrid.innerHTML = `<div class="error">Erro ao carregar documentos: ${error.message || JSON.stringify(error)}</div>`;
+                return;
+            }
+    
+            if (!data || data.length === 0) {
+                documentsGrid.innerHTML = '<div class="empty">Nenhum documento encontrado.</div>';
+                return;
+            }
+    
+            // Limpa e renderiza resultados
+            documentsGrid.innerHTML = '';
+            data.forEach(doc => {
+                const item = document.createElement('div');
+                item.className = 'document-item';
+    
+                // Título (se não houver, usar id)
+                const title = doc.title || `Documento ${doc.id || ''}`;
+                const titleEl = document.createElement('div');
+                titleEl.className = 'document-title';
+                titleEl.textContent = title;
+                item.appendChild(titleEl);
+    
+                // Descrição opcional
+                if (doc.description) {
+                    const desc = document.createElement('div');
+                    desc.className = 'document-desc';
+                    desc.textContent = doc.description;
+                    item.appendChild(desc);
+                }
+    
+                // Link de download / visualização:
+                let href = null;
+                if (doc.url) {
+                    // Se a tabela já contém uma url pública
+                    href = doc.url;
+                } else if (doc.file_path) {
+                    // Se o arquivo está no Storage, construímos a URL pública padrão do Supabase
+                    // ATENÇÃO: se seu bucket não for público, essa URL retornará 401/403.
+                    href = `${SUPABASE_URL.replace(/\\/$/, '')}/storage/v1/object/public/${encodeURIComponent(STORAGE_BUCKET_FOR_DOCUMENTS)}/${encodeURIComponent(doc.file_path)}`;
+                }
+    
+                if (href) {
+                    const a = document.createElement('a');
+                    a.href = href;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.textContent = 'Abrir / Baixar';
+                    a.className = 'document-link';
+                    item.appendChild(a);
+                } else {
+                    const noLink = document.createElement('div');
+                    noLink.className = 'document-no-link';
+                    noLink.textContent = 'Sem link disponível';
+                    item.appendChild(noLink);
+                }
+    
+                // Meta: data de criação
+                if (doc.created_at) {
+                    const meta = document.createElement('div');
+                    meta.className = 'document-meta';
+                    const d = new Date(doc.created_at);
+                    meta.textContent = isNaN(d) ? String(doc.created_at) : d.toLocaleString('pt-BR');
+                    item.appendChild(meta);
+                }
+    
+                documentsGrid.appendChild(item);
+            });
+    
+        } catch (err) {
+            console.error('Erro inesperado em renderDocuments:', err);
+            documentsGrid.innerHTML = '<div class="error">Erro inesperado ao carregar documentos. Veja o console.</div>';
+        }
+    }
+    
+    // vincular a busca ao input (se existir)
+    if (documentSearchInput) {
+        let searchTimeout = null;
+        documentSearchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                renderDocuments(documentSearchInput.value.trim());
+            }, 250); // debounce pequeno
+        });
+    }
+    
+    // chamar renderDocuments ao abrir a aba de documentos:
+    // no seu handlePageNavigation, adicione ou ajuste:
+    function handlePageNavigation(e) {
+        if (e.target.tagName !== 'A') return;
+        const targetPageId = e.target.dataset.page;
+        if (!targetPageId) return;
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        document.getElementById(targetPageId).classList.add('active');
+        e.target.classList.add('active');
+        pageTitleEl.textContent = e.target.textContent;
+    
+        if (targetPageId === 'page-documents') {
+            renderDocuments(documentSearchInput ? documentSearchInput.value.trim() : '');
+        }
+        // ... restante do switch (grades, schedule, calendar etc)
+    }
     
     function renderGrades() {
         gradesContainer.innerHTML = '';
