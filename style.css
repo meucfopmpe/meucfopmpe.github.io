@@ -553,3 +553,21 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
   .doc-card .doc-icon { width: 48px; height: 48px; font-size: 28px; }
   .doc-card .doc-title { font-size: 14px; }
 }
+
+/* --- ESTILO PARA BLOQUEIO DO RANKING --- */
+.ranking-private-container {
+    text-align: center;
+    padding: 40px;
+    background-color: var(--sl-surface);
+    border: 1px solid var(--sl-border);
+    border-radius: 8px;
+    margin: 20px;
+}
+.ranking-private-container h3 {
+    color: var(--sl-primary);
+    margin-bottom: 15px;
+}
+.ranking-private-container p {
+    color: var(--sl-text-secondary);
+    line-height: 1.6;
+}
