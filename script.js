@@ -404,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
     catch (e) { console.warn('renderDocuments init falhou:', e); }
   }, 120);
 });
-    }
+    
     
     // chamar renderDocuments ao abrir a aba de documentos:
     // no seu handlePageNavigation, adicione ou ajuste:
