@@ -13,8 +13,6 @@ let gradesChartInstance;
 let editingLinkId = null; // Variável para controlar a edição de links
 const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO ÚNICA
 
-document.addEventListener('DOMContentLoaded', () => {
-
     // =======================================================
     // 2. ELEMENTOS DO DOM
     // =======================================================
@@ -724,4 +722,3 @@ document.addEventListener('DOMContentLoaded', () => {
             saveUserData();
         });
     });
-});
