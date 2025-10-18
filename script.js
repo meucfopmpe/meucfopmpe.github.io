@@ -381,7 +381,7 @@ async function renderDocuments(searchTerm = '') {
             window.open(href, '_blank');
           });
         
-          
+        }
 
       documentsGrid.appendChild(item);
     });
