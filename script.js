@@ -13,7 +13,9 @@ let gradesChartInstance;
 let editingLinkId = null; // Variável para controlar a edição de links
 const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO ÚNICA
 
-// =======================================================
+document.addEventListener('DOMContentLoaded', () => {
+
+    // =======================================================
     // 2. ELEMENTOS DO DOM
     // =======================================================
     const authPage = document.getElementById('auth-page'), appPage = document.getElementById('app');
@@ -69,7 +71,7 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
         
         const email = `${courseNumber}@cfo.pmpe`;
         const { data: authData, error: authError } = await sb.auth.signUp({ email, password, options: { data: { full_name: fullName, course_number: courseNumber, platoon: platoon } } });
-    
+
         if (authError) { signupMessage.textContent = "Erro: Numérica já pode estar em uso."; signupMessage.className = 'error-message'; return; }
         
         if (authData.user) {
@@ -86,7 +88,7 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
         else if (data.user) { showApp(); loadDashboardData(); }
     }
     async function handleLogout() { await sb.auth.signOut(); window.location.reload(); }
-    
+
     async function loadUserData(user) {
         const { data, error } = await sb.from('profiles').select('user_data').eq('id', user.id).single();
         if (error) { console.error("Erro ao carregar dados do usuário:", error); return; }
@@ -106,13 +108,12 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
         
         rankingToggle.checked = userState.show_in_ranking !== false;
         
-        const placeholderAvatar = 'https://i.imgur.com/xpkhft4.png';
         if (userState.avatar) {
             userAvatarSidebar.src = userState.avatar;
             userAvatarHeader.src = userState.avatar;
         } else {
-            userAvatarSidebar.src = placeholderAvatar;
-            userAvatarHeader.src = placeholderAvatar;
+            userAvatarSidebar.src = PLACEHOLDER_AVATAR;
+            userAvatarHeader.src = PLACEHOLDER_AVATAR;
         }
         
         if (!userState.xp) userState.xp = 0;
@@ -130,7 +131,7 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
         const { error } = await sb.from('profiles').update({ user_data: userState }).eq('id', user.id);
         if (error) console.error("Erro ao salvar dados do usuário:", error);
     }
-    
+
     async function uploadAvatar(file) {
         try {
             const dataUrl = await resizeImage(file, 200, 200);
@@ -143,7 +144,7 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
             alert('Não foi possível processar a imagem.');
         }
     }
-    
+
     function resizeImage(file, maxWidth, maxHeight) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -171,7 +172,7 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
             reader.onerror = reject;
         });
     }
-    
+
     // =======================================================
     // 5. FUNÇÕES DE RENDERIZAÇÃO E LÓGICA DO PAINEL
     // =======================================================
@@ -187,7 +188,7 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
         renderDashboard();
         renderAdminInfo();
     }
-    
+
     async function renderAdminInfo() {
         const { data, error } = await sb.from('global_info').select('*').order('created_at', { ascending: false }).limit(5);
         if (error) { console.error("Erro ao buscar informações do ADM:", error); return; }
@@ -207,7 +208,7 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
             adminInfoList.appendChild(li);
         });
     }
-    
+
     function renderDashboard() {
         updateTimeProgress();
         const level = Math.floor((userState.xp || 0) / 100) + 1;
@@ -217,7 +218,7 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
         playerLevelTitle.textContent = `NÍVEL ${level} - ${title}`;
         xpText.textContent = `EXP: ${currentExp} / ${expForNextLevel}`;
         xpBar.style.width = `${currentExp}%`;
-    
+
         const today = new Date();
         today.setHours(0,0,0,0);
         const scheduled = (userState.missions || []).map(m => ({ date: new Date(m.date + 'T00:00:00'), text: m.name, type: 'Serviço' }));
@@ -233,7 +234,7 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
         } else {
             dashboardMissionsList.innerHTML = '<li><span>Nenhuma missão futura agendada.</span></li>';
         }
-    
+
         dashboardRemindersList.innerHTML = '';
         const last3Reminders = (userState.reminders || []).filter(r => !r.completed).slice(0, 3);
         if (last3Reminders.length > 0) {
@@ -243,7 +244,7 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
         } else {
             dashboardRemindersList.innerHTML = '<li><span>Nenhum lembrete ativo.</span></li>';
         }
-    
+
         dashboardAchievementsList.innerHTML = '';
         const last3Achievements = (userState.achievements || []).slice(-3).reverse();
         if (last3Achievements.length > 0) {
@@ -255,7 +256,7 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
              dashboardAchievementsList.innerHTML = `<div class="achievement-icon locked" title="Nenhuma conquista desbloqueada">?</div>`;
         }
     }
-    
+
     function updateTimeProgress() {
         const today = new Date();
         const graduationDate = new Date('2026-05-26T00:00:00');
@@ -270,210 +271,6 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
         checkAchievements('time_update', { percentage, days_left: daysLeft });
     }
 
-        // --- Renderização de DOCUMENTOS GLOBAIS ---
-    const STORAGE_BUCKET_FOR_DOCUMENTS = 'documents'; // <-- altere se o seu bucket tiver outro nome
-    
-    // Função atualizada para renderizar os documentos como cards (igual ao print)
-async function renderDocuments(searchTerm = '') {
-  if (!documentsGrid) {
-    console.warn('[renderDocuments] #documents-grid não encontrado.');
-    return;
-  }
-
-  documentsGrid.innerHTML = '<div class="loading">Carregando documentos...</div>';
-
-  try {
-    let query = sb.from('documents').select('id, title, description, url, file_path, created_at');
-
-    if (searchTerm && searchTerm.length > 0) {
-      query = query.ilike('title', `%${searchTerm}%`);
-    }
-
-    query = query.order('created_at', { ascending: false }).limit(200);
-
-    const { data, error } = await query;
-    console.log('[renderDocuments] resposta:', { data, error, searchTerm });
-
-    if (error) {
-      console.error('Erro ao buscar documents:', error);
-      documentsGrid.innerHTML = `<div class="error">Erro ao carregar documentos: ${error.message || JSON.stringify(error)}</div>`;
-      return;
-    }
-
-    if (!data || data.length === 0) {
-      documentsGrid.innerHTML = '<div class="empty">Nenhum documento encontrado.</div>';
-      return;
-    }
-
-    // renderiza como grid de cards
-    documentsGrid.innerHTML = '';
-    data.forEach(doc => {
-      const item = document.createElement('div');
-      item.className = 'doc-card';
-
-      // escolha do ícone - se for PDF usar emoji /📄/ ou imagem
-      const ext = (doc.file_path || doc.url || '').split('.').pop()?.toLowerCase() || '';
-      let icon = '📄';
-      if (ext === 'pdf') icon = '📄';
-      else if (['png','jpg','jpeg','gif','svg'].includes(ext)) icon = '🖼️';
-      else if (['doc','docx'].includes(ext)) icon = '📝';
-
-      // montar href (prioriza url, depois file_path via storage pública)
-      let href = null;
-      if (doc.url) {
-        href = doc.url;
-      } else if (doc.file_path) {
-        href = `${SUPABASE_URL.replace(/\/$/, '')}/storage/v1/object/public/${encodeURIComponent(STORAGE_BUCKET_FOR_DOCUMENTS)}/${encodeURIComponent(doc.file_path)}`;
-      }
-
-      // título e descrição (fallback)
-      const title = doc.title || (doc.file_path ? doc.file_path : `Documento ${doc.id || ''}`);
-      const desc = doc.description || '';
-
-      // conteúdo do card (uso de criação de elementos para evitar HTML inseguro)
-      const iconEl = document.createElement('div');
-      iconEl.className = 'doc-icon';
-      iconEl.textContent = icon;
-      item.appendChild(iconEl);
-
-      const titleEl = document.createElement('div');
-      titleEl.className = 'doc-title';
-      titleEl.textContent = title;
-      item.appendChild(titleEl);
-
-      if (desc) {
-        const descEl = document.createElement('div');
-        descEl.className = 'doc-desc';
-        descEl.textContent = desc;
-        item.appendChild(descEl);
-      }
-
-      const metaEl = document.createElement('div');
-      metaEl.className = 'document-meta';
-      if (doc.created_at) {
-        const d = new Date(doc.created_at);
-        if (!isNaN(d)) metaEl.textContent = d.toLocaleDateString('pt-BR');
-      }
-      if (metaEl.textContent) item.appendChild(metaEl);
-
-      if (href) {
-        const a = document.createElement('a');
-        a.className = 'doc-link';
-        a.href = href;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        a.textContent = 'Abrir / Baixar';
-        item.appendChild(a);
-      } else {
-        const noLink = document.createElement('div');
-        noLink.className = 'document-no-link';
-        noLink.textContent = 'Sem link disponível';
-        item.appendChild(noLink);
-      }
-        // tornar todo o card clicável para abrir o arquivo (mesma URL do .doc-link)
-        if (href) {
-          // permitir foco por teclado
-          item.tabIndex = 0;
-          item.style.cursor = 'pointer';
-        
-          // clique com o mouse abre em nova aba
-          item.addEventListener('click', () => {
-            window.open(href, '_blank');
-          });
-        
-        }
-
-      documentsGrid.appendChild(item);
-    });
-
-  } catch (err) {
-    console.error('Erro inesperado em renderDocuments:', err);
-    documentsGrid.innerHTML = '<div class="error">Erro inesperado ao carregar documentos. Veja o console.</div>';
-  }
-}
-
-// bind de busca com debounce (se já não existir)
-if (documentSearchInput) {
-  let searchTimeout = null;
-  documentSearchInput.addEventListener('input', () => {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-      renderDocuments(documentSearchInput.value.trim());
-    }, 220);
-  });
-}
-
-// Assegure que os documentos carreguem já ao abrir a aba e na inicialização:
-// 1) Quando o usuário navega para a aba de documentos (garanta que handlePageNavigation chama isto):
-//    if (targetPageId === 'page-documents') renderDocuments(documentSearchInput ? documentSearchInput.value.trim() : '');
-// 2) E também carregue ao iniciar (após checkSession/DOMContentLoaded)
-document.addEventListener('DOMContentLoaded', () => {
-  // Carregar os documentos logo que o DOM esteja pronto (evita depender só do input)
-  // - chama sem termo de busca para listar todos (ou os mais recentes)
-  setTimeout(() => {
-    // pequeno timeout para garantir variáveis/elementos já inicializados
-    try { renderDocuments(documentSearchInput ? documentSearchInput.value.trim() : ''); }
-    catch (e) { console.warn('renderDocuments init falhou:', e); }
-  }, 120);
-});
-    
-    
-    // chamar renderDocuments ao abrir a aba de documentos:
-    // no seu handlePageNavigation, adicione ou ajuste:
-   function handlePageNavigation(e) {
-    if (e.target.tagName !== 'A') return;
-    const targetPageId = e.target.dataset.page;
-    if (!targetPageId) return;
-
-    // Lógica condicional para o Ranking
-    if (targetPageId === 'page-ranking' && !userState.show_in_ranking) {
-        const rankingPage = document.getElementById('page-ranking');
-        const rankingList = document.getElementById('ranking-list');
-        
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-        
-        rankingPage.classList.add('active');
-        e.target.classList.add('active');
-        pageTitleEl.textContent = e.target.textContent;
-
-        rankingList.innerHTML = `
-            <div class="ranking-private-container">
-                <h3>Acesso Restrito</h3>
-                <p>Para visualizar o ranking da turma, você precisa permitir que seu perfil seja exibido.</p>
-                <p>Vá para a página "Minhas Notas" e ative a opção "Exibir no Ranking".</p>
-            </div>
-        `;
-        
-        if (window.innerWidth <= 768) {
-            sidebar.classList.remove('open');
-            sidebarOverlay.classList.add('hidden');
-        }
-        return; // Interrompe a função aqui para não renderizar o ranking
-    }
-
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    document.getElementById(targetPageId).classList.add('active');
-    e.target.classList.add('active');
-    pageTitleEl.textContent = e.target.textContent;
-
-    // Renderiza o conteúdo específico da página clicada
-    if (targetPageId === 'page-grades') renderGrades();
-    if (targetPageId === 'page-schedule') renderQTSSchedule();
-    if (targetPageId === 'page-calendar') initCalendar();
-    if (targetPageId === 'page-ranking') renderRanking();
-    if (targetPageId === 'page-daily-quests') renderQuests();
-    if (targetPageId === 'page-reminders') renderReminders();
-    if (targetPageId === 'page-links') renderLinks();
-    if (targetPageId === 'page-documents') renderDocuments();
-
-    if (window.innerWidth <= 768) {
-        sidebar.classList.remove('open');
-        sidebarOverlay.classList.add('hidden');
-    }
-}
-    
     function renderGrades() {
         gradesContainer.innerHTML = '';
         subjectList.sort().forEach(subject => {
@@ -509,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(user) await sb.from('profiles').update({ grades_average: average }).eq('id', user.id);
         }
     }
-    
+
     function renderGradesChart() {
         const ctx = document.getElementById('grades-chart').getContext('2d');
         const gradesWithValues = Object.entries(userState.grades).filter(([, score]) => score > 0);
@@ -566,8 +363,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
-    
+
+
     function renderQTSSchedule() {
         qtsScheduleContainer.innerHTML = `<div class="qts-cell qts-header"></div>` + ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'].map(day => `<div class="qts-cell qts-header">${day}</div>`).join('');
         qtsTimes.forEach(time => {
@@ -585,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
         userState.schedule[day][time] = e.target.value.trim().toUpperCase();
         saveUserData();
     }
-    
+
     function initCalendar() {
         if (calendarInstance) { calendarInstance.destroy(); }
         calendarInstance = new FullCalendar.Calendar(calendarContainer, {
@@ -617,14 +414,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         return events;
     }
-    
+
     async function renderRanking() {
         rankingList.innerHTML = 'Carregando ranking...';
         const { data: profiles, error } = await sb.from('profiles').select('full_name, user_data, grades_average').order('grades_average', { ascending: false }).limit(50);
         if (error) { rankingList.innerHTML = '<p style="color: var(--sl-error);">Não foi possível carregar o ranking.</p>'; console.error(error); return; }
         
         const filteredProfiles = profiles.filter(p => p.user_data?.show_in_ranking !== false);
-    
+
         if (filteredProfiles.length === 0) { rankingList.innerHTML = '<p>Ninguém no ranking ainda ou todos estão privados.</p>'; return; }
         
         rankingList.innerHTML = '';
@@ -636,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rankingList.appendChild(item);
         });
     }
-    
+
     function renderAchievements() {
         achievementsGrid.innerHTML = '';
         for (const key in achievementsData) {
@@ -656,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if(stateChanged) saveUserData();
     }
-    
+
     function addXp(amount) {
         if (!userState.xp) userState.xp = 0;
         userState.xp += amount;
@@ -664,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveUserData();
         renderDashboard();
     }
-    
+
     function renderQuests() {
         questsList.innerHTML = '';
         if (!userState.quests) return;
@@ -704,7 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveUserData();
         renderQuests();
     }
-    
+
     function renderScheduledMissions() {
         scheduledMissionsList.innerHTML = '';
         if (!userState.missions) return;
@@ -727,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (calendarInstance) calendarInstance.refetchEvents();
         }
     }
-    
+
     function renderReminders() {
         remindersList.innerHTML = '';
         if (!userState.reminders) return;
@@ -757,7 +554,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveUserData();
         renderReminders();
     }
-    
+
     function renderLinks() {
         linksList.innerHTML = '';
         if (!userState.links) return;
@@ -807,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderLinks();
         }
     }
-    
+
     // =======================================================
     // 6. CONTROLE DE INTERFACE E EVENT LISTENERS
     // =======================================================
@@ -835,94 +632,93 @@ document.addEventListener('DOMContentLoaded', () => {
         if (targetPageId === 'page-daily-quests') renderQuests();
         if (targetPageId === 'page-reminders') renderReminders();
         if (targetPageId === 'page-links') renderLinks();
-    
+
         if (window.innerWidth <= 768) {
             sidebar.classList.remove('open');
             sidebarOverlay.classList.add('hidden');
         }
     }
+
+    checkSession();
+    loginButton.addEventListener('click', handleLogin);
+    signupButton.addEventListener('click', handleSignUp);
+    logoutButton.addEventListener('click', handleLogout);
+    sidebarNav.addEventListener('click', handlePageNavigation);
+    showSignupLink.addEventListener('click', (e) => { e.preventDefault(); loginContainer.classList.add('hidden'); signupContainer.classList.remove('hidden'); });
+    showLoginLink.addEventListener('click', (e) => { e.preventDefault(); signupContainer.classList.add('hidden'); loginContainer.classList.remove('hidden'); });
     
-    document.addEventListener('DOMContentLoaded', () => {
-        checkSession();
-        loginButton.addEventListener('click', handleLogin);
-        signupButton.addEventListener('click', handleSignUp);
-        logoutButton.addEventListener('click', handleLogout);
-        sidebarNav.addEventListener('click', handlePageNavigation);
-        showSignupLink.addEventListener('click', (e) => { e.preventDefault(); loginContainer.classList.add('hidden'); signupContainer.classList.remove('hidden'); });
-        showLoginLink.addEventListener('click', (e) => { e.preventDefault(); signupContainer.classList.add('hidden'); loginContainer.classList.remove('hidden'); });
-        
-        gradesContainer.addEventListener('click', (e) => {
-            const label = e.target.closest('.grade-item-label');
-            if (label) {
-                detailModalTitle.textContent = "Nome da Matéria";
-                detailModalBody.textContent = label.getAttribute('title');
-                detailModal.classList.remove('hidden');
-            }
+    gradesContainer.addEventListener('click', (e) => {
+        const label = e.target.closest('.grade-item-label');
+        if (label) {
+            detailModalTitle.textContent = "Nome da Matéria";
+            detailModalBody.textContent = label.getAttribute('title');
+            detailModal.classList.remove('hidden');
+        }
+    });
+    saveGradesButton.addEventListener('click', () => {
+        document.querySelectorAll('#grades-container .grade-item-input').forEach(input => {
+            handleGradeChange({ target: input });
         });
-        saveGradesButton.addEventListener('click', () => {
-            document.querySelectorAll('#grades-container .grade-item-input').forEach(input => {
-                handleGradeChange({ target: input });
-            });
-            saveUserData().then(() => {
-                updateGradesAverage(true);
-                renderGradesChart();
-                saveGradesButton.textContent = 'Salvo!';
-                setTimeout(() => { saveGradesButton.textContent = 'Salvar Alterações'; }, 1500);
-            });
-        });
-        gradeSearchInput.addEventListener('input', () => {
-            const searchTerm = gradeSearchInput.value.toLowerCase();
-            document.querySelectorAll('#grades-container .grade-item').forEach(item => {
-                const subjectName = item.querySelector('.grade-item-label').getAttribute('title').toLowerCase();
-                item.style.display = subjectName.includes(searchTerm) ? 'flex' : 'none';
-            });
-        });
-    
-        qtsScheduleContainer.addEventListener('change', handleQTSInput);
-        addMissionForm.addEventListener('submit', addCustomMission);
-        scheduledMissionsList.addEventListener('click', (e) => { if(e.target.tagName === 'BUTTON') { userState.missions.splice(e.target.dataset.index, 1); saveUserData(); renderScheduledMissions(); if(calendarInstance) calendarInstance.refetchEvents(); } });
-        addReminderButton.addEventListener('click', addReminder);
-        remindersList.addEventListener('click', handleReminderInteraction);
-        addLinkForm.addEventListener('submit', addLink);
-        linksList.addEventListener('click', handleLinkInteraction);
-        uploadAvatarButton.addEventListener('click', () => uploadAvatarInput.click());
-        uploadAvatarInput.addEventListener('change', (event) => { if (event.target.files[0]) uploadAvatar(event.target.files[0]); });
-        addQuestForm.addEventListener('submit', addQuest);
-        questsList.addEventListener('change', handleQuestInteraction);
-        clearCompletedQuestsButton.addEventListener('click', clearCompletedQuests);
-        
-        achievementsWidget.addEventListener('click', () => {
-            renderAchievements();
-            achievementsModal.classList.remove('hidden');
-        });
-        achievementsModalClose.addEventListener('click', () => achievementsModal.classList.add('hidden'));
-        achievementsModal.addEventListener('click', (e) => { if (e.target === achievementsModal) achievementsModal.classList.add('hidden'); });
-        
-        hamburgerButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            sidebar.classList.toggle('open');
-            sidebarOverlay.classList.toggle('hidden');
-        });
-        sidebarOverlay.addEventListener('click', () => {
-            sidebar.classList.remove('open');
-            sidebarOverlay.classList.add('hidden');
-        });
-    
-        detailModalClose.addEventListener('click', () => detailModal.classList.add('hidden'));
-        detailModal.addEventListener('click', (e) => { if (e.target === detailModal) detailModal.classList.add('hidden'); });
-        achievementsGrid.addEventListener('click', (e) => {
-            const achievementElement = e.target.closest('.achievement');
-            if (!achievementElement) return;
-            const key = achievementElement.dataset.key;
-            const achData = achievementsData[key];
-            if (achData) {
-                detailModalTitle.textContent = `${achData.icon} ${achData.name}`;
-                detailModalBody.textContent = achData.description;
-                detailModal.classList.remove('hidden');
-            }
-        });
-        rankingToggle.addEventListener('change', () => {
-            userState.show_in_ranking = rankingToggle.checked;
-            saveUserData();
+        saveUserData().then(() => {
+            updateGradesAverage(true);
+            renderGradesChart();
+            saveGradesButton.textContent = 'Salvo!';
+            setTimeout(() => { saveGradesButton.textContent = 'Salvar Alterações'; }, 1500);
         });
     });
+    gradeSearchInput.addEventListener('input', () => {
+        const searchTerm = gradeSearchInput.value.toLowerCase();
+        document.querySelectorAll('#grades-container .grade-item').forEach(item => {
+            const subjectName = item.querySelector('.grade-item-label').getAttribute('title').toLowerCase();
+            item.style.display = subjectName.includes(searchTerm) ? 'flex' : 'none';
+        });
+    });
+
+    qtsScheduleContainer.addEventListener('change', handleQTSInput);
+    addMissionForm.addEventListener('submit', addCustomMission);
+    scheduledMissionsList.addEventListener('click', (e) => { if(e.target.tagName === 'BUTTON') { userState.missions.splice(e.target.dataset.index, 1); saveUserData(); renderScheduledMissions(); if(calendarInstance) calendarInstance.refetchEvents(); } });
+    addReminderButton.addEventListener('click', addReminder);
+    remindersList.addEventListener('click', handleReminderInteraction);
+    addLinkForm.addEventListener('submit', addLink);
+    linksList.addEventListener('click', handleLinkInteraction);
+    uploadAvatarButton.addEventListener('click', () => uploadAvatarInput.click());
+    uploadAvatarInput.addEventListener('change', (event) => { if (event.target.files[0]) uploadAvatar(event.target.files[0]); });
+    addQuestForm.addEventListener('submit', addQuest);
+    questsList.addEventListener('change', handleQuestInteraction);
+    clearCompletedQuestsButton.addEventListener('click', clearCompletedQuests);
+    
+    achievementsWidget.addEventListener('click', () => {
+        renderAchievements();
+        achievementsModal.classList.remove('hidden');
+    });
+    achievementsModalClose.addEventListener('click', () => achievementsModal.classList.add('hidden'));
+    achievementsModal.addEventListener('click', (e) => { if (e.target === achievementsModal) achievementsModal.classList.add('hidden'); });
+    
+    hamburgerButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('hidden');
+    });
+    sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.add('hidden');
+    });
+
+    detailModalClose.addEventListener('click', () => detailModal.classList.add('hidden'));
+    detailModal.addEventListener('click', (e) => { if (e.target === detailModal) detailModal.classList.add('hidden'); });
+    achievementsGrid.addEventListener('click', (e) => {
+        const achievementElement = e.target.closest('.achievement');
+        if (!achievementElement) return;
+        const key = achievementElement.dataset.key;
+        const achData = achievementsData[key];
+        if (achData) {
+            detailModalTitle.textContent = `${achData.icon} ${achData.name}`;
+            detailModalBody.textContent = achData.description;
+            detailModal.classList.remove('hidden');
+        }
+    });
+    rankingToggle.addEventListener('change', () => {
+        userState.show_in_ranking = rankingToggle.checked;
+        saveUserData();
+    });
+});
