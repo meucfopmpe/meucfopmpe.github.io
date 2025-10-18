@@ -273,116 +273,137 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
         // --- Renderização de DOCUMENTOS GLOBAIS ---
     const STORAGE_BUCKET_FOR_DOCUMENTS = 'documents'; // <-- altere se o seu bucket tiver outro nome
     
-    async function renderDocuments(searchTerm = '') {
-        if (!documentsGrid) {
-            console.warn('[renderDocuments] #documents-grid não encontrado no DOM.');
-            return;
-        }
-    
-        documentsGrid.innerHTML = '<div class="loading">Carregando documentos...</div>';
-    
-        try {
-            // Monta query - seleciona campos comuns; ajuste conforme seu schema
-            let query = sb.from('documents').select('id, title, description, url, file_path, created_at');
-    
-            // Se houver termo de busca, aplica filtro ilike em title (case-insensitive)
-            if (searchTerm && searchTerm.length > 0) {
-                // ilike é útil para buscas parciais (substitua por eq/se necessário)
-                query = query.ilike('title', `%${searchTerm}%`);
-            }
-    
-            // ordena por criado mais recente
-            query = query.order('created_at', { ascending: false }).limit(200);
-    
-            const { data, error } = await query;
-    
-            console.log('[renderDocuments] resposta:', { data, error, searchTerm });
-    
-            if (error) {
-                console.error('Erro ao buscar documents:', error);
-                documentsGrid.innerHTML = `<div class="error">Erro ao carregar documentos: ${error.message || JSON.stringify(error)}</div>`;
-                return;
-            }
-    
-            if (!data || data.length === 0) {
-                documentsGrid.innerHTML = '<div class="empty">Nenhum documento encontrado.</div>';
-                return;
-            }
-    
-            // Limpa e renderiza resultados
-            documentsGrid.innerHTML = '';
-            data.forEach(doc => {
-                const item = document.createElement('div');
-                item.className = 'document-item';
-    
-                // Título (se não houver, usar id)
-                const title = doc.title || `Documento ${doc.id || ''}`;
-                const titleEl = document.createElement('div');
-                titleEl.className = 'document-title';
-                titleEl.textContent = title;
-                item.appendChild(titleEl);
-    
-                // Descrição opcional
-                if (doc.description) {
-                    const desc = document.createElement('div');
-                    desc.className = 'document-desc';
-                    desc.textContent = doc.description;
-                    item.appendChild(desc);
-                }
-    
-                // Link de download / visualização:
-                let href = null;
-                if (doc.url) {
-                    // Se a tabela já contém uma url pública
-                    href = doc.url;
-                } else if (doc.file_path) {
-                    // Se o arquivo está no Storage, construímos a URL pública padrão do Supabase
-                    // ATENÇÃO: se seu bucket não for público, essa URL retornará 401/403.
-                    href = `${SUPABASE_URL.replace(/\/$/, '')}/storage/v1/object/public/${encodeURIComponent(STORAGE_BUCKET_FOR_DOCUMENTS)}/${encodeURIComponent(doc.file_path)}`;
-                }
-    
-                if (href) {
-                    const a = document.createElement('a');
-                    a.href = href;
-                    a.target = '_blank';
-                    a.rel = 'noopener noreferrer';
-                    a.textContent = 'Abrir / Baixar';
-                    a.className = 'document-link';
-                    item.appendChild(a);
-                } else {
-                    const noLink = document.createElement('div');
-                    noLink.className = 'document-no-link';
-                    noLink.textContent = 'Sem link disponível';
-                    item.appendChild(noLink);
-                }
-    
-                // Meta: data de criação
-                if (doc.created_at) {
-                    const meta = document.createElement('div');
-                    meta.className = 'document-meta';
-                    const d = new Date(doc.created_at);
-                    meta.textContent = isNaN(d) ? String(doc.created_at) : d.toLocaleString('pt-BR');
-                    item.appendChild(meta);
-                }
-    
-                documentsGrid.appendChild(item);
-            });
-    
-        } catch (err) {
-            console.error('Erro inesperado em renderDocuments:', err);
-            documentsGrid.innerHTML = '<div class="error">Erro inesperado ao carregar documentos. Veja o console.</div>';
-        }
+    // Função atualizada para renderizar os documentos como cards (igual ao print)
+async function renderDocuments(searchTerm = '') {
+  if (!documentsGrid) {
+    console.warn('[renderDocuments] #documents-grid não encontrado.');
+    return;
+  }
+
+  documentsGrid.innerHTML = '<div class="loading">Carregando documentos...</div>';
+
+  try {
+    let query = sb.from('documents').select('id, title, description, url, file_path, created_at');
+
+    if (searchTerm && searchTerm.length > 0) {
+      query = query.ilike('title', `%${searchTerm}%`);
     }
-    
-    // vincular a busca ao input (se existir)
-    if (documentSearchInput) {
-        let searchTimeout = null;
-        documentSearchInput.addEventListener('input', () => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                renderDocuments(documentSearchInput.value.trim());
-            }, 250); // debounce pequeno
-        });
+
+    query = query.order('created_at', { ascending: false }).limit(200);
+
+    const { data, error } = await query;
+    console.log('[renderDocuments] resposta:', { data, error, searchTerm });
+
+    if (error) {
+      console.error('Erro ao buscar documents:', error);
+      documentsGrid.innerHTML = `<div class="error">Erro ao carregar documentos: ${error.message || JSON.stringify(error)}</div>`;
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      documentsGrid.innerHTML = '<div class="empty">Nenhum documento encontrado.</div>';
+      return;
+    }
+
+    // renderiza como grid de cards
+    documentsGrid.innerHTML = '';
+    data.forEach(doc => {
+      const item = document.createElement('div');
+      item.className = 'doc-card';
+
+      // escolha do ícone - se for PDF usar emoji /📄/ ou imagem
+      const ext = (doc.file_path || doc.url || '').split('.').pop()?.toLowerCase() || '';
+      let icon = '📄';
+      if (ext === 'pdf') icon = '📄';
+      else if (['png','jpg','jpeg','gif','svg'].includes(ext)) icon = '🖼️';
+      else if (['doc','docx'].includes(ext)) icon = '📝';
+
+      // montar href (prioriza url, depois file_path via storage pública)
+      let href = null;
+      if (doc.url) {
+        href = doc.url;
+      } else if (doc.file_path) {
+        href = `${SUPABASE_URL.replace(/\/$/, '')}/storage/v1/object/public/${encodeURIComponent(STORAGE_BUCKET_FOR_DOCUMENTS)}/${encodeURIComponent(doc.file_path)}`;
+      }
+
+      // título e descrição (fallback)
+      const title = doc.title || (doc.file_path ? doc.file_path : `Documento ${doc.id || ''}`);
+      const desc = doc.description || '';
+
+      // conteúdo do card (uso de criação de elementos para evitar HTML inseguro)
+      const iconEl = document.createElement('div');
+      iconEl.className = 'doc-icon';
+      iconEl.textContent = icon;
+      item.appendChild(iconEl);
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'doc-title';
+      titleEl.textContent = title;
+      item.appendChild(titleEl);
+
+      if (desc) {
+        const descEl = document.createElement('div');
+        descEl.className = 'doc-desc';
+        descEl.textContent = desc;
+        item.appendChild(descEl);
+      }
+
+      const metaEl = document.createElement('div');
+      metaEl.className = 'document-meta';
+      if (doc.created_at) {
+        const d = new Date(doc.created_at);
+        if (!isNaN(d)) metaEl.textContent = d.toLocaleDateString('pt-BR');
+      }
+      if (metaEl.textContent) item.appendChild(metaEl);
+
+      if (href) {
+        const a = document.createElement('a');
+        a.className = 'doc-link';
+        a.href = href;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = 'Abrir / Baixar';
+        item.appendChild(a);
+      } else {
+        const noLink = document.createElement('div');
+        noLink.className = 'document-no-link';
+        noLink.textContent = 'Sem link disponível';
+        item.appendChild(noLink);
+      }
+
+      documentsGrid.appendChild(item);
+    });
+
+  } catch (err) {
+    console.error('Erro inesperado em renderDocuments:', err);
+    documentsGrid.innerHTML = '<div class="error">Erro inesperado ao carregar documentos. Veja o console.</div>';
+  }
+}
+
+// bind de busca com debounce (se já não existir)
+if (documentSearchInput) {
+  let searchTimeout = null;
+  documentSearchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      renderDocuments(documentSearchInput.value.trim());
+    }, 220);
+  });
+}
+
+// Assegure que os documentos carreguem já ao abrir a aba e na inicialização:
+// 1) Quando o usuário navega para a aba de documentos (garanta que handlePageNavigation chama isto):
+//    if (targetPageId === 'page-documents') renderDocuments(documentSearchInput ? documentSearchInput.value.trim() : '');
+// 2) E também carregue ao iniciar (após checkSession/DOMContentLoaded)
+document.addEventListener('DOMContentLoaded', () => {
+  // Carregar os documentos logo que o DOM esteja pronto (evita depender só do input)
+  // - chama sem termo de busca para listar todos (ou os mais recentes)
+  setTimeout(() => {
+    // pequeno timeout para garantir variáveis/elementos já inicializados
+    try { renderDocuments(documentSearchInput ? documentSearchInput.value.trim() : ''); }
+    catch (e) { console.warn('renderDocuments init falhou:', e); }
+  }, 120);
+});
     }
     
     // chamar renderDocuments ao abrir a aba de documentos:
