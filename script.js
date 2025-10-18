@@ -619,23 +619,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     async function renderRanking() {
-        rankingList.innerHTML = 'Carregando ranking...';
-        const { data: profiles, error } = await sb.from('profiles').select('full_name, user_data, grades_average').order('grades_average', { ascending: false }).limit(50);
-        if (error) { rankingList.innerHTML = '<p style="color: var(--sl-error);">Não foi possível carregar o ranking.</p>'; console.error(error); return; }
-        
-        const filteredProfiles = profiles.filter(p => p.user_data?.show_in_ranking !== false);
-    
-        if (filteredProfiles.length === 0) { rankingList.innerHTML = '<p>Ninguém no ranking ainda ou todos estão privados.</p>'; return; }
-        
+    if (!rankingList) return;
+
+    // Se o usuário atual escolheu não aparecer no ranking, mostramos a mensagem de bloqueio.
+    // Isso bloqueia a visualização local da lista enquanto o usuário estiver com a opção desativada.
+    if (userState && userState.show_in_ranking === false) {
+        rankingList.innerHTML = `
+            <div class="ranking-private-container">
+                <h3>Acesso Restrito</h3>
+                <p>Você desativou a opção "Exibir no Ranking". Para visualizar o ranking, ative a opção <strong>Exibir no Ranking</strong> na página <em>Minhas Notas</em>.</p>
+                <p>Depois de ativar, atualize a página ou volte ao ranking para ver a lista.</p>
+            </div>
+        `;
+        return;
+    }
+
+    rankingList.innerHTML = 'Carregando ranking...';
+
+    try {
+        const { data: profiles, error } = await sb
+            .from('profiles')
+            .select('full_name, user_data, grades_average')
+            .order('grades_average', { ascending: false })
+            .limit(50);
+
+        if (error) {
+            console.error('Erro ao carregar ranking:', error);
+            rankingList.innerHTML = `<p style="color: var(--sl-error);">Não foi possível carregar o ranking. (${error.message || 'erro'})</p>`;
+            return;
+        }
+
+        // Filtra apenas perfis que permitiram aparecer no ranking
+        const filteredProfiles = (profiles || []).filter(p => p.user_data?.show_in_ranking !== false);
+
+        if (filteredProfiles.length === 0) {
+            rankingList.innerHTML = '<p>Ninguém no ranking ainda ou todos optaram por ficar privados.</p>';
+            return;
+        }
+
+        // Renderiza a lista
         rankingList.innerHTML = '';
         filteredProfiles.forEach((profile, index) => {
             const item = document.createElement('div');
             item.className = 'ranking-item';
             const avatarSrc = profile.user_data?.avatar || PLACEHOLDER_AVATAR;
-            item.innerHTML = `<div class="ranking-pos">${index + 1}</div><img class="ranking-avatar" src="${avatarSrc}"><div class="ranking-info"><div class="ranking-name">${profile.full_name || 'Anônimo'}</div></div><div class="ranking-avg">${profile.grades_average ? profile.grades_average.toFixed(2) : '0.00'}</div>`;
+            item.innerHTML = `<div class="ranking-pos">${index + 1}</div>
+                              <img class="ranking-avatar" src="${avatarSrc}" alt="Avatar">
+                              <div class="ranking-info"><div class="ranking-name">${profile.full_name || 'Anônimo'}</div></div>
+                              <div class="ranking-avg">${profile.grades_average ? Number(profile.grades_average).toFixed(2) : '0.00'}</div>`;
             rankingList.appendChild(item);
         });
+
+    } catch (err) {
+        console.error('Erro inesperado ao renderizar ranking:', err);
+        rankingList.innerHTML = '<p style="color: var(--sl-error);">Erro ao carregar ranking (ver console).</p>';
     }
+}
     
     function renderAchievements() {
         achievementsGrid.innerHTML = '';
@@ -921,8 +960,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 detailModal.classList.remove('hidden');
             }
         });
-        rankingToggle.addEventListener('change', () => {
+
+        
+        if (rankingToggle) {
+          rankingToggle.addEventListener('change', async () => {
+            // atualiza estado local
             userState.show_in_ranking = rankingToggle.checked;
-            saveUserData();
-        });
+            // salva no Supabase
+            try {
+              await saveUserData();
+            } catch (err) {
+              console.error('Erro ao salvar preferência de ranking:', err);
+            }
+            // se estivermos na página de ranking, re-renderiza (para aplicar o bloqueio / desbloqueio)
+            const rankingPageEl = document.getElementById('page-ranking');
+            if (rankingPageEl && rankingPageEl.classList.contains('active')) {
+              renderRanking();
+            }
+          });
+}
     });
