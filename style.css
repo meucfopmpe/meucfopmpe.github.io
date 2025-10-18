@@ -238,3 +238,118 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
     color: var(--sl-text-secondary);
     line-height: 1.6;
 }
+
+/* Estilos para aba DOCUMENTOS GLOBAIS e cards no estilo do print */
+
+/* Container de busca (centralizado, grande e arredondado) */
+#document-search-input {
+  display: block;
+  width: 70%;
+  max-width: 980px;
+  margin: 36px auto 20px;
+  padding: 18px 26px;
+  font-size: 20px;
+  border-radius: 14px;
+  border: 3px solid #24345a; /* cor de contorno */
+  box-shadow: 0 8px 18px rgba(36,52,90,0.08), 0 2px 6px rgba(0,0,0,0.06);
+  text-align: center;
+  outline: none;
+  transition: box-shadow .18s ease, transform .08s ease;
+  background: #fff;
+  color: #6b6f78;
+}
+#document-search-input:focus {
+  box-shadow: 0 14px 28px rgba(36,52,90,0.12);
+  transform: translateY(-1px);
+}
+
+/* Grid de documentos */
+#documents-grid {
+  width: 92%;
+  max-width: 1180px;
+  margin: 28px auto 60px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+  align-items: stretch;
+}
+
+/* Responsivo */
+@media (max-width: 1024px) {
+  #documents-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  #documents-grid { grid-template-columns: 1fr; }
+  #document-search-input { width: 90%; }
+}
+
+/* Card do documento (visual do print) */
+.doc-card {
+  background: #fff;
+  border-radius: 6px;
+  padding: 24px 28px;
+  box-shadow: 0 6px 18px rgba(22,28,38,0.06);
+  transition: transform .14s ease, box-shadow .14s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 150px;
+  text-align: center;
+  border: 1px solid rgba(10,10,10,0.03);
+}
+.doc-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 34px rgba(22,28,38,0.09);
+}
+
+/* Icone no topo (use emoji ou <img>) */
+.doc-card .doc-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+/* Título e descrição */
+.doc-card .doc-title {
+  font-weight: 500;
+  color: #222;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+.doc-card .doc-desc {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 14px;
+  line-height: 1.4;
+  max-width: 95%;
+}
+
+/* Botão/link para abrir documento */
+.doc-card .doc-link {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: linear-gradient(180deg,#0b73c9,#0a6bb6);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  box-shadow: 0 6px 14px rgba(10,100,180,0.12);
+}
+.doc-card .doc-link:hover {
+  opacity: 0.96;
+  transform: translateY(-1px);
+}
+
+/* Mensagens */
+#documents-grid .loading,
+#documents-grid .empty,
+#documents-grid .error {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 26px;
+  color: #666;
+  background: transparent;
+}
