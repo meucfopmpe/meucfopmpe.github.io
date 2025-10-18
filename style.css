@@ -1,6 +1,16 @@
 :root {
     --sl-bg: #0A0F1E; --sl-surface: #1B2139; --sl-primary: #00AFFF; --sl-glow: rgba(0, 175, 255, 0.5);
     --sl-text-primary: #EAEFFC; --sl-text-secondary: #8A94B6; --sl-border: #394269; --sl-error: #FF4D4D; --sl-success: #33FFB5;
+    -bg-dark: #0f1724;        /* fundo geral mais escuro */
+      --panel:   #161f2d;        /* painel escuro */
+      --panel-2: #1f2a3a;        /* painel alternativo / cards */
+      --card:    #14202b;        /* cor dos cards */
+      --border:  rgba(255,255,255,0.04);
+      --muted:   #8f9fb3;        /* texto secundário */
+      --text:    #dbe8ff;        /* texto principal mais claro */
+      --accent:  #16a8ff;        /* ciano brilhante (destaques) */
+      --accent-2:#00d39f;        /* verde de progresso */
+      --shadow:  0 14px 30px rgba(4,12,24,0.55);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Rajdhani', sans-serif; background-color: var(--sl-bg); color: var(--sl-text-primary); overflow: hidden; }
@@ -139,42 +149,121 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
 .achievement-title { margin-top: 10px; font-size: 0.9em; font-weight: 600; }
 
 /* --- PÁGINA DE DOCUMENTOS --- */
+/* Busca central (mais coerente com o tema) */
 #document-search-input {
-    width: 100%;
-    margin-bottom: 30px;
+  display: block;
+  width: 70%;
+  max-width: 980px;
+  margin: 36px auto 18px;
+  padding: 16px 26px;
+  font-size: 18px;
+  border-radius: 12px;
+  border: 2px solid rgba(22,40,70,0.6);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  color: var(--text);
+  box-shadow: 0 6px 16px rgba(6,12,28,0.45);
+  text-align: center;
+  outline: none;
+  transition: box-shadow .18s ease, transform .06s ease, border-color .12s;
 }
-.documents-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+#document-search-input::placeholder { color: var(--muted); }
+#document-search-input:focus {
+  border-color: rgba(22,140,255,0.95);
+  box-shadow: 0 20px 40px rgba(6,12,28,0.55);
+  transform: translateY(-1px);
 }
-.document-card {
-    background-color: var(--sl-surface);
-    border: 1px solid var(--sl-border);
-    border-radius: 8px;
-    padding: 20px;
-    text-align: center;
-    text-decoration: none;
-    color: var(--sl-text-primary);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+/* Grid ajustado */
+#documents-grid {
+  width: 92%;
+  max-width: 1180px;
+  margin: 28px auto 60px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  align-items: stretch;
+  border-radius: 8px;
 }
-.document-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 25px var(--sl-glow);
+
+/* Responsivo */
+@media (max-width: 1024px) { #documents-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  { #documents-grid { grid-template-columns: 1fr; } #document-search-input { width: 90%; } }
+
+/* Card do documento: estilo escuro, bordas suaves, destaque azul */
+.doc-card{
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.007));
+  border-radius: 10px;
+  padding: 22px 20px;
+  box-shadow: 0 8px 24px rgba(2,8,20,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 150px;
+  text-align: center;
+  border: 1px solid var(--border);
+  transition: transform .12s ease, box-shadow .12s ease;
+  color: var(--text);
 }
-.document-card-icon {
-    font-size: 3em;
-    margin-bottom: 15px;
+.doc-card:hover{
+  transform: translateY(-6px);
+  box-shadow: var(--shadow);
 }
-.document-card-title {
-    font-weight: 700;
-    font-size: 1.1em;
-    margin-bottom: 5px;
+
+/* ícone */
+.doc-card .doc-icon{
+  font-size: 34px;
+  margin-bottom: 12px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.45));
 }
-.document-card-description {
-    font-size: 0.9em;
-    color: var(--sl-text-secondary);
-    line-height: 1.4;
+
+/* título e descrição */
+.doc-card .doc-title{
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  font-size: 16px;
+}
+.doc-card .doc-desc{
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 12px;
+  line-height: 1.4;
+  max-width: 94%;
+}
+
+/* meta e link */
+.doc-card .document-meta{
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+.doc-card .doc-link{
+  display: inline-block;
+  margin-top: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, var(--accent), #0b7fcc);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 8px 18px rgba(10,90,170,0.16);
+}
+.doc-card .doc-link:hover{
+  opacity: 0.98;
+  transform: translateY(-1px);
+}
+
+/* mensagens de estado (carregando/erro/vazio) */
+#documents-grid .loading,
+#documents-grid .empty,
+#documents-grid .error{
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 22px;
+  color: var(--muted);
 }
 
 /* --- ESTILOS PARA MISSÕES, LEMBRETES, LINKS --- */
