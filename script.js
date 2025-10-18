@@ -338,7 +338,7 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
                 } else if (doc.file_path) {
                     // Se o arquivo está no Storage, construímos a URL pública padrão do Supabase
                     // ATENÇÃO: se seu bucket não for público, essa URL retornará 401/403.
-                    href = `${SUPABASE_URL.replace(/\\/$/, '')}/storage/v1/object/public/${encodeURIComponent(STORAGE_BUCKET_FOR_DOCUMENTS)}/${encodeURIComponent(doc.file_path)}`;
+                    href = `${SUPABASE_URL.replace(/\/$/, '')}/storage/v1/object/public/${encodeURIComponent(STORAGE_BUCKET_FOR_DOCUMENTS)}/${encodeURIComponent(doc.file_path)}`;
                 }
     
                 if (href) {
