@@ -1033,7 +1033,7 @@ document.addEventListener('DOMContentLoaded', () => {
               alert(`Pontuação de ${score} registrada!`);
             }
           });
-        }
+        });
                 // === BLOQUEIA E DESBLOQUEIA O SCROLL GLOBAL ===
         let scrollPosition = 0;
         
