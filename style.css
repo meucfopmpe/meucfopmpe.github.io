@@ -597,3 +597,35 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
     height: 90vh;
   }
 }
+
+/* === Cabeçalho da página de Jogos === */
+.games-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.games-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #00aaff; /* mantém o tom da sua interface */
+}
+
+.back-selection-btn {
+  background: transparent;
+  border: none;
+  color: #00aaff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.2s, transform 0.1s;
+}
+
+.back-selection-btn:hover {
+  color: #33bbff;
+  transform: translateX(-2px);
+}
+
