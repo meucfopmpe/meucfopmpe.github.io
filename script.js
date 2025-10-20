@@ -1023,15 +1023,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           });
         }
-                function disableScroll() {
+                // === BLOQUEIA E DESBLOQUEIA O SCROLL GLOBAL ===
+        let scrollPosition = 0;
+        
+        function disableScroll() {
+          scrollPosition = window.scrollY;
+          document.body.style.position = 'fixed';
+          document.body.style.top = `-${scrollPosition}px`;
+          document.body.style.width = '100%';
           document.body.style.overflow = 'hidden';
-          document.documentElement.style.overflow = 'hidden';
         }
         
         function enableScroll() {
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.width = '';
           document.body.style.overflow = '';
-          document.documentElement.style.overflow = '';
+          window.scrollTo(0, scrollPosition);
         }
+
         
         
         document.getElementById('back-to-games').onclick = () => {
