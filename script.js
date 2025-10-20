@@ -1032,6 +1032,7 @@ document.addEventListener('DOMContentLoaded', () => {
           document.body.style.top = `-${scrollPosition}px`;
           document.body.style.width = '100%';
           document.body.style.overflow = 'hidden';
+          window.addEventListener('keydown', preventScrollKeys, { passive: false });
         }
         
         function enableScroll() {
@@ -1040,7 +1041,17 @@ document.addEventListener('DOMContentLoaded', () => {
           document.body.style.width = '';
           document.body.style.overflow = '';
           window.scrollTo(0, scrollPosition);
+          window.removeEventListener('keydown', preventScrollKeys);
         }
+        
+        function preventScrollKeys(e) {
+          // Bloqueia teclas que causam rolagem
+          const keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '];
+          if (keys.includes(e.key)) {
+            e.preventDefault();
+          }
+        }
+
 
         
         
