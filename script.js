@@ -981,8 +981,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
                 // === CONFIGURAÇÃO DE JOGOS DISPONÍVEIS ===
         const games = [
-          { id: 'desafio-cfo', name: 'Desafio CFO - GPCL', path: 'game/desafio-cfo.html', subject: 'TIC (AV2)', date: '2025-10-23' },
-          { id: 'ace-jogo', name: 'Desafio ACE', path: 'game/ace.html', subject: 'ACE', date: '2025-10-25' }
+          { id: 'desafio-cfo', name: 'Desafio CFO - GPCL', path: 'game/desafio-tic.html', subject: 'TIC (AV2)', date: '2025-10-23' },
+          { id: 'ace-jogo', name: 'Desafio ACE', path: 'game/desafio-cfo.html', subject: 'ACE', date: '2025-10-25' }
           // 🔹 você pode adicionar novos jogos aqui conforme as provas da semana
         ];
         
