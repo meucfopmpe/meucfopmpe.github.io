@@ -1023,6 +1023,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           });
         }
+                function disableScroll() {
+          document.body.style.overflow = 'hidden';
+          document.documentElement.style.overflow = 'hidden';
+        }
+        
+        function enableScroll() {
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+        }
+        
         
         document.getElementById('back-to-games').onclick = () => {
           document.getElementById('game-frame-container').classList.add('hidden');
