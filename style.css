@@ -574,3 +574,20 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
     color: var(--sl-text-secondary);
     line-height: 1.6;
 }
+
+#game-frame-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#game-frame {
+  width: 100%;
+  max-width: 480px; /* 🔹 largura ideal do jogo */
+  height: 90vh;     /* 🔹 ocupa quase toda a altura da tela */
+  border-radius: 12px;
+  border: none;
+  background-color: #000;
+}
+
