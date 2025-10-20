@@ -1068,21 +1068,83 @@ document.addEventListener('DOMContentLoaded', () => {
           document.getElementById('games-list').classList.remove('hidden');
         };
         
-        // chama a renderização ao carregar a aba
         function renderGames() {
             const gamesPage = document.getElementById('page-games');
             if (!gamesPage) return;
         
-            // Garante que o conteúdo só é carregado uma vez
-            if (!gamesPage.dataset.loaded) {
-                gamesPage.innerHTML = `
-                    <iframe 
-                        src="desafio-cfo.html" 
-                        style="width:100%; height:90vh; border:none; border-radius:10px; overflow:hidden;"
-                        allowfullscreen>
-                    </iframe>
-                `;
-                gamesPage.dataset.loaded = "true";
-            }
+            // Só carrega uma vez
+            if (gamesPage.dataset.initialized === "true") return;
+        
+            // Layout dos cards de jogos
+            gamesPage.innerHTML = `
+                <h2>Selecione um Jogo</h2>
+                <div id="games-list" style="
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                    gap: 20px;
+                    padding: 20px;
+                ">
+                    <div class="game-card" data-game="desafio-cfo" style="
+                        background-color: var(--sl-surface);
+                        border: 1px solid var(--sl-border);
+                        border-radius: 8px;
+                        padding: 20px;
+                        text-align: center;
+                        cursor: pointer;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                        transition: transform 0.2s, box-shadow 0.2s;
+                    ">
+                        <img src="edddad68-b195-4bb3-ac0a-c1ab49e25ef4.png" 
+                             alt="Desafio CFO" 
+                             style="width:100%; border-radius:6px; margin-bottom:10px;">
+                        <h3>Desafio CFO</h3>
+                        <p style="color:var(--sl-text-secondary)">Teste seus conhecimentos!</p>
+                    </div>
+                </div>
+        
+                <div id="game-frame-container" style="margin-top:20px; display:none;">
+                    <button id="back-to-games" style="
+                        background-color: var(--sl-primary);
+                        color: var(--sl-bg);
+                        font-weight: bold;
+                        border: none;
+                        border-radius: 6px;
+                        padding: 10px 15px;
+                        margin-bottom: 10px;
+                        cursor: pointer;
+                    ">⬅ Voltar</button>
+                    <iframe id="game-frame" src="" style="
+                        width: 100%;
+                        height: 90vh;
+                        border: none;
+                        border-radius: 10px;
+                        overflow: hidden;
+                    "></iframe>
+                </div>
+            `;
+        
+            // Quando clicar em um card → abre o jogo
+            const gameCards = gamesPage.querySelectorAll('.game-card');
+            const gameFrameContainer = document.getElementById('game-frame-container');
+            const gameFrame = document.getElementById('game-frame');
+            const backButton = document.getElementById('back-to-games');
+        
+            gameCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const game = card.dataset.game;
+                    if (game === "desafio-cfo") {
+                        gameFrame.src = "desafio-cfo.html";
+                    }
+                    gameFrameContainer.style.display = "block";
+                    document.getElementById('games-list').style.display = "none";
+                });
+            });
+        
+            backButton.addEventListener('click', () => {
+                gameFrameContainer.style.display = "none";
+                document.getElementById('games-list').style.display = "grid";
+                gameFrame.src = "";
+            });
+        
+            gamesPage.dataset.initialized = "true";
         }
-
