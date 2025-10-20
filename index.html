@@ -60,6 +60,7 @@
                 <a href="#" class="nav-link" data-page="page-links">Links/SEI</a>
                 <a href="#" class="nav-link" data-page="page-documents">DOCUMENTOS GLOBAIS</a>
                 <a href="#" class="nav-link" data-page="page-ranking">Ranking da Turma</a>
+                <a href="#" class="nav-link" data-page="page-games">🎮 Jogos</a>
             </nav>
             <button id="logout-button" class="logout-button">SAIR</button>
         </aside>
@@ -198,6 +199,20 @@
                 <h2>Ranking de Combatentes (Top 50)</h2>
                 <div id="ranking-list"></div>
             </div>
+
+            <div id="page-games" class="page">
+              <h2>Jogos da Semana</h2>
+              <div id="games-list" class="grid"></div>
+              <div id="game-frame-container" class="hidden">
+                <button id="back-to-games" class="button back-button">← Voltar</button>
+                <iframe id="game-frame" style="width:100%; height:80vh; border:none; border-radius:10px;"></iframe>
+              </div>
+            </div>
+
+
+
+
+            
         </main>
     </div>
 
@@ -239,5 +254,6 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
