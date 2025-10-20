@@ -189,7 +189,7 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
     }
     
     async function renderAdminInfo() {
-        const { data, error } = await sb.from('global_info').select('*').order('created_at', { ascending: false }).limit(5);
+        const { data, error } = await sb.from('global_info').select('*').order('due_date', { ascending: true }).order('created_at', { ascending: false }).limit(5);
         if (error) { console.error("Erro ao buscar informações do ADM:", error); return; }
         if (!adminInfoList) return;
         if (!data || data.length === 0) {
