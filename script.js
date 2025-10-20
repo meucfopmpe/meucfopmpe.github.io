@@ -978,5 +978,60 @@ document.addEventListener('DOMContentLoaded', () => {
               renderRanking();
             }
           });
-}
+        }
+                // === CONFIGURAÇÃO DE JOGOS DISPONÍVEIS ===
+        const games = [
+          { id: 'desafio-cfo', name: 'Desafio CFO - GPCL', path: 'game/desafio-cfo.html', subject: 'TIC (AV2)', date: '2025-10-23' },
+          { id: 'ace-jogo', name: 'Desafio ACE', path: 'game/ace.html', subject: 'ACE', date: '2025-10-25' }
+          // 🔹 você pode adicionar novos jogos aqui conforme as provas da semana
+        ];
+        
+        // === RENDERIZAÇÃO DOS CARDS ===
+        function renderGames() {
+          const container = document.getElementById('games-list');
+          container.innerHTML = '';
+          games
+            .sort((a, b) => new Date(a.date) - new Date(b.date)) // ordena pela data mais próxima
+            .forEach(game => {
+              const card = document.createElement('div');
+              card.className = 'doc-card';
+              card.innerHTML = `
+                <h3>${game.subject}</h3>
+                <p>${game.name}</p>
+                <p><strong>Data:</strong> ${new Date(game.date).toLocaleDateString('pt-BR')}</p>
+              `;
+              card.onclick = () => openGame(game);
+              container.appendChild(card);
+            });
+        }
+        
+        // === ABRIR O JOGO NO IFRAME ===
+        function openGame(game) {
+          document.getElementById('games-list').classList.add('hidden');
+          const frameContainer = document.getElementById('game-frame-container');
+          const iframe = document.getElementById('game-frame');
+          iframe.src = game.path;
+          frameContainer.classList.remove('hidden');
+        
+          // Monitora mensagens vindas do jogo
+          window.addEventListener('message', async (event) => {
+            if (event.data.type === 'GAME_SCORE') {
+              const score = event.data.score;
+              const userId = localStorage.getItem('user_id'); // supondo que seu login já salva o ID
+              await sb.from('user_scores').insert({ user_id: userId, game_id: game.id, score });
+              alert(`Pontuação de ${score} registrada!`);
+            }
+          });
+        }
+        
+        document.getElementById('back-to-games').onclick = () => {
+          document.getElementById('game-frame-container').classList.add('hidden');
+          document.getElementById('games-list').classList.remove('hidden');
+        };
+        
+        // chama a renderização ao carregar a aba
+        renderGames();
+
+
+        
     });
