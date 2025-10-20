@@ -1007,22 +1007,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // === ABRIR O JOGO NO IFRAME ===
         function openGame(game) {
-              document.getElementById('games-list').classList.add('hidden');
-              document.getElementById('back-to-games').classList.remove('hidden');
-              const frameContainer = document.getElementById('game-frame-container');
-              const iframe = document.getElementById('game-frame');
-              iframe.src = game.path;
-              frameContainer.classList.remove('hidden');
-              disableScroll();
-            }
-            
-            document.getElementById('back-to-games').onclick = () => {
-              document.getElementById('game-frame-container').classList.add('hidden');
-              document.getElementById('games-list').classList.remove('hidden');
-              document.getElementById('back-to-games').classList.add('hidden');
-              enableScroll();
-            };
-
+          document.getElementById('games-list').classList.add('hidden');
+          const frameContainer = document.getElementById('game-frame-container');
+          const iframe = document.getElementById('game-frame');
+          iframe.src = game.path;
+          frameContainer.classList.remove('hidden');
         
           // Monitora mensagens vindas do jogo
           window.addEventListener('message', async (event) => {
@@ -1033,118 +1022,26 @@ document.addEventListener('DOMContentLoaded', () => {
               alert(`Pontuação de ${score} registrada!`);
             }
           });
-        });
-                // === BLOQUEIA E DESBLOQUEIA O SCROLL GLOBAL ===
-        let scrollPosition = 0;
-        
-        function disableScroll() {
-          scrollPosition = window.scrollY;
-          document.body.style.position = 'fixed';
-          document.body.style.top = `-${scrollPosition}px`;
-          document.body.style.width = '100%';
+        }
+                function disableScroll() {
           document.body.style.overflow = 'hidden';
-          window.addEventListener('keydown', preventScrollKeys, { passive: false });
+          document.documentElement.style.overflow = 'hidden';
         }
         
         function enableScroll() {
-          document.body.style.position = '';
-          document.body.style.top = '';
-          document.body.style.width = '';
           document.body.style.overflow = '';
-          window.scrollTo(0, scrollPosition);
-          window.removeEventListener('keydown', preventScrollKeys);
+          document.documentElement.style.overflow = '';
         }
         
-        function preventScrollKeys(e) {
-          // Bloqueia teclas que causam rolagem
-          const keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '];
-          if (keys.includes(e.key)) {
-            e.preventDefault();
-          }
-        }        
         
-          document.getElementById('back-to-games').onclick = () => {
+        document.getElementById('back-to-games').onclick = () => {
           document.getElementById('game-frame-container').classList.add('hidden');
           document.getElementById('games-list').classList.remove('hidden');
         };
         
-        function renderGames() {
-            const gamesPage = document.getElementById('page-games');
-            if (!gamesPage) return;
+        // chama a renderização ao carregar a aba
+        renderGames();
+
+
         
-            // Só carrega uma vez
-            if (gamesPage.dataset.initialized === "true") return;
-        
-            // Layout dos cards de jogos
-            gamesPage.innerHTML = `
-                <h2>Selecione um Jogo</h2>
-                <div id="games-list" style="
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                    gap: 20px;
-                    padding: 20px;
-                ">
-                    <div class="game-card" data-game="desafio-cfo" style="
-                        background-color: var(--sl-surface);
-                        border: 1px solid var(--sl-border);
-                        border-radius: 8px;
-                        padding: 20px;
-                        text-align: center;
-                        cursor: pointer;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-                        transition: transform 0.2s, box-shadow 0.2s;
-                    ">
-                        <img src="edddad68-b195-4bb3-ac0a-c1ab49e25ef4.png" 
-                             alt="Desafio CFO" 
-                             style="width:100%; border-radius:6px; margin-bottom:10px;">
-                        <h3>Desafio CFO</h3>
-                        <p style="color:var(--sl-text-secondary)">Teste seus conhecimentos!</p>
-                    </div>
-                </div>
-        
-                <div id="game-frame-container" style="margin-top:20px; display:none;">
-                    <button id="back-to-games" style="
-                        background-color: var(--sl-primary);
-                        color: var(--sl-bg);
-                        font-weight: bold;
-                        border: none;
-                        border-radius: 6px;
-                        padding: 10px 15px;
-                        margin-bottom: 10px;
-                        cursor: pointer;
-                    ">⬅ Voltar</button>
-                    <iframe id="game-frame" src="" style="
-                        width: 100%;
-                        height: 90vh;
-                        border: none;
-                        border-radius: 10px;
-                        overflow: hidden;
-                    "></iframe>
-                </div>
-            `;
-        
-            // Quando clicar em um card → abre o jogo
-            const gameCards = gamesPage.querySelectorAll('.game-card');
-            const gameFrameContainer = document.getElementById('game-frame-container');
-            const gameFrame = document.getElementById('game-frame');
-            const backButton = document.getElementById('back-to-games');
-        
-            gameCards.forEach(card => {
-                card.addEventListener('click', () => {
-                    const game = card.dataset.game;
-                    if (game === "desafio-cfo") {
-                        gameFrame.src = "desafio-cfo.html";
-                    }
-                    gameFrameContainer.style.display = "block";
-                    document.getElementById('games-list').style.display = "none";
-                });
-            });
-        
-            backButton.addEventListener('click', () => {
-                gameFrameContainer.style.display = "none";
-                document.getElementById('games-list').style.display = "grid";
-                gameFrame.src = "";
-            });
-        
-            gamesPage.dataset.initialized = "true";
-        }
+    });
