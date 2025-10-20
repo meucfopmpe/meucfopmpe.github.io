@@ -618,3 +618,15 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
   transform: translateX(-2px);
 }
 
+#page-games h2 {
+  font-size: 0; /* remove o espaço sem quebrar layout */
+  margin: 0;
+  padding: 0;
+}
+
+#page-games {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  overflow: hidden;
+}
+
