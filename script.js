@@ -1061,10 +1061,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (keys.includes(e.key)) {
             e.preventDefault();
           }
-        }
-
-
-        
+        }        
         
           document.getElementById('back-to-games').onclick = () => {
           document.getElementById('game-frame-container').classList.add('hidden');
@@ -1072,4 +1069,20 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         
         // chama a renderização ao carregar a aba
-        renderGames();
+        function renderGames() {
+            const gamesPage = document.getElementById('page-games');
+            if (!gamesPage) return;
+        
+            // Garante que o conteúdo só é carregado uma vez
+            if (!gamesPage.dataset.loaded) {
+                gamesPage.innerHTML = `
+                    <iframe 
+                        src="desafio-cfo.html" 
+                        style="width:100%; height:90vh; border:none; border-radius:10px; overflow:hidden;"
+                        allowfullscreen>
+                    </iframe>
+                `;
+                gamesPage.dataset.loaded = "true";
+            }
+        }
+
