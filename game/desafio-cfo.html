@@ -442,6 +442,12 @@
                 reportContainer.innerHTML = `<p>Você respondeu ${questions.length - availableQuestions.length} questões sem erros!</p>`;
             }
 
+                        // --- Envia pontuação para a plataforma ---
+            if (window.parent) {
+              window.parent.postMessage({ type: 'GAME_SCORE', score: score }, '*');
+            }
+
+
             showScreen('game-over-screen');
         }
         function nextRound() {
