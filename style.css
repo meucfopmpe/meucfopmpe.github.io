@@ -597,3 +597,25 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
     height: 75vh;
   }
 }
+
+.games-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+#back-to-games {
+  background-color: #0ea5e9;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+#back-to-games:hover {
+  background-color: #0284c7;
+}
