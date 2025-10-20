@@ -49,9 +49,10 @@
           flex-direction: column;
           align-items: center;
           justify-content: flex-start;
-          width: 360px;
-          max-width: 360px;
-          height: 100%;
+          width: 90vw;
+          max-width: 400px;
+          height: 80vh;
+          maxheight:600px;
           margin-top: 0;       /* removido espaço superior */
           padding: 0;          /* garante fixação */
           background-color: var(--secondary-bg);
@@ -61,7 +62,7 @@
         }
        #game-container {
           width: 100%;
-          height: 500px; /* altura ajustada — exibe o boneco */
+          height: calc(100% - 120px); /* altura ajustada — exibe o boneco */
           background-color: var(--secondary-bg);
           border-radius: 8px;
           border: 2px solid var(--light-text);
@@ -83,7 +84,7 @@
           background-color: var(--road-color);
           display: block;
           width: 100%;
-          height: 500px; /* igual à altura do container */
+          height: 100%; /* igual à altura do container */
           object-fit: contain;
         }
         #touch-controls { display: flex; justify-content: space-between; width: 100%; margin-top: 8px; flex-wrap: wrap; }
@@ -123,6 +124,31 @@
         #error-report em { color: #f1c40f; }
         
         .hidden { display: none; }
+                /* ====== Ajustes para telas grandes (desktop) ====== */
+        @media (min-width: 800px) {
+          #game-wrapper {
+            width: 360px;
+            height: 640px;      /* altura vertical fixa */
+          }
+        
+          #game-container {
+            height: 500px;      /* deixa espaço pro boneco aparecer */
+          }
+        }
+        
+        /* ====== Ajustes para telas pequenas (mobile) ====== */
+        @media (max-width: 799px) {
+          #game-wrapper {
+            width: 95vw;
+            height: 90vh;
+            max-width: 380px;
+            max-height: 600px;
+          }
+        
+          #game-container {
+            height: 500px;
+          }
+        }
     </style>
 </head>
 <body>
