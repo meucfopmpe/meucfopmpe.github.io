@@ -1007,11 +1007,22 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // === ABRIR O JOGO NO IFRAME ===
         function openGame(game) {
-          document.getElementById('games-list').classList.add('hidden');
-          const frameContainer = document.getElementById('game-frame-container');
-          const iframe = document.getElementById('game-frame');
-          iframe.src = game.path;
-          frameContainer.classList.remove('hidden');
+              document.getElementById('games-list').classList.add('hidden');
+              document.getElementById('back-to-games').classList.remove('hidden');
+              const frameContainer = document.getElementById('game-frame-container');
+              const iframe = document.getElementById('game-frame');
+              iframe.src = game.path;
+              frameContainer.classList.remove('hidden');
+              disableScroll();
+            }
+            
+            document.getElementById('back-to-games').onclick = () => {
+              document.getElementById('game-frame-container').classList.add('hidden');
+              document.getElementById('games-list').classList.remove('hidden');
+              document.getElementById('back-to-games').classList.add('hidden');
+              enableScroll();
+            };
+
         
           // Monitora mensagens vindas do jogo
           window.addEventListener('message', async (event) => {
@@ -1055,7 +1066,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         
         
-        document.getElementById('back-to-games').onclick = () => {
+          document.getElementById('back-to-games').onclick = () => {
           document.getElementById('game-frame-container').classList.add('hidden');
           document.getElementById('games-list').classList.remove('hidden');
         };
