@@ -584,8 +584,8 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
 
 #game-frame {
   width: 100%;
-  max-width: 240px; 
-  height: 70vh;     /* 🔹 ligeiramente menor pra dar mais respiro */
+  max-width: 340px; /* 🔹 antes era 480px — reduzido ~30% */
+  height: 80vh;     /* 🔹 ligeiramente menor pra dar mais respiro */
   border-radius: 12px;
   border: none;
   background-color: #000;
@@ -593,29 +593,7 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
 
 @media (max-width: 768px) {
   #game-frame {
-    max-width: 90%;  /* 🔹 em telas pequenas, ocupa toda a largura */
-    height: 75vh;
+    max-width: 100%;  /* 🔹 em telas pequenas, ocupa toda a largura */
+    height: 90vh;
   }
-}
-
-.games-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-#back-to-games {
-  background-color: #0ea5e9;
-  color: #fff;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-#back-to-games:hover {
-  background-color: #0284c7;
 }
