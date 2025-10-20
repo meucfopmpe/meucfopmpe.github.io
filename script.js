@@ -1073,7 +1073,3 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // chama a renderização ao carregar a aba
         renderGames();
-
-
-        
-    });
