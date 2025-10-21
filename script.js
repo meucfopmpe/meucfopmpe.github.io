@@ -1017,6 +1017,3 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           });
         });
-                
-                
-    });
