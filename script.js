@@ -981,7 +981,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
                 // === CONFIGURAÇÃO DE JOGOS DISPONÍVEIS ===
         const games = [
-          { id: 'desafio-cfo', name: 'Desafio CFO - GPCL', path: 'game/desafio-tic.html', subject: 'TIC (AV2)', date: '2025-10-23' },
+          { id: 'desafio-cfo', name: 'Desafio CFO - GPCL', path: 'game/desafio-cfo.html', subject: 'TIC (AV2)', date: '2025-10-23' },
           { id: 'ace-jogo', name: 'Desafio ACE', path: 'game/desafio-cfo.html', subject: 'ACE', date: '2025-10-25' }
           // 🔹 você pode adicionar novos jogos aqui conforme as provas da semana
         ];
@@ -1005,13 +1005,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        // === ABRIR O JOGO NO IFRAME ===
-        function openGame(game) {
-          document.getElementById('games-list').classList.add('hidden');
-          const frameContainer = document.getElementById('game-frame-container');
-          const iframe = document.getElementById('game-frame');
-          iframe.src = game.path;
-          frameContainer.classList.remove('hidden');
+        
         
           // Monitora mensagens vindas do jogo
           window.addEventListener('message', async (event) => {
@@ -1023,35 +1017,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           });
         }
-                // === BLOQUEIA E DESBLOQUEIA O SCROLL GLOBAL ===
-        let scrollPosition = 0;
-        
-        function disableScroll() {
-          scrollPosition = window.scrollY;
-          document.body.style.position = 'fixed';
-          document.body.style.top = `-${scrollPosition}px`;
-          document.body.style.width = '100%';
-          document.body.style.overflow = 'hidden';
-        }
-        
-        function enableScroll() {
-          document.body.style.position = '';
-          document.body.style.top = '';
-          document.body.style.width = '';
-          document.body.style.overflow = '';
-          window.scrollTo(0, scrollPosition);
-        }
-
-        
-        
-        document.getElementById('back-to-games').onclick = () => {
-          document.getElementById('game-frame-container').classList.add('hidden');
-          document.getElementById('games-list').classList.remove('hidden');
-        };
-        
-        // chama a renderização ao carregar a aba
-        renderGames();
-
-
-        
+                
+                
     });
