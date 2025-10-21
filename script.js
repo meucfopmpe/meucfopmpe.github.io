@@ -425,6 +425,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const targetPageId = e.target.dataset.page;
     if (!targetPageId) return;
 
+       
+
     // Lógica condicional para o Ranking
     if (targetPageId === 'page-ranking' && !userState.show_in_ranking) {
         const rankingPage = document.getElementById('page-ranking');
@@ -467,6 +469,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (targetPageId === 'page-reminders') renderReminders();
     if (targetPageId === 'page-links') renderLinks();
     if (targetPageId === 'page-documents') renderDocuments();
+       
+       
+    if (targetPageId === 'page-games') renderGames();
 
     if (window.innerWidth <= 768) {
         sidebar.classList.remove('open');
@@ -1020,6 +1025,13 @@ document.addEventListener('DOMContentLoaded', () => {
               container.appendChild(card);
             });
         }
+
+                // === FAZ OS JOGOS APARECEREM QUANDO A ABA É ABERTA ===
+        document.getElementById('sidebar-nav').addEventListener('click', (e) => {
+          if (e.target.dataset.page === 'page-games') {
+            setTimeout(renderGames, 100); // pequeno delay pra garantir o DOM
+          }
+        });
 
         
         
