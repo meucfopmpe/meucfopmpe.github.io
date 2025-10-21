@@ -1016,7 +1016,7 @@ document.addEventListener('DOMContentLoaded', () => {
               alert(`Pontuação de ${score} registrada!`);
             }
           });
-        }
+        });
                 
                 
     });
