@@ -94,10 +94,14 @@
         
         .hidden { display: none; }
 
-        transform: scale(0.67);
-        transform-origin: top center;
-        height: 150vh; /* evita corte do conteúdo */
-        overflow: hidden;
+                /* === AJUSTE DE ESCALA GLOBAL PARA 67% === */
+        html {
+          transform: scale(0.67);
+          transform-origin: top center;
+          height: 150vh;
+          overflow: hidden;
+        }
+
     </style>
 </head>
 <body>
