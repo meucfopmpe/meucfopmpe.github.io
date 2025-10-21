@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Desafio CFO: GPCL - Versão Final</title>
+    <title>Desafio CFO: Modo Desafio</title>
     <style>
         :root {
             --primary-bg: #2c3e50; --secondary-bg: #34495e; --light-text: #ecf0f1;
@@ -91,12 +91,6 @@
         .shop-button-equip { background-color: #9b59b6; }
         .shop-button-equipped { background-color: #27ae60; cursor: not-allowed; }
         .shop-button-owned { background-color: #7f8c8d; }
-
-        #error-report { text-align: left; max-height: 150px; overflow-y: auto; background-color: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; margin-top: 15px;}
-        #error-report p { margin: 0 0 15px 0; border-bottom: 1px solid #7f8c8d; padding-bottom: 10px;}
-        #error-report p:last-child { border-bottom: none; }
-        #error-report strong { color: var(--accent-red); }
-        #error-report em { color: #f1c40f; }
         
         .hidden { display: none; }
     </style>
@@ -111,10 +105,7 @@
             <button id="start-game-button" class="button play-button">Jogar</button>
             <button id="go-to-shop-button" class="button shop-button">Loja</button>
         </div>
-        <p style="margin-top: 20px;">
-            <strong>Moedas:</strong> <span id="start-coins">0</span> | 
-            <strong>Recorde:</strong> <span id="high-score">0</span>
-        </p>
+        <p style="margin-top: 20px;"><strong>Moedas:</strong> <span id="start-coins">0</span></p>
     </div>
 
     <div id="game-wrapper" class="hidden">
@@ -139,7 +130,6 @@
         <h2 id="game-over-title">Fim de Jogo</h2>
         <p>Pontuação final: <span id="final-score">0</span></p>
         <p>Moedas ganhas: <span id="coins-earned">0</span></p>
-        <div id="report-container"></div>
         <div>
             <button id="restart-button" class="button restart-button">Jogar Novamente</button>
             <button id="go-to-shop-from-over-button" class="button shop-button">Ir para a Loja</button>
@@ -173,13 +163,12 @@
         const basePortalSpeed = 45;
 
         // --- VARIÁVEIS DE ESTADO DO JOGO ---
-        let player, portals, obstacles, powerUps, projectiles, answerPopup;
+        let player, portals, obstacles, powerUps, answerPopup;
         let score, lives, gameActive, gameLoopId, difficultyLevel;
         let isPaused, correctAnswersInARow, powerReady, isNextGolden, isAccelerating;
         let lastTime = 0;
         let playerData = {};
         let activeTimeouts = [];
-        let incorrectAnswers = [];
 
         const questions = [
         // --- HISTÓRIA DA ANÁLISE CRIMINAL ---
@@ -331,8 +320,7 @@
         function loadPlayerData() {
             const data = localStorage.getItem('cfoGameData');
             if (data) playerData = JSON.parse(data);
-            else playerData = { name: "", coins: 0, highScore: 0, ownedSkins: ['default'], equippedSkinId: 'default' };
-            if (!playerData.highScore) playerData.highScore = 0;
+            else playerData = { name: "", coins: 0, ownedSkins: ['default'], equippedSkinId: 'default' };
             if (playerData.name) {
                 document.getElementById('player-name-input').value = playerData.name;
                 document.getElementById('welcome-message').textContent = `Bem-vindo de volta, ${playerData.name}!`;
@@ -342,9 +330,9 @@
             playerData.name = document.getElementById('player-name-input').value.trim() || "Cadete";
             localStorage.setItem('cfoGameData', JSON.stringify(playerData));
         }
-        function updateStartScreenDisplays() {
+        function updateCoinDisplays() {
             document.getElementById('start-coins').textContent = playerData.coins;
-            document.getElementById('high-score').textContent = playerData.highScore;
+            document.getElementById('shop-coins').textContent = playerData.coins;
         }
         function showScreen(screenId) {
             ['start-screen', 'game-wrapper', 'game-over-screen', 'shop-screen'].forEach(id => {
@@ -355,7 +343,6 @@
         function populateShop() {
             const container = document.getElementById('shop-items');
             container.innerHTML = '';
-            document.getElementById('shop-coins').textContent = playerData.coins;
             skins.forEach(skin => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'shop-item';
@@ -395,7 +382,7 @@
         function buySkin(skinId, price) {
             if (playerData.coins >= price) {
                 playerData.coins -= price; playerData.ownedSkins.push(skinId);
-                savePlayerData(); updateStartScreenDisplays(); populateShop();
+                savePlayerData(); updateCoinDisplays(); populateShop();
             }
         }
         function equipSkin(skinId) {
@@ -405,10 +392,9 @@
 
         function resetGame() {
             player = { x: canvas.width / 2 - playerWidth / 2, y: canvas.height - playerHeight - 20, width: playerWidth, height: playerHeight, speed: baseSpeed, isShielded: false, isInvincible: false, isPhasing: false, controlsSlippery: false, isLeaping: false, isSlowed: false, slowsTime: false };
-            portals = []; obstacles = []; powerUps = []; projectiles = []; answerPopup = null;
+            portals = []; obstacles = []; powerUps = []; answerPopup = null;
             score = 0; lives = 3; difficultyLevel = 0; correctAnswersInARow = 0; powerReady = false; isNextGolden = false;
             isFrozen = false; isAccelerating = false; isPaused = false;
-            incorrectAnswers = [];
             shuffle(questions); availableQuestions = [...questions];
             updateGameStatus(); updatePowerIndicator(); nextRound();
         }
@@ -425,32 +411,10 @@
             cancelAnimationFrame(gameLoopId);
             activeTimeouts.forEach(id => clearTimeout(id));
             activeTimeouts = [];
-
-            if (score > playerData.highScore) { playerData.highScore = score; }
             const coinsEarned = score; playerData.coins += coinsEarned; savePlayerData();
-            
             document.getElementById('final-score').textContent = score;
             document.getElementById('coins-earned').textContent = coinsEarned;
             document.getElementById('game-over-title').textContent = collided ? "Fim de Jogo: Colisão!" : "Fim de Jogo";
-            
-            const reportContainer = document.getElementById('report-container');
-            if (incorrectAnswers.length > 0) {
-                let reportHTML = `<p>Você respondeu ${questions.length - availableQuestions.length} questões. Erros:</p><div id="error-report">`;
-                incorrectAnswers.forEach(item => {
-                    reportHTML += `<p>${item.question}<br><strong>Resposta correta: ${item.correctAnswer}</strong></p>`;
-                });
-                reportHTML += '</div>';
-                reportContainer.innerHTML = reportHTML;
-            } else {
-                reportContainer.innerHTML = `<p>Você respondeu ${questions.length - availableQuestions.length} questões sem erros!</p>`;
-            }
-
-                        // --- Envia pontuação para a plataforma ---
-            if (window.parent) {
-              window.parent.postMessage({ type: 'GAME_SCORE', score: score }, '*');
-            }
-
-
             showScreen('game-over-screen');
         }
         function nextRound() {
@@ -471,21 +435,16 @@
             portals.push({ x: positions[0], y: portalY, width: portalWidth, height: portalHeight, isCorrect: currentQuestion.answer === true, text: 'V', isGolden: isGolden });
             portals.push({ x: positions[1], y: portalY, width: portalWidth, height: portalHeight, isCorrect: currentQuestion.answer === false, text: 'F', isGolden: isGolden });
 
-            const attempts = 1 + Math.floor(difficultyLevel);
+            const attempts = 1 + Math.floor(difficultyLevel); // Aumenta a quantidade de tentativas mais rápido
             for(let i = 0; i < attempts; i++) {
-                const obstacleChance = 0.4 + (difficultyLevel * 0.15);
+                const obstacleChance = 0.4 + (difficultyLevel * 0.15); // Aumenta a chance mais rápido
                 if (Math.random() < obstacleChance) {
                     let type = 'cone';
-                    if (difficultyLevel >= 7 && Math.random() < 0.2) type = 'dinosaur';
-                    else if (difficultyLevel >= 6 && Math.random() < 0.25) type = 'clown';
-                    else if (difficultyLevel >= 5 && Math.random() < 0.3) type = 'wizard';
-                    else if (difficultyLevel >= 4 && Math.random() < 0.3) type = 'hole';
+                    if (difficultyLevel >= 4 && Math.random() < 0.3) type = 'hole';
                     else if (difficultyLevel >= 3 && Math.random() < 0.35) type = 'monster';
                     else if (difficultyLevel >= 2 && Math.random() < 0.4) type = 'puddle';
                     else if (difficultyLevel >= 1 && Math.random() < 0.4) type = 'tornado';
                     if (difficultyLevel >= 2 && Math.random() < 0.2) type = 'oil';
-                    if (difficultyLevel >= 5 && Math.random() < 0.25) type = 'spiderweb';
-
                     obstacles.push({ type: type, x: streetX + Math.random() * (streetWidth - 30), y: -60 - (i * 120) - Math.random() * 100, size: 30, isStunned: false });
                 }
             }
@@ -497,7 +456,7 @@
         function updateGameStatus() {
             document.getElementById('score').textContent = `Pontos: ${score}`;
             document.getElementById('lives').innerHTML = `Vidas: ${'❤️'.repeat(lives)}`;
-            const newDifficultyLevel = Math.floor(score / 70);
+            const newDifficultyLevel = Math.floor(score / 70); // Nível a cada 70 pontos
             if (newDifficultyLevel > difficultyLevel) {
                 difficultyLevel = newDifficultyLevel;
                 const indicator = document.getElementById('difficulty-indicator');
@@ -537,7 +496,7 @@
             answerPopup.alpha -= 0.015;
         }
         function usePower() {
-            if (!gameActive || !powerReady || isPaused) return;
+            if (!gameActive || !powerReady) return;
             const equippedSkin = skins.find(s => s.id === playerData.equippedSkinId) || skins[0];
             equippedSkin.power.execute();
             powerReady = false; correctAnswersInARow = 0;
@@ -546,24 +505,23 @@
         
         function gameLoop(timestamp) {
             if (!gameActive) { return; }
-            gameLoopId = requestAnimationFrame(gameLoop);
-
+            
             const deltaTime = (timestamp - lastTime) / 1000 || 0;
             lastTime = timestamp;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#95a5a6'; ctx.fillRect(streetX, 0, streetWidth, canvas.height);
-            
+
             if (!isPaused) {
                 let currentSpeedMultiplier = 1;
                 if (isFrozen || player.slowsTime) currentSpeedMultiplier = 0.5;
                 if (isAccelerating) currentSpeedMultiplier *= 3;
                 const moveDistance = basePortalSpeed * currentSpeedMultiplier * deltaTime;
 
-                [...portals, ...obstacles, ...powerUps, ...projectiles].forEach(obj => {
+                [...portals, ...obstacles, ...powerUps].forEach(obj => {
                     if (obj && !obj.isStunned) obj.y += moveDistance;
                 });
             }
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#95a5a6'; ctx.fillRect(streetX, 0, streetWidth, canvas.height);
             
             const equippedSkin = skins.find(s => s.id === playerData.equippedSkinId) || skins[0];
             ctx.globalAlpha = (player.isPhasing || player.isLeaping) ? 0.5 : 1.0;
@@ -591,7 +549,6 @@
                     } else {
                         lives--; correctAnswersInARow = 0;
                         answerPopup = { text: 'ERRADO!', color: 'rgba(231, 76, 60, 0.9)', alpha: 1.0 };
-                        incorrectAnswers.push({ question: currentQuestion.text, correctAnswer: currentQuestion.answer ? 'Verdadeiro' : 'Falso' });
                     }
                     updateGameStatus(); if(lives > 0) nextRound();
                 }
@@ -600,25 +557,17 @@
             if (portals.length > 0 && portals[0].y > canvas.height && lives > 0) {
                 lives--; correctAnswersInARow = 0;
                 answerPopup = { text: 'ERRADO!', color: 'rgba(231, 76, 60, 0.9)', alpha: 1.0 };
-                incorrectAnswers.push({ question: currentQuestion.text, correctAnswer: currentQuestion.answer ? 'Verdadeiro' : 'Falso' });
                 updateGameStatus(); if(lives > 0) nextRound();
             }
             
             for(let i = obstacles.length - 1; i >= 0; i--) {
                 let o = obstacles[i];
-                if (o.type === 'tornado' && !isPaused) o.x += Math.sin(o.y * 0.05) * 2;
-                if (o.type === 'wizard' && !isPaused && o.y > 0 && Math.random() < 0.005) {
-                    projectiles.push({ x: o.x + o.size / 2, y: o.y + o.size, size: 10 });
-                }
-
+                if (o.type === 'tornado') o.x += Math.sin(o.y * 0.05) * 2;
                 let emoji, collisionBox = { ...o, width: o.size, height: o.size };
                 switch(o.type) {
                     case 'cone': emoji = '🚧'; break; case 'monster': emoji = '👾'; break;
                     case 'puddle': emoji = '💧'; break; case 'oil': emoji = '⚫'; break;
-                    case 'tornado': emoji = '🌪️'; break; case 'wizard': emoji = '🧙'; break;
-                    case 'spider': emoji = '🕷️'; break; case 'bat': emoji = '🦇'; break;
-                    case 'dinosaur': emoji = '🦖'; break; case 'clown': emoji = '🤡'; break;
-                    case 'spiderweb': emoji = '🕸️'; break;
+                    case 'tornado': emoji = '🌪️'; break;
                     case 'hole':
                         ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.beginPath();
                         ctx.arc(o.x + o.size/2, o.y + o.size/2, o.size/2, 0, Math.PI * 2);
@@ -626,10 +575,9 @@
                 }
                 ctx.font = `${o.size}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 if(emoji) ctx.fillText(emoji, o.x + o.size/2, o.y + o.size/2);
-
                 if (checkCollision(player, collisionBox)) {
                     obstacles.splice(i, 1);
-                    if (o.type === 'puddle' || o.type === 'spiderweb') {
+                    if (o.type === 'puddle') {
                         if (!player.isSlowed) { player.isSlowed = true; registerTimeout(() => { player.isSlowed = false; }, 3000); }
                     } else if (o.type === 'oil') {
                         if (!player.controlsSlippery) { player.controlsSlippery = true; registerTimeout(() => { player.controlsSlippery = false; }, 4000); }
@@ -639,20 +587,6 @@
                     }
                     if (lives <= 0) { endGame(true); return; }
                 } else if (o.y > canvas.height) { obstacles.splice(i, 1); }
-            }
-
-            for(let i = projectiles.length - 1; i >= 0; i--) {
-                let p = projectiles[i];
-                ctx.fillStyle = '#9b59b6';
-                ctx.font = `${p.size}px Arial`; ctx.fillText('✨', p.x, p.y);
-                if (checkCollision(player, { ...p, width: p.size, height: p.size })) {
-                    projectiles.splice(i, 1);
-                    if (!player.isInvincible && !player.isPhasing) {
-                        if (player.isShielded) { player.isShielded = false; }
-                        else if (lives > 0) { lives--; correctAnswersInARow = 0; updateGameStatus(); }
-                    }
-                    if (lives <= 0) { endGame(true); return; }
-                } else if (p.y > canvas.height) { projectiles.splice(i, 1); }
             }
             
             for(let i = powerUps.length - 1; i >= 0; i--) {
@@ -672,6 +606,7 @@
                 } else if (p.y > canvas.height) { powerUps.splice(i, 1); }
             }
             drawAnswerPopup();
+            gameLoopId = requestAnimationFrame(gameLoop);
         };
         
         let moveInterval = null;
@@ -708,8 +643,8 @@
 
         document.getElementById('start-game-button').onclick = startGame;
         document.getElementById('restart-button').onclick = startGame;
-        document.getElementById('go-to-shop-button').onclick = () => { savePlayerData(); updateStartScreenDisplays(); populateShop(); showScreen('shop-screen'); };
-        document.getElementById('go-to-shop-from-over-button').onclick = () => { updateStartScreenDisplays(); populateShop(); showScreen('shop-screen'); };
+        document.getElementById('go-to-shop-button').onclick = () => { savePlayerData(); updateCoinDisplays(); populateShop(); showScreen('shop-screen'); };
+        document.getElementById('go-to-shop-from-over-button').onclick = () => { updateCoinDisplays(); populateShop(); showScreen('shop-screen'); };
         document.getElementById('back-to-start-button').onclick = () => {
              document.getElementById('welcome-message').textContent = `Bem-vindo de volta, ${playerData.name}!`;
              showScreen('start-screen');
