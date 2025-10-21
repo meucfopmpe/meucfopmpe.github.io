@@ -93,6 +93,31 @@
         .shop-button-owned { background-color: #7f8c8d; }
         
         .hidden { display: none; }
+
+        
+               /* === AJUSTE DE ESCALA SUAVE E CENTRALIZADO === */
+        body {
+          zoom: 0.67; /* reduz o tamanho total da interface para 67% */
+          transform-origin: top center;
+          overflow: hidden;
+        }
+        
+        @media (max-width: 768px) {
+          body {
+            zoom: 1; /* mantém o tamanho normal no celular */
+          }
+        }
+        
+        html, body {
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          padding-top: 40px; /* desloca o jogo um pouco para baixo */
+          box-sizing: border-box;
+        }
+
+
     </style>
 </head>
 <body>
@@ -171,19 +196,113 @@
         let activeTimeouts = [];
 
         const questions = [
-            { text: "O Oficial é um líder apenas pelo cargo que exerce, não precisando ser inspirador ou motivador.", answer: false }, { text: "Gestão de Pessoas (GP) é o conjunto de práticas para administrar as pessoas, desconsiderando suas necessidades e motivações.", answer: false }, { text: "Na moderna Gestão de Pessoas, as pessoas constituem o principal ativo da organização.", answer: true }, { text: "Um dos objetivos da GP é proporcionar à organização pessoas bem treinadas e bem motivadas.", answer: true }, { text: "A evolução da Gestão de Pessoas passou de uma abordagem estratégica para uma puramente burocrática.", answer: false }, { text: "Agregar, aplicar, recompensar, desenvolver, manter e monitorar pessoas são os seis processos da GP.", answer: true }, { text: "O recrutamento interno atua sobre candidatos que estão no mercado, fora do serviço público.", answer: false }, { text: "A avaliação de desempenho serve para julgar o valor, a excelência e as competências de uma pessoa ou equipe.", answer: true }, { text: "A avaliação 360 graus é quando o desempenho é avaliado apenas pela chefia imediata.", answer: false }, { text: "O processo de recompensar pessoas é um elemento primordial para o incentivo e a motivação dos colaboradores.", answer: true }, { text: "A remuneração total inclui apenas o salário base, sem considerar benefícios ou incentivos.", answer: false }, { text: "Motivação extrínseca refere-se a fatores internos e pessoais que impulsionam um indivíduo a agir.", answer: false }, { text: "Na pirâmide de Maslow, as necessidades fisiológicas são a base e devem ser satisfeitas primeiro.", answer: true }, { text: "A Teoria X de McGregor pressupõe que o trabalho é uma atividade natural e gratificante para os seres humanos.", answer: false }, { text: "Fatores motivacionais, segundo Herzberg, estão relacionados ao conteúdo do trabalho em si, como reconhecimento e crescimento.", answer: true }, { text: "Treinamento e Desenvolvimento de pessoas têm o mesmo significado e foco.", answer: false }, { text: "O diagnóstico é a etapa inicial do processo de treinamento para identificar as necessidades da organização.", answer: true }, { text: "Liderança é a capacidade de guiar e influenciar um grupo para alcançar um objetivo comum.", answer: true }, { text: "A liderança informal origina-se da autoridade do cargo ocupado na estrutura da organização.", answer: false }, { text: "O estilo de liderança 'Laissez-faire' ou Liberal é caracterizado pelo controle centralizado e rígido do líder.", answer: false }, { text: "A escuta ativa é uma habilidade de comunicação crucial para líderes eficazes.", answer: true }, { text: "A gestão de conflitos busca sempre evitar o conflito, mesmo que isso signifique ignorar o problema.", answer: false }, { text: "O estilo de gestão de conflitos de 'Colaboração' busca uma solução que atenda às necessidades de ambas as partes.", answer: true }, { text: "Grupo e equipe de trabalho são termos com o mesmo significado, representando um conjunto de pessoas com um objetivo.", answer: false }, { text: "No Exército Brasileiro, a chefia militar engloba o comando, a administração e a liderança.", answer: true }, { text: "Um dos princípios da liderança militar é evitar assumir a responsabilidade pelos atos dos subordinados.", answer: false }, { text: "Cultura organizacional é definida como um conjunto de hábitos, crenças, valores e símbolos de uma organização.", answer: true }, { text: "Os artefatos visíveis, como uniformes e layout, são o nível mais profundo e inconsciente da cultura organizacional.", answer: false }, { text: "A resistência à mudança é sempre um fator negativo e deve ser suprimida imediatamente.", answer: false }, { text: "A Qualidade de Vida no Trabalho (QVT) refere-se apenas ao bem-estar físico dos funcionários, ignorando o mental e emocional.", answer: false },
-            // NOVAS QUESTÕES
-            { text: "A Teoria Y de McGregor assume que as pessoas são inerentemente preguiçosas e precisam de controle rígido.", answer: false },
-            { text: "No ciclo de mudança diretivo, a mudança é imposta de cima para baixo na organização.", answer: true },
-            { text: "Fatores de higiene, segundo Herzberg, quando presentes, são os principais responsáveis pela motivação duradoura.", answer: false },
-            { text: "A liderança situacional defende que um único estilo de liderança (ex: democrático) é eficaz em todas as situações.", answer: false },
-            { text: "O processo de 'Manter Pessoas' na GP inclui a gestão do clima, cultura organizacional e qualidade de vida.", answer: true },
-            { text: "Na pirâmide de Maslow, a necessidade de 'Auto-Realização' é a mais básica de todas.", answer: false },
-            { text: "O método de avaliação de desempenho de 'incidentes críticos' foca em registrar comportamentos específicos, positivos ou negativos.", answer: true },
-            { text: "A gestão multigeracional é um desafio da GP que lida com a convivência de diferentes gerações no ambiente de trabalho.", answer: true },
-            { text: "O 'Job rotation' (rotação de cargos) é um método de desenvolvimento de pessoas focado fora do cargo.", answer: false },
-            { text: "Um dos efeitos positivos do conflito organizacional é que ele pode estimular a busca por soluções criativas e inovadoras.", answer: true }
-        ];
+        // --- MÓDULO 8: SISTEMAS INFORMATIZADOS DE INTEGRAÇÃO NACIONAL ---
+        // INFOSEG
+        { text: "O SINESP INFOSEG é um sistema restrito a órgãos da esfera Federal, não integrando bases de dados Estaduais ou Municipais.", answer: false },
+        { text: "A funcionalidade 'Visualização em Rede' do INFOSEG permite explorar os vínculos entre informações (indivíduos, veículos, armas) por meio de um diagrama de grafo.", answer: true },
+        { text: "A 'Consulta Inteligente' do INFOSEG permite a pesquisa de apenas um parâmetro por vez, como CPF ou placa de veículo.", answer: false },
+        { text: "Dentro do INFOSEG, a consulta à base CNJ-BNMP permite o acesso a mandados de prisão que ainda estão em aberto.", answer: true },
+        { text: "O perfil de 'Inteligência' no INFOSEG não permite acesso a movimentações de veículos captadas por radares em rodovias federais.", answer: false },
+        { text: "A funcionalidade 'Relatório' do INFOSEG gera um arquivo único no formato PDF, consolidando dados de diversas bases consultadas.", answer: true },
+        { text: "O acesso ao SINESP INFOSEG é realizado informando o número da matrícula do servidor, e não o CPF.", answer: false },
+        { text: "As bases de dados do INFOSEG são agrupadas em quatro subgrupos: Indivíduos, Veículos, Empresas e Armas.", answer: true },
+        { text: "A consulta na base Denatran-RENACH dentro do INFOSEG não disponibiliza a foto do condutor, apenas os dados da CNH.", answer: false },
+        { text: "A pesquisa avançada no INFOSEG oferece parâmetros mais específicos de cada base de dados do que a consulta inteligente.", answer: true },
+
+        // CÓRTEX
+        { text: "O principal objetivo do Córtex é a integração de bases de dados para produzir conhecimento para inteligência, investigação e gerar indicativos de abordagem.", answer: true },
+        { text: "O login no sistema Córtex é realizado obrigatoriamente por meio do sistema gov.br.", answer: true },
+        { text: "O módulo 'Cercamento Eletrônico' do Córtex é focado apenas em ações repressivas, não auxiliando na atuação preventiva.", answer: false },
+        { text: "A consulta de um veículo no Córtex exibe, em um mapa, os últimos locais onde o veículo foi registrado por radares integrados ao sistema.", answer: true },
+        { text: "O monitoramento de caravanas de torcidas organizadas é um exemplo de uso operacional do Córtex para prevenção de vandalismo.", answer: true },
+        { text: "As consultas no Córtex são divididas apenas em 'Veículos', não havendo uma categoria para consulta de 'Pessoas'.", answer: false },
+        { text: "O Córtex não integra sistemas produtores de eventos em tempo real, trabalhando apenas com bases de dados estáticas.", answer: false },
+        { text: "As funcionalidades disponíveis no menu do Córtex são as mesmas para todos os usuários, independentemente do nível de permissão.", answer: false },
+        { text: "A consulta de um veículo no Córtex não informa se ele possui alguma restrição administrativa ou criminal.", answer: false },
+        { text: "Córtex é uma plataforma de uso exclusivo para a Polícia Federal, não sendo utilizada por outras forças de segurança.", answer: false },
+
+        // BNMP 3.0
+        { text: "O Banco Nacional de Medidas Penais e Prisões (BNMP 3.0) é um sistema eletrônico que monitora a realidade do sistema prisional brasileiro.", answer: true },
+        { text: "O BNMP 3.0 é um software que precisa ser instalado em cada computador, não sendo acessível pela internet em nuvem.", answer: false },
+        { text: "O BNMP consolida um banco de dados que inclui apenas mandados de prisão, sem abranger medidas cautelares ou protetivas de urgência.", answer: false },
+        { text: "O BNMP 3.0 é integrado à Plataforma Digital do Poder Judiciário (PDPJ-Br).", answer: true },
+        { text: "Ao consultar um mandado de prisão no BNMP, é possível ter acesso a informações como marcas e sinais distintivos do alvo (tatuagens, cicatrizes).", answer: true },
+        { text: "O BNMP 3.0 substituiu a versão anterior (BNMP 2.0) e é coordenado pelo Departamento de Monitoramento e Fiscalização do Sistema Carcerário (DMF).", answer: true },
+        { text: "A pesquisa no BNMP não permite a busca por número de processo ou alcunha do indivíduo.", answer: false },
+        { text: "Se uma pesquisa no BNMP não encontra mandados pendentes para uma pessoa, o sistema não emite nenhum tipo de certidão ou comprovante.", answer: false },
+        { text: "É desnecessário que o policial verifique a data de validade do mandado de prisão no BNMP, pois todos os mandados ativos são válidos.", answer: false },
+        { text: "O BNMP 3.0 permite identificar todas as pessoas procuradas ou custodiadas em diferentes categorias de prisão, seja civil ou penal.", answer: true },
+
+        // SINESP Cidadão
+        { text: "O SINESP Cidadão é um aplicativo exclusivo para agentes de segurança pública, não podendo ser utilizado por cidadãos comuns.", answer: false },
+        { text: "O SINESP Cidadão é uma ferramenta útil para agentes de segurança que não possuem acesso aos sistemas corporativos, como o INFOSEG.", answer: true },
+        { text: "Através do SINESP Cidadão, é possível consultar a situação de roubo ou furto de qualquer veículo do Brasil utilizando a placa.", answer: true },
+        { text: "As bases de dados acessíveis pelo SINESP Cidadão incluem Veículos, Desaparecidos, Mandados de Prisão e Procurados.", answer: true },
+        { text: "A lista de 'Procurados' no SINESP Cidadão foca em criminosos que atuam apenas em um único estado.", answer: false },
+        { text: "A consulta de mandados de prisão no SINESP Cidadão é realizada diretamente no banco de dados do Conselho Nacional de Justiça (BNMP/CNJ).", answer: true },
+        { text: "O SINESP Cidadão não permite a consulta de placas no padrão Mercosul, apenas no formato tradicional.", answer: false },
+        { text: "O projeto 'Participação Cidadã' é um canal de denúncias dentro do SINESP Cidadão que encaminha as informações para a Ouvidoria do Governo Federal.", answer: true },
+        { text: "A consulta de desaparecidos no SINESP Cidadão se baseia em informações de redes sociais, e não em boletins de ocorrência.", answer: false },
+        { text: "O principal objetivo do SINESP Cidadão é permitir que os cidadãos registrem boletins de ocorrência diretamente pelo aplicativo.", answer: false },
+
+        // --- MÓDULO 9: TELECOMUNICAÇÕES ---
+        // Conceitos e Elementos
+        { text: "Os três elementos básicos de um sistema de comunicação são: Transmissor (Tx), Meio de Transmissão e Receptor (Rx).", answer: true },
+        { text: "O Transmissor (Tx) tem a função de decodificar o sinal recebido para resgatar a informação original.", answer: false },
+        { text: "O Meio de Transmissão é o elemento que exerce a maior influência sobre o desempenho de um sistema de comunicação.", answer: true },
+        { text: "O Receptor (Rx) tem a finalidade de transformar a informação em um sinal adequado para ser transportado pelo meio de transmissão.", answer: false },
+        
+        // Meios de Transmissão
+        { text: "Os meios de transmissão são classificados apenas como físicos (guiados), não existindo meios não-físicos.", answer: false },
+        { text: "A Fibra Ótica é um meio de transmissão físico imune a interferências eletromagnéticas e com alta capacidade de transmissão.", answer: true },
+        { text: "O cabo de Par Trançado, apesar do baixo custo, é altamente resistente a interferências eletromagnéticas.", answer: false },
+        { text: "As ondas de rádio são omnidirecionais e penetram facilmente em prédios, sendo amplamente utilizadas para comunicação.", answer: true },
+        { text: "A transmissão por Micro-ondas ocorre em linha reta e atravessa com facilidade obstáculos físicos como paredes e edifícios.", answer: false },
+        { text: "Satélites geoestacionários são aqueles que orbitam em baixa altitude ao redor do planeta Terra.", answer: false },
+        { text: "Ondas de infravermelho, como as de um controle remoto de TV, são adequadas para comunicação de longa distância e atravessam objetos sólidos.", answer: false },
+
+        // Canais e Modos de Comunicação
+        { text: "O modo de comunicação Simplex é bidirecional, permitindo que a informação flua em ambos os sentidos, mas não simultaneamente.", answer: false },
+        { text: "O modo Half-Duplex (Semi-Duplex), utilizado nos rádios da PMPE, permite comunicação bidirecional, mas não de forma simultânea.", answer: true },
+        { text: "A comunicação Full-Duplex (Duplex), como na telefonia celular, permite a transmissão e recepção de dados simultaneamente em ambos os sentidos.", answer: true },
+        { text: "Em uma comunicação Half-Duplex, a mesma frequência é utilizada tanto para transmissão (Tx) quanto para recepção (Rx).", answer: true },
+        { text: "Em uma comunicação Full-Duplex, frequências distintas são utilizadas para transmissão (Tx) e recepção (Rx), permitindo a comunicação simultânea.", answer: true },
+        { text: "Transmissões de TV e rádio comercial são exemplos clássicos de comunicação Full-Duplex.", answer: false },
+
+        // Equipamentos e Repetidoras
+        { text: "Rádios portáteis (HT's) são alimentados pela bateria da viatura e possuem uma potência de saída de aproximadamente 30 Watts.", answer: false },
+        { text: "Rádios móveis, instalados nas viaturas, possuem potência de saída superior à dos rádios portáteis.", answer: true },
+        { text: "Repetidoras têm a função de receber, amplificar e reenviar um sinal de rádio, ampliando o alcance da comunicação.", answer: true },
+        { text: "Para se comunicar através de uma repetidora, os rádios operam com uma única frequência, tanto para recepção (Rx) quanto para transmissão (Tx).", answer: false },
+        { text: "Rádios Fixos são alimentados por uma fonte que converte a tensão da rede elétrica (220V AC) para a tensão de operação do rádio (12V DC).", answer: true },
+        
+        // Sistemas Analógico vs. Digital (Trunking)
+        { text: "O sistema de rádio analógico (modulação FM) é considerado altamente seguro e privado, sendo imune a interceptações.", answer: false },
+        { text: "O sistema digital Trunking (troncalizado) otimiza o uso do espectro de radiofrequência através da alocação dinâmica de canais.", answer: true },
+        { text: "No sistema Trunking, se uma repetidora falhar, o controlador do sistema a isola e continua alocando as outras, garantindo a continuidade da comunicação.", answer: true },
+        { text: "O modo 'Failsoft' é ativado quando um sistema Trunking perde seu canal de controle, fazendo com que os rádios operem em um modo repetidor 'convencional'.", answer: true },
+        { text: "A criptografia em sistemas de rádio digital tornou-se fundamental para manter o sigilo das comunicações, dificultando a escuta por 'scanners'.", answer: true },
+        { text: "Em um sistema de rádio convencional (analógico), cada frequência é alocada de maneira exclusiva para um grupo, permanecendo ociosa se não houver comunicação.", answer: true },
+        { text: "A modulação em um sistema digital é avançada, sendo capaz de inserir apenas o sinal de voz na portadora, sem dados de controle ou localização.", answer: false },
+        { text: "No sistema Trunking, a alocação de canais é fixa, ou seja, um grupo de conversa sempre utilizará a mesma frequência.", answer: false },
+
+        // Código Q e Procedimentos
+        { text: "O Código Q tem caráter sigiloso e não pode ser considerado como linguagem clara.", answer: false },
+        { text: "No Código Q, 'QAP' significa 'Ocupado' e 'QRL' significa 'Na escuta'.", answer: false },
+        { text: "A sigla 'QTH' é utilizada para se referir ao local ou endereço de uma estação ou viatura.", answer: true },
+        { text: "'QSL' significa 'Entendido' ou 'Confirmado', e 'TKS' é a abreviação para 'Obrigado'.", answer: true },
+        { text: "A disciplina na rede de rádio não é importante, pois múltiplos postos podem transmitir simultaneamente sem causar interferência.", answer: false },
+        { text: "Um procedimento correto de radiocomunicação é escutar a rede para verificar se está em silêncio antes de iniciar uma transmissão.", answer: true },
+        { text: "O motorista de uma viatura pode operar o rádio normalmente enquanto dirige, pois isso não desvia sua atenção do trânsito.", answer: false },
+        { text: "A tecla PTT (Push To Talk) deve ser mantida pressionada continuamente durante toda a comunicação para garantir a qualidade do sinal.", answer: false },
+        { text: "Para soletrar uma palavra usando o alfabeto fonético, deve-se enunciar 'VOU SOLETRAR' antes de iniciar.", answer: true },
+
+        // Princípios de Comunicação
+        { text: "O princípio da 'Brevidade' na comunicação policial significa que as mensagens devem ser longas e detalhadas para não deixar dúvidas.", answer: false },
+        { text: "A 'Clareza' é um princípio que visa evitar mal-entendidos, garantindo que as informações sejam transmitidas de forma compreensível.", answer: true },
+        { text: "Manter a 'Serenidade' durante situações críticas na comunicação por rádio é importante para transmitir calma e confiança.", answer: true },
+        { text: "O princípio da 'Precisão' implica em fornecer mensagens com todos os dados relevantes para eliminar dúvidas.", answer: true }
+];
         let availableQuestions = [];
 
         function shuffle(array) {
