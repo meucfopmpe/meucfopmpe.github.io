@@ -1024,3 +1024,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         container.appendChild(card);
       });
+
+  }
