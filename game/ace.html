@@ -94,13 +94,19 @@
         
         .hidden { display: none; }
 
-                /* === AJUSTE DE ESCALA GLOBAL PARA 67% === */
-        html {
-          transform: scale(0.67);
+               /* === AJUSTE DE ESCALA SUAVE E CENTRALIZADO === */
+        body {
+          zoom: 0.67; /* reduz o tamanho total da interface para 67% */
           transform-origin: top center;
-          height: 150vh;
           overflow: hidden;
         }
+        
+        @media (max-width: 768px) {
+          body {
+            zoom: 1; /* mantém o tamanho normal no celular */
+          }
+        }
+
 
     </style>
 </head>
