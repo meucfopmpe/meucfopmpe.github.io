@@ -1000,7 +1000,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p>${game.name}</p>
                 <p><strong>Data:</strong> ${new Date(game.date).toLocaleDateString('pt-BR')}</p>
               `;
-              card.onclick = () => openGame(game);
+              card.onclick = () => window.open(game.path, '_blank');
               container.appendChild(card);
             });
         }
