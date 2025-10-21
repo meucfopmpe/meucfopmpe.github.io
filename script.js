@@ -981,17 +981,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
                 // === CONFIGURAÇÃO DE JOGOS DISPONÍVEIS ===
         const games = [
-          { id: 'desafio-cfo', name: 'Desafio CFO - GPCL', path: 'game/desafio-cfo.html', subject: 'TIC (AV2)', date: '2025-10-23' },
-          { id: 'ace-jogo', name: 'Desafio ACE', path: 'game/desafio-cfo.html', subject: 'ACE', date: '2025-10-25' }
-          // 🔹 você pode adicionar novos jogos aqui conforme as provas da semana
+          { 
+            id: 'desafio-cfo', 
+            name: 'Desafio CFO - GPCL', 
+            path: 'game/desafio-cfo.html', 
+            subject: 'TIC (AV2)', 
+            date: '2025-10-23' 
+          },
+          { 
+            id: 'ace-jogo', 
+            name: 'Desafio ACE', 
+            path: 'game/desafio-cfo.html',  // usa o mesmo jogo por enquanto
+            subject: 'ACE', 
+            date: '2025-10-25' 
+          }
         ];
         
         // === RENDERIZAÇÃO DOS CARDS ===
         function renderGames() {
           const container = document.getElementById('games-list');
+          if (!container) return;
           container.innerHTML = '';
+        
           games
-            .sort((a, b) => new Date(a.date) - new Date(b.date)) // ordena pela data mais próxima
+            .sort((a, b) => new Date(a.date) - new Date(b.date))
             .forEach(game => {
               const card = document.createElement('div');
               card.className = 'doc-card';
@@ -1000,10 +1013,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p>${game.name}</p>
                 <p><strong>Data:</strong> ${new Date(game.date).toLocaleDateString('pt-BR')}</p>
               `;
-              card.onclick = () => window.open(game/desafio-cfo.html, '_blank');
+        
+              // 👉 Ao clicar, abre o jogo em nova aba
+              card.onclick = () => window.open(game.path, '_blank');
+        
               container.appendChild(card);
             });
         }
+
         
         
         
