@@ -984,65 +984,43 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           });
         }
-                // === CONFIGURAÇÃO DE JOGOS DISPONÍVEIS ===
-        const games = [
-          { 
-            id: 'desafio-cfo', 
-            name: 'Desafio CFO - GPCL', 
-            path: 'game/desafio-cfo.html', 
-            subject: 'TIC (AV2)', 
-            date: '2025-10-23' 
-          },
-          { 
-            id: 'ace-jogo', 
-            name: 'Desafio ACE', 
-            path: 'game/desafio-cfo.html',  // usa o mesmo jogo por enquanto
-            subject: 'ACE', 
-            date: '2025-10-25' 
-          }
-        ];
-        
-        // === RENDERIZAÇÃO DOS CARDS ===
-        function renderGames() {
-          const container = document.getElementById('games-list');
-          if (!container) return;
-          container.innerHTML = '';
-        
-          games
-            .sort((a, b) => new Date(a.date) - new Date(b.date))
-            .forEach(game => {
-              const card = document.createElement('div');
-              card.className = 'doc-card';
-              card.innerHTML = `
-                <h3>${game.subject}</h3>
-                <p>${game.name}</p>
-                <p><strong>Data:</strong> ${new Date(game.date).toLocaleDateString('pt-BR')}</p>
-              `;
-        
-              // 👉 Ao clicar, abre o jogo em nova aba
-              card.onclick = () => window.open(game.path, '_blank');
-        
-              container.appendChild(card);
-            });
-        }
+                 // === CONFIGURAÇÃO DE JOGOS DISPONÍVEIS ===
+  const games = [
+    { 
+      id: 'desafio-cfo', 
+      name: 'Desafio CFO - GPCL', 
+      path: 'game/desafio-cfo.html', 
+      subject: 'TIC (AV2)', 
+      date: '2025-10-23' 
+    },
+    { 
+      id: 'ace-jogo', 
+      name: 'Desafio ACE', 
+      path: 'game/desafio-cfo.html',  
+      subject: 'ACE', 
+      date: '2025-10-25' 
+    }
+  ];
 
-                // === FAZ OS JOGOS APARECEREM QUANDO A ABA É ABERTA ===
-        document.getElementById('sidebar-nav').addEventListener('click', (e) => {
-          if (e.target.dataset.page === 'page-games') {
-            setTimeout(renderGames, 100); // pequeno delay pra garantir o DOM
-          }
-        });
+  // === RENDERIZAÇÃO DOS CARDS ===
+  function renderGames() {
+    const container = document.getElementById('games-list');
+    if (!container) return;
+    container.innerHTML = '';
 
-        
-        
-        
-          // Monitora mensagens vindas do jogo
-          window.addEventListener('message', async (event) => {
-            if (event.data.type === 'GAME_SCORE') {
-              const score = event.data.score;
-              const userId = localStorage.getItem('user_id'); // supondo que seu login já salva o ID
-              await sb.from('user_scores').insert({ user_id: userId, game_id: game.id, score });
-              alert(`Pontuação de ${score} registrada!`);
-            }
-          });
+    games
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .forEach(game => {
+        const card = document.createElement('div');
+        card.className = 'doc-card';
+        card.innerHTML = `
+          <h3>${game.subject}</h3>
+          <p>${game.name}</p>
+          <p><strong>Data:</strong> ${new Date(game.date).toLocaleDateString('pt-BR')}</p>
+        `;
+        // 👉 abre o jogo em nova aba
+        card.addEventListener('click', () => {
+          window.open(game.path, '_blank');
         });
+        container.appendChild(card);
+      });
