@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Desafio CFO: GPCL - Versão Final</title>
+    <title>Desafio CFO: Modo Desafio</title>
     <style>
         :root {
             --primary-bg: #2c3e50; --secondary-bg: #34495e; --light-text: #ecf0f1;
@@ -91,12 +91,6 @@
         .shop-button-equip { background-color: #9b59b6; }
         .shop-button-equipped { background-color: #27ae60; cursor: not-allowed; }
         .shop-button-owned { background-color: #7f8c8d; }
-
-        #error-report { text-align: left; max-height: 150px; overflow-y: auto; background-color: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; margin-top: 15px;}
-        #error-report p { margin: 0 0 15px 0; border-bottom: 1px solid #7f8c8d; padding-bottom: 10px;}
-        #error-report p:last-child { border-bottom: none; }
-        #error-report strong { color: var(--accent-red); }
-        #error-report em { color: #f1c40f; }
         
         .hidden { display: none; }
     </style>
@@ -111,10 +105,7 @@
             <button id="start-game-button" class="button play-button">Jogar</button>
             <button id="go-to-shop-button" class="button shop-button">Loja</button>
         </div>
-        <p style="margin-top: 20px;">
-            <strong>Moedas:</strong> <span id="start-coins">0</span> | 
-            <strong>Recorde:</strong> <span id="high-score">0</span>
-        </p>
+        <p style="margin-top: 20px;"><strong>Moedas:</strong> <span id="start-coins">0</span></p>
     </div>
 
     <div id="game-wrapper" class="hidden">
@@ -139,7 +130,6 @@
         <h2 id="game-over-title">Fim de Jogo</h2>
         <p>Pontuação final: <span id="final-score">0</span></p>
         <p>Moedas ganhas: <span id="coins-earned">0</span></p>
-        <div id="report-container"></div>
         <div>
             <button id="restart-button" class="button restart-button">Jogar Novamente</button>
             <button id="go-to-shop-from-over-button" class="button shop-button">Ir para a Loja</button>
@@ -173,78 +163,27 @@
         const basePortalSpeed = 45;
 
         // --- VARIÁVEIS DE ESTADO DO JOGO ---
-        let player, portals, obstacles, powerUps, projectiles, answerPopup;
+        let player, portals, obstacles, powerUps, answerPopup;
         let score, lives, gameActive, gameLoopId, difficultyLevel;
         let isPaused, correctAnswersInARow, powerReady, isNextGolden, isAccelerating;
         let lastTime = 0;
         let playerData = {};
         let activeTimeouts = [];
-        let incorrectAnswers = [];
 
         const questions = [
-  // --- HISTÓRIA DA ANÁLISE CRIMINAL ---
-  [cite_start]{ text: "Henry Fielding, magistrado inglês, é considerado um dos precursores da Análise Criminal por sistematizar denúncias e descrições de criminosos para orientar seus 'Bow Street Runners'.", answer: true, explanation: "Explicação: Correto. A apostila credita a Henry Fielding os primeiros traços do uso estruturado de rudimentos da Análise Criminal. [cite: 41]" },
-  { text: "O conceito de Modus Operandi (MO) foi desenvolvido nos Estados Unidos por August Vollmer para classificar crimes e criminosos.", answer: false, explanation: "Explicação: Incorreto. [cite_start]O conceito de Modus Operandi (MO) foi desenvolvido na segunda metade do século XIX em Londres, na Polícia Metropolitana. [cite: 59]" },
-  [cite_start]{ text: "August Vollmer, conhecido como o 'pai da polícia americana', desenvolveu a técnica do 'mapa de pinos' para identificar visualmente as áreas de concentração de crimes. [cite: 74, 76]", answer: true, explanation: "Explicação: Correto. [cite_start]Vollmer utilizava mapas com pinos para marcar onde os crimes e chamadas de emergência estavam concentrados. [cite: 74]" },
-  { text: "O termo 'análise de crime' foi formalmente utilizado pela primeira vez por August Vollmer em seu artigo 'A Ronda Policial'.", answer: false, explanation: "Explicação: Incorreto. [cite_start]O termo 'análise de crime' surgiu formalmente pela primeira vez em 1963, no livro 'Administração Policial' de Orlando W. Wilson, um pupilo de Vollmer. [cite: 89]" },
-  [cite_start]{ text: "O sistema CompStat, um dos marcos da 'Era de Ouro' da Análise Criminal, é um modelo de gestão da polícia de Nova Iorque fortemente baseado em mapeamento e análise de dados para cobrar resultados dos comandantes. [cite: 156, 167]", answer: true, explanation: "Explicação: Correto. [cite_start]O CompStat foi um sistema de gestão por resultados que utilizou intensivamente a análise e o mapeamento criminal. [cite: 156]" },
-  { text: "No Brasil, a Análise Criminal é uma prática consolidada desde o início do século XX, com sistemas de dados nacionais integrados e confiáveis.", answer: false, explanation: "Explicação: Incorreto. [cite_start]A apostila aponta que o Brasil enfrenta desafios como a ausência de uma cultura técnica de Análise Criminal e a falta de um sistema de dados agregados que lhe dê sustentação. [cite: 215]" },
-  [cite_start]{ text: "O Programa Padronizado de Registro de Crimes (UCR) foi criado pelo FBI para ajudar as polícias a pensar em classificações mais amplas de crimes, como 'Arrombamento', em vez de tipos penais específicos e complexos. [cite: 104, 106]", answer: true, explanation: "Explicação: Correto. [cite_start]O UCR ajudou a mover o raciocínio de uma categorização baseada em leis para classificações mais amplas e úteis para a análise criminal. [cite: 106]" },
-
-  // --- FUNDAMENTOS E FLUXO DA ANÁLISE ---
-  { text: "A Análise Criminal visa mudar a lógica do policiamento de proativo para reativo, focando apenas na resposta a crimes que já ocorreram.", answer: false, explanation: "Explicação: Incorreto. [cite_start]O objetivo é o oposto: deixar de agir reativamente para assumir uma postura proativa, com ações preventivas para quebrar a sequência de incidentes. [cite: 269]" },
-  { text: "O fluxo de execução da análise estatística segue a ordem: Coleta de Dados, Apresentação dos Dados, Crítica dos Dados e Análise.", answer: false, explanation: "Explicação: Incorreto. A ordem correta do fluxo é: Coleta de Dados, Crítica dos Dados, Apresentação dos Dados e Análise. [cite_start]A crítica (limpeza) dos dados deve vir antes da apresentação. [cite: 423]" },
-  [cite_start]{ text: "A Análise Criminal Estratégica (ACE) tem como principal objetivo fornecer subsídios para os operadores de segurança que atuam 'nas ruas', como a identificação de pontos quentes. [cite: 408]", answer: false, explanation: "Explicação: Incorreto. Essa é a definição da Análise Criminal Tática (ACT). [cite_start]A ACE é voltada para o longo prazo, como a formulação de políticas públicas. [cite: 398, 407]" },
-  [cite_start]{ text: "Pesquisas sobre a efetividade das estratégias de policiamento indicam que o Policiamento Orientado a Problemas apresenta fortes evidências de redução da incidência criminal. [cite: 322]", answer: true, explanation: "Explicação: Correto. [cite_start]A apostila apresenta um quadro que mostra que, entre as estratégias, o Policiamento Orientado a Problemas é o que tem evidências empíricas de forte ou moderada relação com a diminuição da criminalidade. [cite: 309]" },
-  { text: "A 'Crítica dos Dados' é a etapa do fluxo de análise onde se interpreta tabelas e gráficos para extrair conclusões.", answer: false, explanation: "Explicação: Incorreto. [cite_start]A Crítica dos Dados é a etapa de revisão e 'limpeza' para identificar e suprimir erros. [cite: 434] [cite_start]A interpretação de gráficos é a etapa de 'Análise dos Dados'. [cite: 438]" },
-
-  // --- TEORIAS SOCIOLÓGICAS (CRIMINOLOGIA AMBIENTAL) ---
-  { text: "A Criminologia Ambiental foca seu estudo na 'criação do criminoso', analisando fatores biológicos e psicológicos ao longo de sua vida.", answer: false, explanation: "Explicação: Incorreto. A Criminologia Ambiental tem como objeto de interesse o 'crime' (o evento), não o 'criminoso'. [cite_start]Ela foca nas circunstâncias imediatas que permitem a ocorrência do crime. [cite: 717]" },
-  [cite_start]{ text: "A Teoria da Escolha Racional postula que o comportamento criminal é, em grande medida, resultado de uma escolha que avalia os benefícios e os custos de se cometer o crime. [cite: 464]", answer: true, explanation: "Explicação: Correto. [cite_start]Essa teoria sustenta que o indivíduo decide praticar um crime buscando maximizar benefícios e minimizar custos. [cite: 467]" },
-  { text: "No 'Triângulo do Crime' da Teoria da Atividade de Rotina, um 'guardião capaz' refere-se exclusivamente a um policial ou segurança profissional.", answer: false, explanation: "Explicação: Incorreto. [cite_start]Um 'guardião capaz' pode ser qualquer pessoa cuja presença possa desencorajar a ação criminosa, como um vizinho, um porteiro ou um pedestre. [cite: 573]" },
-  { text: "A Teoria do Padrão Criminal afirma que os crimes ocorrem de forma totalmente aleatória no espaço e no tempo.", answer: false, explanation: "Explicação: Incorreto. [cite_start]A teoria defende o oposto: a distribuição de crimes não é aleatória, concentrando-se em 'nós' (nodes), 'caminhos' (paths) e 'fronteiras' (edges) das atividades de rotina. [cite: 683]" },
-  { text: "De acordo com a Teoria do Padrão Criminal, 'Nós' (Nodes) são as rotas e ruas utilizadas para se deslocar pela cidade.", answer: false, explanation: "Explicação: Incorreto. 'Nós' são os lugares de destino e origem das pessoas (casa, trabalho, shoppings). [cite_start]As rotas que os ligam são os 'Caminhos' (Paths). [cite: 656, 664]" },
-  [cite_start]{ text: "A Teoria da Atividade de Rotina considera o criminoso motivado como um dado pré-existente e foca sua análise nos outros dois elementos do triângulo: o alvo apropriado e a ausência do guardião. [cite: 572]", answer: true, explanation: "Explicação: Correto. [cite_start]A abordagem da teoria não busca explicar a origem da motivação do criminoso, mas sim as condições que permitem que ele atue. [cite: 572]" },
-  [cite_start]{ text: "Segundo a Criminologia Ambiental, a distribuição do crime no tempo e no espaço não é aleatória. [cite: 734]", answer: true, explanation: "Explicação: Correto. [cite_start]Uma das premissas da Criminologia Ambiental é que os eventos criminais se concentram onde as oportunidades e características ambientais são mais favoráveis. [cite: 735]" },
-
-  // --- FONTES DE COLETA DE INFORMAÇÃO ---
-  { text: "Os Registros Policiais (B.O.) são a fonte de dados mais completa, pois refletem todos os crimes que ocorrem na sociedade, sem problemas de subnotificação.", answer: false, explanation: "Explicação: Incorreto. [cite_start]A apostila destaca que uma das principais limitações dos registros policiais é a subnotificação, já que muitos crimes não são registrados pelas vítimas. [cite: 909]" },
-  [cite_start]{ text: "A principal limitação dos dados do Sistema de Informação sobre Mortalidade (SIM) para análise criminal é que ele registra o local do óbito, que pode não ser o mesmo local da ocorrência do crime. [cite: 857]", answer: true, explanation: "Explicação: Correto. [cite_start]Um crime pode ocorrer em um município e a vítima falecer em outro, distorcendo a análise geográfica do crime. [cite: 857, 861]" },
-  { text: "As pesquisas de vitimização são um método barato e rápido para obter informações sobre a 'cifra oculta' da criminalidade.", answer: false, explanation: "Explicação: Incorreto. [cite_start]Embora sejam ótimas para medir a 'cifra oculta', a apostila as descreve como um método caro e complexo. [cite: 891, 2511]" },
-  [cite_start]{ text: "Em Pernambuco, a multiplicidade de fontes para o registro de CVLI (Mortes Violentas Letais Intencionais) foi um problema sanado pela criação da pulseira de identificação de cadáver. [cite: 845]", answer: true, explanation: "Explicação: Correto. [cite_start]A apostila menciona que a pulseira de identificação numérica para cada morte violenta ajudou no registro rápido e preciso, sanando o problema de hiper notificação. [cite: 845]" },
-  { text: "A classificação de um fato delituoso registrada em um Boletim de Ocorrência (B.O.) é definitiva e não pode ser alterada durante o inquérito policial.", answer: false, explanation: "Explicação: Incorreto. [cite_start]A apostila afirma que a classificação inicial é provisória e pode ser alterada a qualquer momento pela autoridade policial em face de novos fatos. [cite: 921]" },
-
-  // --- ANÁLISE ESTATÍSTICA ---
-  [cite_start]{ text: "A 'Taxa Bruta' é um indicador utilizado para permitir a comparação justa da incidência criminal entre regiões com tamanhos populacionais diferentes. [cite: 1334]", answer: true, explanation: "Explicação: Correto. [cite_start]A taxa padroniza o número de crimes pela população (geralmente por 100 mil habitantes), corrigindo distorções causadas por populações de tamanhos distintos. [cite: 1334]" },
-  { text: "Um coeficiente de correlação (r) igual a -0,8 indica que não há relação entre as duas variáveis analisadas.", answer: false, explanation: "Explicação: Incorreto. Um valor de -0,8 indica uma correlação negativa forte, pois está próximo de -1. [cite_start]A ausência de correlação seria um valor próximo de zero. [cite: 1475]" },
-  { text: "A afirmação 'correlação implica causalidade' é um dos princípios fundamentais da análise estatística criminal.", answer: false, explanation: "Explicação: Incorreto. [cite_start]A apostila dá um 'ALERTA MÁXIMO' de que correlação NÃO implica causalidade. [cite: 1455] [cite_start]Duas variáveis podem estar associadas sem que uma cause a outra. [cite: 1455]" },
-  { text: "A Mediana é a medida de tendência central mais sensível a valores extremos (outliers) em um conjunto de dados.", answer: false, explanation: "Explicação: Incorreto. A Média é a medida mais sensível a valores extremos. [cite_start]A Mediana, por ser o valor central, não é afetada por eles. [cite: 1316]" },
-  { text: "Se a correlação (r) entre duas variáveis é positiva (r > 0), significa que, quando uma variável cresce, a outra tende a decrescer.", answer: false, explanation: "Explicação: Incorreto. [cite_start]Uma correlação positiva significa que, quando uma variável cresce, a outra também tende a crescer. [cite: 1478]" },
-  { text: "O Desvio Padrão é uma medida de tendência central que indica o valor médio de um conjunto de dados.", answer: false, explanation: "Explicação: Incorreto. [cite_start]O Desvio Padrão é uma medida de dispersão, que indica o quão agrupados ou dispersos os dados estão em torno da média. [cite: 1418, 1420]" },
-  { text: "A Moda é o valor que ocorre com menor frequência em uma amostra de dados.", answer: false, explanation: "Explicação: Incorreto. [cite_start]A Moda é a observação que ocorre com maior frequência em uma amostra. [cite: 1315]" },
-  { text: "A Amplitude de um conjunto de dados é calculada pela soma do maior e do menor valor.", answer: false, explanation: "Explicação: Incorreto. [cite_start]A Amplitude é a diferença entre o maior e o menor valor dos dados analisados. [cite: 1416]" },
-
-  // --- MAPEAMENTO DE CRIMES E FERRAMENTAS ---
-  [cite_start]{ text: "Um Sistema de Informações Geográficas (SIG) é um software que permite criar mapas com múltiplas camadas de informação sobrepostas para realizar análises espaciais. [cite: 1665, 1761]", answer: true, explanation: "Explicação: Correto. [cite_start]A capacidade de integrar e analisar diferentes camadas de dados (ruas, crimes, escolas, etc.) em um único ambiente é a principal característica de um SIG. [cite: 1613]" },
-  { text: "O Google Earth é um SIG completo, permitindo análises espaciais complexas como a de superposição (overlay).", answer: false, explanation: "Explicação: Incorreto. [cite_start]A apostila classifica o Google Earth como um programa de visualização, não um SIG completo, e cita a análise de superposição como uma função avançada de SIG que não está presente no Google Earth. [cite: 2412, 1848]" },
-  { text: "As imagens do Google Earth são atualizadas em tempo real, permitindo o monitoramento ao vivo de eventos criminais.", answer: false, explanation: "Explicação: Incorreto. [cite_start]A apostila esclarece que as imagens do Google Earth não são em tempo real, tratando-se de fotografias de satélite que podem ter até três anos de existência. [cite: 2218, 2222]" },
-  [cite_start]{ text: "A 'Tabela Dinâmica' do Excel é um recurso destacado na apostila por ser útil para resumir e cruzar grandes volumes de dados de forma interativa. [cite: 2244, 2258]", answer: true, explanation: "Explicação: Correto. [cite_start]A Tabela Dinâmica é apresentada como uma ferramenta poderosa para criar relatórios resumidos a partir de uma base de dados. [cite: 2244]" },
-  { text: "O Sistema INFOPOL, em Pernambuco, é uma ferramenta de Business Intelligence (BI) para a criação de dashboards visuais.", answer: false, explanation: "Explicação: Incorreto. [cite_start]O INFOPOL é o sistema de coleta e análise de ocorrências, a fonte primária dos dados. [cite: 2422] [cite_start]A ferramenta de BI para dashboards mencionada é o SACE (Power BI). [cite: 2378, 2379]" },
-  { text: "O SACE (Power BI) é o sistema onde os Boletins de Ocorrência são originalmente registrados pela Polícia Civil de Pernambuco.", answer: false, explanation: "Explicação: Incorreto. [cite_start]O SACE é um sistema de análise e visualização de dados (dashboard). [cite: 2378] [cite_start]O sistema de registro primário dos B.O.s é o INFOPOL. [cite: 2526]" },
-  { text: "A análise de 'superposição' em um SIG consiste em encontrar o caminho mais curto entre dois pontos.", answer: false, explanation: "Explicação: Incorreto. [cite_start]A análise de superposição (overlay) é o agrupamento de diferentes camadas de informação para visualizá-las em conjunto. [cite: 1761] [cite_start]Encontrar o caminho mais curto é uma 'análise de rede'. [cite: 1764]" },
-  [cite_start]{ text: "O QlikView é uma ferramenta de Business Intelligence (BI) utilizada em Pernambuco para o monitoramento de indicadores, com funcionalidades semelhantes às do Power BI. [cite: 2401, 2403]", answer: true, explanation: "Explicação: Correto. [cite_start]A apostila cita o QlikView como a ferramenta utilizada nas reuniões do 'Juntos pela Segurança' para monitorar indicadores, sendo uma solução de BI. [cite: 2401]" },
-
-  // --- Questões Gerais e Conceituais ---
-  [cite_start]{ text: "A ferramenta 'Régua' do Google Earth permite medir a distância entre dois ou mais pontos em um mapa. [cite: 2188, 2191]", answer: true, explanation: "Explicação: Correto. [cite_start]O menu 'Ferramentas' do Google Earth inclui a função 'Régua' para medir distâncias e caminhos. [cite: 2188]" },
-  { text: "A 'cifra oculta' da criminalidade refere-se aos crimes cometidos por policiais que não são investigados.", answer: false, explanation: "Explicação: Incorreto. A 'cifra oculta' refere-se à quantidade de crimes que não chegam ao conhecimento das autoridades, ou seja, que não são registrados. [cite_start]As pesquisas de vitimização são a melhor forma de medi-la. [cite: 2511]" },
-  [cite_start]{ text: "A análise de proximidade em um SIG permite, por exemplo, saber quais imóveis se encontram a uma determinada distância de uma rodovia. [cite: 1760]", answer: true, explanation: "Explicação: Correto. [cite_start]A análise de proximidade está relacionada à análise espacial a partir de um ponto, linha ou área de referência. [cite: 1760]" },
-  [cite_start]{ text: "O objetivo principal da gestão da informação é identificar e potencializar recursos informacionais, envolvendo aquisição, armazenamento, análise e uso. [cite: 745]", answer: true, explanation: "Explicação: Correto. [cite_start]Esta é a definição apresentada na apostila sobre a finalidade da gestão da informação. [cite: 745]" },
-  [cite_start]{ text: "A focalização em tipos criminais específicos (ex: roubo a coletivo) é desencorajada na análise criminal, pois dificulta a identificação das causas do problema. [cite: 394]", answer: false, explanation: "Explicação: Incorreto. [cite_start]A apostila recomenda a focalização, pois cada tipo de crime possui causas específicas, atores e dinâmicas distintas, permitindo uma análise mais acurada. [cite: 393, 396]" },
-  { text: "Os dados coletados pelo SIM (Saúde) e pelas Polícias são diretamente comparáveis, pois usam as mesmas classificações (Código Penal) e registram o mesmo local (ocorrência do fato).", answer: false, explanation: "Explicação: Incorreto. [cite_start]A apostila destaca que as fontes não são diretamente comparáveis, pois o SIM usa a Classificação Internacional de Doenças (CID) e registra o local do óbito, enquanto a polícia usa o Código Penal e registra o local do fato. [cite: 854, 857, 861]" },
-  [cite_start]{ text: "O policiamento comunitário, embora importante para a legitimidade da polícia, apresenta evidências de fraca ou moderada relação com a diminuição da incidência criminal. [cite: 303]", answer: true, explanation: "Explicação: Correto. [cite_start]Conforme o quadro de efetividade das estratégias de policiamento, a relação do policiamento comunitário com a redução do crime é classificada como fraca ou moderada. [cite: 303]" },
-  { text: "A estratégia tradicional de policiamento, baseada apenas no aumento de efetivo e viaturas, possui fortes evidências empíricas de que reduz a criminalidade.", answer: false, explanation: "Explicação: Incorreto. [cite_start]A pesquisa apresentada na apostila conclui que 'falta evidência empírica que demonstra relação com a diminuição na incidência criminal' para a estratégia tradicional. [cite: 306]" },
-  [cite_start]{ text: "No Excel, para criar rapidamente um gráfico que se baseia no tipo padrão, basta selecionar os dados e pressionar a tecla F11. [cite: 2365]", answer: true, explanation: "Explicação: Correto. [cite_start]A apostila menciona que pressionar F11 cria o gráfico em uma planilha de gráfico separada, enquanto ALT+F1 o exibe como um gráfico incorporado. [cite: 2365, 2367]" }
-];
+            { text: "O Oficial é um líder apenas pelo cargo que exerce, não precisando ser inspirador ou motivador.", answer: false }, { text: "Gestão de Pessoas (GP) é o conjunto de práticas para administrar as pessoas, desconsiderando suas necessidades e motivações.", answer: false }, { text: "Na moderna Gestão de Pessoas, as pessoas constituem o principal ativo da organização.", answer: true }, { text: "Um dos objetivos da GP é proporcionar à organização pessoas bem treinadas e bem motivadas.", answer: true }, { text: "A evolução da Gestão de Pessoas passou de uma abordagem estratégica para uma puramente burocrática.", answer: false }, { text: "Agregar, aplicar, recompensar, desenvolver, manter e monitorar pessoas são os seis processos da GP.", answer: true }, { text: "O recrutamento interno atua sobre candidatos que estão no mercado, fora do serviço público.", answer: false }, { text: "A avaliação de desempenho serve para julgar o valor, a excelência e as competências de uma pessoa ou equipe.", answer: true }, { text: "A avaliação 360 graus é quando o desempenho é avaliado apenas pela chefia imediata.", answer: false }, { text: "O processo de recompensar pessoas é um elemento primordial para o incentivo e a motivação dos colaboradores.", answer: true }, { text: "A remuneração total inclui apenas o salário base, sem considerar benefícios ou incentivos.", answer: false }, { text: "Motivação extrínseca refere-se a fatores internos e pessoais que impulsionam um indivíduo a agir.", answer: false }, { text: "Na pirâmide de Maslow, as necessidades fisiológicas são a base e devem ser satisfeitas primeiro.", answer: true }, { text: "A Teoria X de McGregor pressupõe que o trabalho é uma atividade natural e gratificante para os seres humanos.", answer: false }, { text: "Fatores motivacionais, segundo Herzberg, estão relacionados ao conteúdo do trabalho em si, como reconhecimento e crescimento.", answer: true }, { text: "Treinamento e Desenvolvimento de pessoas têm o mesmo significado e foco.", answer: false }, { text: "O diagnóstico é a etapa inicial do processo de treinamento para identificar as necessidades da organização.", answer: true }, { text: "Liderança é a capacidade de guiar e influenciar um grupo para alcançar um objetivo comum.", answer: true }, { text: "A liderança informal origina-se da autoridade do cargo ocupado na estrutura da organização.", answer: false }, { text: "O estilo de liderança 'Laissez-faire' ou Liberal é caracterizado pelo controle centralizado e rígido do líder.", answer: false }, { text: "A escuta ativa é uma habilidade de comunicação crucial para líderes eficazes.", answer: true }, { text: "A gestão de conflitos busca sempre evitar o conflito, mesmo que isso signifique ignorar o problema.", answer: false }, { text: "O estilo de gestão de conflitos de 'Colaboração' busca uma solução que atenda às necessidades de ambas as partes.", answer: true }, { text: "Grupo e equipe de trabalho são termos com o mesmo significado, representando um conjunto de pessoas com um objetivo.", answer: false }, { text: "No Exército Brasileiro, a chefia militar engloba o comando, a administração e a liderança.", answer: true }, { text: "Um dos princípios da liderança militar é evitar assumir a responsabilidade pelos atos dos subordinados.", answer: false }, { text: "Cultura organizacional é definida como um conjunto de hábitos, crenças, valores e símbolos de uma organização.", answer: true }, { text: "Os artefatos visíveis, como uniformes e layout, são o nível mais profundo e inconsciente da cultura organizacional.", answer: false }, { text: "A resistência à mudança é sempre um fator negativo e deve ser suprimida imediatamente.", answer: false }, { text: "A Qualidade de Vida no Trabalho (QVT) refere-se apenas ao bem-estar físico dos funcionários, ignorando o mental e emocional.", answer: false },
+            // NOVAS QUESTÕES
+            { text: "A Teoria Y de McGregor assume que as pessoas são inerentemente preguiçosas e precisam de controle rígido.", answer: false },
+            { text: "No ciclo de mudança diretivo, a mudança é imposta de cima para baixo na organização.", answer: true },
+            { text: "Fatores de higiene, segundo Herzberg, quando presentes, são os principais responsáveis pela motivação duradoura.", answer: false },
+            { text: "A liderança situacional defende que um único estilo de liderança (ex: democrático) é eficaz em todas as situações.", answer: false },
+            { text: "O processo de 'Manter Pessoas' na GP inclui a gestão do clima, cultura organizacional e qualidade de vida.", answer: true },
+            { text: "Na pirâmide de Maslow, a necessidade de 'Auto-Realização' é a mais básica de todas.", answer: false },
+            { text: "O método de avaliação de desempenho de 'incidentes críticos' foca em registrar comportamentos específicos, positivos ou negativos.", answer: true },
+            { text: "A gestão multigeracional é um desafio da GP que lida com a convivência de diferentes gerações no ambiente de trabalho.", answer: true },
+            { text: "O 'Job rotation' (rotação de cargos) é um método de desenvolvimento de pessoas focado fora do cargo.", answer: false },
+            { text: "Um dos efeitos positivos do conflito organizacional é que ele pode estimular a busca por soluções criativas e inovadoras.", answer: true }
+        ];
         let availableQuestions = [];
 
         function shuffle(array) {
@@ -333,8 +272,7 @@
         function loadPlayerData() {
             const data = localStorage.getItem('cfoGameData');
             if (data) playerData = JSON.parse(data);
-            else playerData = { name: "", coins: 0, highScore: 0, ownedSkins: ['default'], equippedSkinId: 'default' };
-            if (!playerData.highScore) playerData.highScore = 0;
+            else playerData = { name: "", coins: 0, ownedSkins: ['default'], equippedSkinId: 'default' };
             if (playerData.name) {
                 document.getElementById('player-name-input').value = playerData.name;
                 document.getElementById('welcome-message').textContent = `Bem-vindo de volta, ${playerData.name}!`;
@@ -344,9 +282,9 @@
             playerData.name = document.getElementById('player-name-input').value.trim() || "Cadete";
             localStorage.setItem('cfoGameData', JSON.stringify(playerData));
         }
-        function updateStartScreenDisplays() {
+        function updateCoinDisplays() {
             document.getElementById('start-coins').textContent = playerData.coins;
-            document.getElementById('high-score').textContent = playerData.highScore;
+            document.getElementById('shop-coins').textContent = playerData.coins;
         }
         function showScreen(screenId) {
             ['start-screen', 'game-wrapper', 'game-over-screen', 'shop-screen'].forEach(id => {
@@ -357,7 +295,6 @@
         function populateShop() {
             const container = document.getElementById('shop-items');
             container.innerHTML = '';
-            document.getElementById('shop-coins').textContent = playerData.coins;
             skins.forEach(skin => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'shop-item';
@@ -397,7 +334,7 @@
         function buySkin(skinId, price) {
             if (playerData.coins >= price) {
                 playerData.coins -= price; playerData.ownedSkins.push(skinId);
-                savePlayerData(); updateStartScreenDisplays(); populateShop();
+                savePlayerData(); updateCoinDisplays(); populateShop();
             }
         }
         function equipSkin(skinId) {
@@ -407,10 +344,9 @@
 
         function resetGame() {
             player = { x: canvas.width / 2 - playerWidth / 2, y: canvas.height - playerHeight - 20, width: playerWidth, height: playerHeight, speed: baseSpeed, isShielded: false, isInvincible: false, isPhasing: false, controlsSlippery: false, isLeaping: false, isSlowed: false, slowsTime: false };
-            portals = []; obstacles = []; powerUps = []; projectiles = []; answerPopup = null;
+            portals = []; obstacles = []; powerUps = []; answerPopup = null;
             score = 0; lives = 3; difficultyLevel = 0; correctAnswersInARow = 0; powerReady = false; isNextGolden = false;
             isFrozen = false; isAccelerating = false; isPaused = false;
-            incorrectAnswers = [];
             shuffle(questions); availableQuestions = [...questions];
             updateGameStatus(); updatePowerIndicator(); nextRound();
         }
@@ -427,26 +363,10 @@
             cancelAnimationFrame(gameLoopId);
             activeTimeouts.forEach(id => clearTimeout(id));
             activeTimeouts = [];
-
-            if (score > playerData.highScore) { playerData.highScore = score; }
             const coinsEarned = score; playerData.coins += coinsEarned; savePlayerData();
-            
             document.getElementById('final-score').textContent = score;
             document.getElementById('coins-earned').textContent = coinsEarned;
             document.getElementById('game-over-title').textContent = collided ? "Fim de Jogo: Colisão!" : "Fim de Jogo";
-            
-            const reportContainer = document.getElementById('report-container');
-            if (incorrectAnswers.length > 0) {
-                let reportHTML = `<p>Você respondeu ${questions.length - availableQuestions.length} questões. Erros:</p><div id="error-report">`;
-                incorrectAnswers.forEach(item => {
-                    reportHTML += `<p>${item.question}<br><strong>Resposta correta: ${item.correctAnswer}</strong></p>`;
-                });
-                reportHTML += '</div>';
-                reportContainer.innerHTML = reportHTML;
-            } else {
-                reportContainer.innerHTML = `<p>Você respondeu ${questions.length - availableQuestions.length} questões sem erros!</p>`;
-            }
-
             showScreen('game-over-screen');
         }
         function nextRound() {
@@ -467,21 +387,16 @@
             portals.push({ x: positions[0], y: portalY, width: portalWidth, height: portalHeight, isCorrect: currentQuestion.answer === true, text: 'V', isGolden: isGolden });
             portals.push({ x: positions[1], y: portalY, width: portalWidth, height: portalHeight, isCorrect: currentQuestion.answer === false, text: 'F', isGolden: isGolden });
 
-            const attempts = 1 + Math.floor(difficultyLevel);
+            const attempts = 1 + Math.floor(difficultyLevel); // Aumenta a quantidade de tentativas mais rápido
             for(let i = 0; i < attempts; i++) {
-                const obstacleChance = 0.4 + (difficultyLevel * 0.15);
+                const obstacleChance = 0.4 + (difficultyLevel * 0.15); // Aumenta a chance mais rápido
                 if (Math.random() < obstacleChance) {
                     let type = 'cone';
-                    if (difficultyLevel >= 7 && Math.random() < 0.2) type = 'dinosaur';
-                    else if (difficultyLevel >= 6 && Math.random() < 0.25) type = 'clown';
-                    else if (difficultyLevel >= 5 && Math.random() < 0.3) type = 'wizard';
-                    else if (difficultyLevel >= 4 && Math.random() < 0.3) type = 'hole';
+                    if (difficultyLevel >= 4 && Math.random() < 0.3) type = 'hole';
                     else if (difficultyLevel >= 3 && Math.random() < 0.35) type = 'monster';
                     else if (difficultyLevel >= 2 && Math.random() < 0.4) type = 'puddle';
                     else if (difficultyLevel >= 1 && Math.random() < 0.4) type = 'tornado';
                     if (difficultyLevel >= 2 && Math.random() < 0.2) type = 'oil';
-                    if (difficultyLevel >= 5 && Math.random() < 0.25) type = 'spiderweb';
-
                     obstacles.push({ type: type, x: streetX + Math.random() * (streetWidth - 30), y: -60 - (i * 120) - Math.random() * 100, size: 30, isStunned: false });
                 }
             }
@@ -493,7 +408,7 @@
         function updateGameStatus() {
             document.getElementById('score').textContent = `Pontos: ${score}`;
             document.getElementById('lives').innerHTML = `Vidas: ${'❤️'.repeat(lives)}`;
-            const newDifficultyLevel = Math.floor(score / 70);
+            const newDifficultyLevel = Math.floor(score / 70); // Nível a cada 70 pontos
             if (newDifficultyLevel > difficultyLevel) {
                 difficultyLevel = newDifficultyLevel;
                 const indicator = document.getElementById('difficulty-indicator');
@@ -533,7 +448,7 @@
             answerPopup.alpha -= 0.015;
         }
         function usePower() {
-            if (!gameActive || !powerReady || isPaused) return;
+            if (!gameActive || !powerReady) return;
             const equippedSkin = skins.find(s => s.id === playerData.equippedSkinId) || skins[0];
             equippedSkin.power.execute();
             powerReady = false; correctAnswersInARow = 0;
@@ -542,24 +457,23 @@
         
         function gameLoop(timestamp) {
             if (!gameActive) { return; }
-            gameLoopId = requestAnimationFrame(gameLoop);
-
+            
             const deltaTime = (timestamp - lastTime) / 1000 || 0;
             lastTime = timestamp;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#95a5a6'; ctx.fillRect(streetX, 0, streetWidth, canvas.height);
-            
+
             if (!isPaused) {
                 let currentSpeedMultiplier = 1;
                 if (isFrozen || player.slowsTime) currentSpeedMultiplier = 0.5;
                 if (isAccelerating) currentSpeedMultiplier *= 3;
                 const moveDistance = basePortalSpeed * currentSpeedMultiplier * deltaTime;
 
-                [...portals, ...obstacles, ...powerUps, ...projectiles].forEach(obj => {
+                [...portals, ...obstacles, ...powerUps].forEach(obj => {
                     if (obj && !obj.isStunned) obj.y += moveDistance;
                 });
             }
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#95a5a6'; ctx.fillRect(streetX, 0, streetWidth, canvas.height);
             
             const equippedSkin = skins.find(s => s.id === playerData.equippedSkinId) || skins[0];
             ctx.globalAlpha = (player.isPhasing || player.isLeaping) ? 0.5 : 1.0;
@@ -587,7 +501,6 @@
                     } else {
                         lives--; correctAnswersInARow = 0;
                         answerPopup = { text: 'ERRADO!', color: 'rgba(231, 76, 60, 0.9)', alpha: 1.0 };
-                        incorrectAnswers.push({ question: currentQuestion.text, correctAnswer: currentQuestion.answer ? 'Verdadeiro' : 'Falso' });
                     }
                     updateGameStatus(); if(lives > 0) nextRound();
                 }
@@ -596,25 +509,17 @@
             if (portals.length > 0 && portals[0].y > canvas.height && lives > 0) {
                 lives--; correctAnswersInARow = 0;
                 answerPopup = { text: 'ERRADO!', color: 'rgba(231, 76, 60, 0.9)', alpha: 1.0 };
-                incorrectAnswers.push({ question: currentQuestion.text, correctAnswer: currentQuestion.answer ? 'Verdadeiro' : 'Falso' });
                 updateGameStatus(); if(lives > 0) nextRound();
             }
             
             for(let i = obstacles.length - 1; i >= 0; i--) {
                 let o = obstacles[i];
-                if (o.type === 'tornado' && !isPaused) o.x += Math.sin(o.y * 0.05) * 2;
-                if (o.type === 'wizard' && !isPaused && o.y > 0 && Math.random() < 0.005) {
-                    projectiles.push({ x: o.x + o.size / 2, y: o.y + o.size, size: 10 });
-                }
-
+                if (o.type === 'tornado') o.x += Math.sin(o.y * 0.05) * 2;
                 let emoji, collisionBox = { ...o, width: o.size, height: o.size };
                 switch(o.type) {
                     case 'cone': emoji = '🚧'; break; case 'monster': emoji = '👾'; break;
                     case 'puddle': emoji = '💧'; break; case 'oil': emoji = '⚫'; break;
-                    case 'tornado': emoji = '🌪️'; break; case 'wizard': emoji = '🧙'; break;
-                    case 'spider': emoji = '🕷️'; break; case 'bat': emoji = '🦇'; break;
-                    case 'dinosaur': emoji = '🦖'; break; case 'clown': emoji = '🤡'; break;
-                    case 'spiderweb': emoji = '🕸️'; break;
+                    case 'tornado': emoji = '🌪️'; break;
                     case 'hole':
                         ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.beginPath();
                         ctx.arc(o.x + o.size/2, o.y + o.size/2, o.size/2, 0, Math.PI * 2);
@@ -622,10 +527,9 @@
                 }
                 ctx.font = `${o.size}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 if(emoji) ctx.fillText(emoji, o.x + o.size/2, o.y + o.size/2);
-
                 if (checkCollision(player, collisionBox)) {
                     obstacles.splice(i, 1);
-                    if (o.type === 'puddle' || o.type === 'spiderweb') {
+                    if (o.type === 'puddle') {
                         if (!player.isSlowed) { player.isSlowed = true; registerTimeout(() => { player.isSlowed = false; }, 3000); }
                     } else if (o.type === 'oil') {
                         if (!player.controlsSlippery) { player.controlsSlippery = true; registerTimeout(() => { player.controlsSlippery = false; }, 4000); }
@@ -635,20 +539,6 @@
                     }
                     if (lives <= 0) { endGame(true); return; }
                 } else if (o.y > canvas.height) { obstacles.splice(i, 1); }
-            }
-
-            for(let i = projectiles.length - 1; i >= 0; i--) {
-                let p = projectiles[i];
-                ctx.fillStyle = '#9b59b6';
-                ctx.font = `${p.size}px Arial`; ctx.fillText('✨', p.x, p.y);
-                if (checkCollision(player, { ...p, width: p.size, height: p.size })) {
-                    projectiles.splice(i, 1);
-                    if (!player.isInvincible && !player.isPhasing) {
-                        if (player.isShielded) { player.isShielded = false; }
-                        else if (lives > 0) { lives--; correctAnswersInARow = 0; updateGameStatus(); }
-                    }
-                    if (lives <= 0) { endGame(true); return; }
-                } else if (p.y > canvas.height) { projectiles.splice(i, 1); }
             }
             
             for(let i = powerUps.length - 1; i >= 0; i--) {
@@ -668,6 +558,7 @@
                 } else if (p.y > canvas.height) { powerUps.splice(i, 1); }
             }
             drawAnswerPopup();
+            gameLoopId = requestAnimationFrame(gameLoop);
         };
         
         let moveInterval = null;
@@ -704,8 +595,8 @@
 
         document.getElementById('start-game-button').onclick = startGame;
         document.getElementById('restart-button').onclick = startGame;
-        document.getElementById('go-to-shop-button').onclick = () => { savePlayerData(); updateStartScreenDisplays(); populateShop(); showScreen('shop-screen'); };
-        document.getElementById('go-to-shop-from-over-button').onclick = () => { updateStartScreenDisplays(); populateShop(); showScreen('shop-screen'); };
+        document.getElementById('go-to-shop-button').onclick = () => { savePlayerData(); updateCoinDisplays(); populateShop(); showScreen('shop-screen'); };
+        document.getElementById('go-to-shop-from-over-button').onclick = () => { updateCoinDisplays(); populateShop(); showScreen('shop-screen'); };
         document.getElementById('back-to-start-button').onclick = () => {
              document.getElementById('welcome-message').textContent = `Bem-vindo de volta, ${playerData.name}!`;
              showScreen('start-screen');
