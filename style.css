@@ -597,36 +597,3 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
     height: 90vh;
   }
 }
-
-/* === Botão Voltar da aba de Jogos === */
-#back-to-games {
-  background: transparent;
-  border: none;
-  color: #00aaff;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  padding: 4px 8px;
-  transition: color 0.2s, transform 0.1s;
-  position: relative;
-  left: 0;
-  margin-top: 6px;
-}
-
-#back-to-games:hover {
-  color: #33bbff;
-  transform: translateX(-2px);
-}
-
-#page-games h2 {
-  font-size: 0; /* remove o espaço sem quebrar layout */
-  margin: 0;
-  padding: 0;
-}
-
-#page-games {
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  overflow: hidden;
-}
-
