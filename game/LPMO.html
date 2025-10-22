@@ -196,66 +196,125 @@
         let activeTimeouts = [];
 
         const questions = [
-        // --- HISTÓRIA DA ANÁLISE CRIMINAL ---
-        { text: "Henry Fielding, magistrado inglês, é considerado um dos precursores da Análise Criminal por sistematizar denúncias e descrições de criminosos para orientar seus 'Bow Street Runners'.", answer: true },
-        { text: "O conceito de Modus Operandi (MO) foi desenvolvido nos Estados Unidos por August Vollmer para classificar crimes e criminosos.", answer: false },
-        { text: "August Vollmer, conhecido como o 'pai da polícia americana', desenvolveu a técnica do 'mapa de pinos' para identificar visualmente as áreas de concentração de crimes, também conhecidas como 'hot spots'.", answer: true },
-        { text: "O termo 'análise de crime' foi formalmente utilizado pela primeira vez por August Vollmer em seu artigo 'A Ronda Policial'.", answer: false },
-        { text: "O sistema CompStat, um dos marcos da 'Era de Ouro' da Análise Criminal, é um modelo de gestão da polícia de Nova Iorque fortemente baseado em mapeamento e análise de dados para cobrar resultados dos comandantes.", answer: true },
-        { text: "No Brasil, a Análise Criminal é uma prática consolidada desde o início do século XX, com sistemas de dados nacionais integrados e confiáveis.", answer: false },
-        { text: "O Programa Padronizado de Registro de Crimes (UCR) foi criado pelo FBI para ajudar as polícias a pensar em classificações mais amplas de crimes, como 'Arrombamento', em vez de tipos penais específicos e complexos.", answer: true },
-        { text: "A 'Era de Ouro' da Análise Criminal nos anos 90 foi impulsionada pela publicação do livro 'Policiamento Orientado para a Solução de Problemas', pelo avanço de tecnologias de mapeamento e pelo desenvolvimento do sistema CompStat.", answer: true },
+    // --- LEI ORGÂNICA NACIONAL (LEI 14.751/23) ---
+    // Fundamentos e Atribuições
+    { text: "A competência para legislar sobre normas gerais das polícias militares é concorrente entre a União e os Estados.", answer: false },
+    { text: "A Lei Orgânica Nacional (Lei 14.751/23) tem eficácia imediata e não revoga automaticamente as leis estaduais, exigindo que os Estados se adequem a ela.", answer: true },
+    { text: "Segundo a Lei Orgânica, os membros das polícias militares são considerados autoridades de polícia administrativa, ostensiva, de preservação da ordem pública e judiciária militar.", answer: true },
+    { text: "A função de polícia judiciária militar restringe-se ao cumprimento de mandados de prisão expedidos pela Justiça Militar.", answer: false },
+    { text: "A Lei Orgânica Nacional veda a participação das polícias militares no planejamento de políticas públicas de segurança.", answer: false },
+    { text: "As funções constitucionais das polícias militares podem ser exercidas por qualquer servidor público, desde que autorizado pelo Governador.", answer: false },
 
-        // --- FUNDAMENTOS E FLUXO DA ANÁLISE ---
-        { text: "A Análise Criminal visa mudar a lógica do policiamento de reativo para proativo, focando em ações preventivas.", answer: true },
-        { text: "O fluxo de execução da análise estatística segue a ordem: Coleta de Dados, Apresentação dos Dados, Crítica dos Dados e Análise.", answer: false },
-        { text: "A Análise Criminal Estratégica (ACE) tem como principal objetivo fornecer subsídios para os operadores de segurança que atuam 'nas ruas', como a identificação de pontos quentes.", answer: false },
-        { text: "Pesquisas sobre a efetividade das estratégias de policiamento indicam que o Policiamento Orientado a Problemas apresenta fortes evidências de redução da incidência criminal.", answer: true },
-        { text: "A 'Crítica dos Dados' é a etapa do fluxo de análise onde se interpreta tabelas e gráficos para extrair conclusões.", answer: false },
-        { text: "A Análise Criminal Administrativa (ACA) é voltada para a produção de estatísticas e relatórios para o público externo, como cidadãos e imprensa.", answer: true },
-        { text: "A estratégia tradicional de policiamento, baseada apenas no aumento de efetivo e viaturas, possui fortes evidências empíricas de que reduz a criminalidade.", answer: false },
+    // Estrutura e Hierarquia
+    { text: "O Art. 10 da Lei Orgânica Nacional estabelece uma estrutura básica para as corporações de forma taxativa, não permitindo nenhuma variação.", answer: false },
+    { text: "A estrutura básica das Polícias Militares, segundo a Lei Orgânica, deve conter preferencialmente órgãos de direção, assessoramento, apoio, execução e correição.", answer: true },
+    { text: "Os órgãos de execução destinam-se à realização das atividades-meio da instituição, como logística e recursos humanos.", answer: false },
+    { text: "Os órgãos de correição destinam-se a exercer as funções de corregedoria-geral, com atuação desconcentrada.", answer: true },
+    { text: "A hierarquia de postos e graduações definida no Art. 12 da Lei Orgânica é taxativa, devendo ser seguida por todas as corporações militares estaduais.", answer: true },
+    { text: "Na nova estrutura hierárquica nacional, a graduação de Cabo foi extinta.", answer: false },
+    { text: "Aspirante a Oficial, Cadete e Aluno-Oficial são classificados como 'Praças Especiais' pela Lei Orgânica Nacional.", answer: true },
+    { text: "Posto é o grau hierárquico do oficial, enquanto Graduação é o grau hierárquico da praça.", answer: true },
 
-        // --- TEORIAS (CRIMINOLOGIA AMBIENTAL) ---
-        { text: "A Criminologia Ambiental foca seu estudo na 'criação do criminoso', analisando fatores biológicos e psicológicos ao longo de sua vida.", answer: false },
-        { text: "A Teoria da Escolha Racional postula que o comportamento criminal é, em grande medida, resultado de uma escolha que avalia os benefícios e os custos de se cometer o crime.", answer: true },
-        { text: "No 'Triângulo do Crime' da Teoria da Atividade de Rotina, um 'guardião capaz' refere-se exclusivamente a um policial ou segurança profissional.", answer: false },
-        { text: "A Teoria do Padrão Criminal afirma que os crimes ocorrem de forma totalmente aleatória no espaço e no tempo.", answer: false },
-        { text: "De acordo com a Teoria do Padrão Criminal, 'Nós' (Nodes) são as rotas e ruas utilizadas para se deslocar pela cidade.", answer: false },
-        { text: "Para que um crime ocorra, segundo a Teoria da Atividade de Rotina, é necessária a convergência de um ofensor motivado, um alvo apropriado e a ausência de um guardião capaz.", answer: true },
-        { text: "A Criminologia Ambiental é considerada uma convergência de três teorias: Escolha Racional, Atividade de Rotina e Padrão Criminal.", answer: true },
-        { text: "Na Teoria do Padrão Criminal, 'Fronteiras' (Edges) são as bordas ou limites entre diferentes áreas (bairros, comunidades), onde o risco de crimes pode ser maior.", answer: true },
+    // Condições de Ingresso
+    { text: "A Lei Orgânica Nacional exige que o candidato para o cargo de Oficial seja brasileiro nato.", answer: false },
+    { text: "Para ingresso na corporação, a lei exige procedimento social e idoneidade moral irrepreensíveis, apurados por meio de investigação.", answer: true },
+    { text: "A exigência de escolaridade de nível superior para ingresso na carreira de Praça tem um prazo de adequação de até 6 anos a contar da publicação da Lei Orgânica.", answer: true },
+    { text: "É permitida a restrição em edital de concurso a pessoas com qualquer tipo de tatuagem, mesmo que não seja visível com o uniforme.", answer: false },
+    { text: "A Lei Orgânica Nacional estabelece que não haverá limite de idade para o concurso público de ingresso no Quadro de Oficiais de Estado-Maior (QOEM).", answer: true },
+    { text: "A simples existência de inquéritos policiais ou processos penais em curso autoriza, como regra geral, a eliminação de candidatos em concursos públicos.", answer: false },
 
-        // --- FONTES DE COLETA DE INFORMAÇÃO ---
-        { text: "Os Registros Policiais (B.O.) são a fonte de dados mais completa, pois refletem todos os crimes que ocorrem na sociedade, sem problemas de subnotificação.", answer: false },
-        { text: "A principal limitação dos dados do Sistema de Informação sobre Mortalidade (SIM) para análise criminal é que ele registra o local do óbito, que pode não ser o mesmo local da ocorrência do crime.", answer: true },
-        { text: "As pesquisas de vitimização são um método barato e rápido para obter informações sobre a 'cifra oculta' da criminalidade.", answer: false },
-        { text: "A classificação de um fato delituoso registrada em um Boletim de Ocorrência (B.O.) é definitiva e não pode ser alterada durante o inquérito policial.", answer: false },
-        { text: "Os dados de homicídios contabilizados pelo SIM (saúde) são sempre menores que os contabilizados pelas polícias devido à sua metodologia de classificação.", answer: false },
-        { text: "A 'cifra oculta' da criminalidade refere-se à quantidade de crimes que não chegam ao conhecimento das autoridades, ou seja, que não são registrados.", answer: true },
+    // --- QUADROS E CARREIRA ---
+    { text: "O Quadro de Oficiais de Estado-Maior (QOEM) exige como requisito de ingresso o bacharelado em Direito.", answer: true },
+    { text: "O Quadro de Oficiais Especialistas (QOE) é integrado por oficiais oriundos do quadro de praças, com promoção admitida até o posto de Major.", answer: false },
+    { text: "O Quadro de Praças (QP) destina-se às atividades da instituição, com progressão prevista até a graduação de Subtenente.", answer: true },
+    { text: "A Lei Orgânica Nacional criou os Quadros de Oficiais da Reserva e Reformados (QORR) e de Praças da Reserva e Reformados (QPRR).", answer: true },
+    { text: "O tempo de atividade militar e os cursos realizados não podem ser contados como título em concursos públicos para a carreira militar.", answer: false },
+    { text: "A Súmula Vinculante nº 43 do STF permite que um servidor seja investido em cargo de outra carreira sem a necessidade de novo concurso público.", answer: false },
+    { text: "A carreira policial-militar é caracterizada como uma atividade de dedicação parcial, permitindo o acúmulo com qualquer outro cargo público.", answer: false },
+    { text: "A Emenda Constitucional nº 101 permitiu aos militares estaduais a acumulação de cargos públicos nas mesmas condições dos servidores civis, com prevalência da atividade militar.", answer: true },
 
-        // --- ANÁLISE ESTATÍSTICA ---
-        { text: "A 'Taxa Bruta' é um indicador utilizado para permitir a comparação justa da incidência criminal entre regiões com tamanhos populacionais diferentes.", answer: true },
-        { text: "Um coeficiente de correlação (r) igual a -0,8 indica que não há relação entre as duas variáveis analisadas.", answer: false },
-        { text: "A afirmação 'correlação implica causalidade' é um dos princípios fundamentais da análise estatística criminal.", answer: false },
-        { text: "A Mediana é a medida de tendência central mais indicada para descrever dados com valores extremos, pois não é afetada por eles.", answer: true },
-        { text: "Se a correlação (r) entre duas variáveis é positiva (r > 0), significa que, quando uma variável cresce, a outra tende a decrescer.", answer: false },
-        { text: "O Desvio Padrão é uma medida de tendência central que indica o valor médio de um conjunto de dados.", answer: false },
-        { text: "A Moda é o valor que ocorre com maior frequência em uma amostra de dados.", answer: true },
-        { text: "A Amplitude de um conjunto de dados é calculada pela soma do maior e do menor valor.", answer: false },
-        
-        // --- MAPEAMENTO DE CRIMES E FERRAMENTAS ---
-        { text: "Um Sistema de Informações Geográficas (SIG) é um software que permite criar mapas com múltiplas camadas de informação sobrepostas para realizar análises espaciais.", answer: true },
-        { text: "O Google Earth é um SIG completo, permitindo análises espaciais complexas como a de superposição (overlay).", answer: false },
-        { text: "As imagens do Google Earth são atualizadas em tempo real, permitindo o monitoramento ao vivo de eventos criminais.", answer: false },
-        { text: "A 'Tabela Dinâmica' do Excel é um recurso destacado na apostila por ser útil para resumir e cruzar grandes volumes de dados de forma interativa.", answer: true },
-        { text: "O Sistema INFOPOL, em Pernambuco, é uma ferramenta de Business Intelligence (BI) para a criação de dashboards visuais.", answer: false },
-        { text: "O SACE (Power BI) é o sistema onde os Boletins de Ocorrência são originalmente registrados pela Polícia Civil de Pernambuco.", answer: false },
-        { text: "A análise de 'superposição' em um SIG consiste em encontrar o caminho mais curto entre dois pontos.", answer: false },
-        { text: "O QlikView é uma ferramenta de Business Intelligence (BI) utilizada em Pernambuco para o monitoramento de indicadores, com funcionalidades semelhantes às do Power BI.", answer: true },
-        { text: "O Sistema INFOPOL é a fonte primária dos dados brutos que alimentam as ferramentas de análise como o SACE.", answer: true },
-        { text: "A ferramenta 'Régua' do Google Earth permite medir a distância entre dois ou mais pontos em um mapa.", answer: true },
-        { text: "A análise de proximidade em um SIG permite, por exemplo, saber quais crimes ocorreram a menos de 100 metros de uma escola.", answer: true },
-        { text: "No Excel, para criar rapidamente um gráfico que se baseia no tipo padrão em uma planilha de gráfico separada, basta selecionar os dados e pressionar a tecla F11.", answer: true }
+    // --- PROMOÇÕES ---
+    // Critérios e Tipos
+    { text: "Os critérios ordinários de promoção são: Antiguidade e Merecimento.", answer: true },
+    { text: "A promoção por merecimento deve ser baseada em critérios subjetivos, a critério exclusivo da comissão de promoção.", answer: false },
+    { text: "Além dos critérios ordinários, a Lei admite promoções por Bravura e Post Mortem.", answer: true },
+    { text: "A promoção por Bravura resulta de um ato comum de coragem, dentro dos limites normais do cumprimento do dever.", answer: false },
+    { text: "A promoção Post Mortem ocorre quando o militar falece em serviço ou em consequência dele, sendo um reconhecimento do Estado.", answer: true },
+    { text: "A promoção por Invalidez Permanente ocorre quando o militar é julgado incapaz definitivamente para o serviço ativo.", answer: true },
+    { text: "A promoção decenal em Pernambuco garante a promoção a Cabo após 10 anos, a 3º Sargento após 20 anos e a 2º Sargento após 30 anos de serviço.", answer: true },
+    { text: "A Promoção Requerida é um direito do militar que atinge os requisitos para a reserva, sendo um ato que pode ser revogado a pedido do militar.", answer: false },
+    { text: "A promoção em Ressarcimento de Preterição ocorre quando um militar teve seu direito à promoção negado e, após recurso ou decisão judicial, é promovido retroativamente.", answer: true },
+    { text: "Para a promoção ao posto de Coronel, a proporcionalidade é de uma vaga por merecimento e duas por antiguidade.", answer: false },
+    { text: "A promoção para 3º Sargento e Cabo na PMPE ocorre apenas pelo critério de antiguidade.", answer: true },
+    { text: "O Aspirante a Oficial é promovido a 2º Tenente pelo critério de merecimento, após estágio probatório.", answer: false },
+
+    // Quadro de Acesso
+    { text: "O militar precisa possuir o interstício (tempo mínimo no posto/graduação) exigido para poder ingressar no Quadro de Acesso.", answer: true },
+    { text: "O militar que for réu em processo criminal não pode, em nenhuma hipótese, constar em Quadro de Acesso.", answer: false },
+    { text: "O militar que estiver em gozo de licença para tratar de interesse particular pode constar no Quadro de Acesso.", answer: false },
+    { text: "A promoção por merecimento para oficiais é de competência do Comandante-Geral.", answer: false },
+    { text: "A promoção das praças é de competência do Comandante-Geral da Corporação.", answer: true },
+    { text: "A promoção por antiguidade dos oficiais pode ser realizada pelo Comandante-Geral, por delegação do Governador.", answer: true },
+
+    // --- ESTATUTO DOS MILITARES DE PE (LEI 6.783/74) E OUTRAS NORMAS ---
+    // Direitos e Deveres
+    { text: "O Estatuto dos Militares define os militares do estado como uma categoria especial de servidores públicos estaduais, conceito que permanece inalterado.", answer: false },
+    { text: "O termo 'Veterano' substituiu legalmente o termo 'Inativo' para todos os fins de direito, não sendo apenas uma forma de tratamento.", answer: false },
+    { text: "Os deveres policiais-militares emanam de vínculos racionais e morais, e compreendem a dedicação integral ao serviço e o respeito à hierarquia.", answer: true },
+    { text: "Um dos direitos do militar com mais de 30 anos de serviço, ao ser transferido para a inatividade, é a percepção de remuneração correspondente ao grau hierárquico superior.", answer: true },
+    { text: "O direito de recorrer na esfera administrativa prescreve em 15 dias para atos de quota compulsória e em 180 dias nos demais casos.", answer: false },
+    { text: "O militar da ativa que se dirigir ao Poder Judiciário deve participar, antecipadamente, esta iniciativa à autoridade a que estiver subordinado.", answer: true },
+    { text: "O militar com menos de 5 anos de serviço que se candidatar a cargo eletivo será agregado para tratar de interesse particular.", answer: false },
+
+    // Prerrogativas e Garantias
+    { text: "As prerrogativas dos militares são as honras, dignidades e distinções devidas aos graus hierárquicos e cargos.", answer: true },
+    { text: "O militar só pode ser preso por autoridade policial em caso de flagrante delito, devendo ser entregue imediatamente à autoridade militar mais próxima.", answer: true },
+    { text: "O cumprimento de pena de prisão ou detenção, para o militar, deve ocorrer em organização policial-militar.", answer: true },
+    { text: "O porte de arma para praças da PMPE não possui nenhuma restrição imposta pelo Comando Geral.", answer: false },
+    { text: "A INCG nº 612/2024 regula a compra, o porte e a posse de arma de fogo para os militares de Pernambuco.", answer: true },
+    { text: "O Certificado de Registro de Arma de Fogo (CRAF) emitido pela PMPE confere ao proprietário o direito automático ao porte da arma.", answer: false },
+    { text: "O CRAF do policial militar possui validade de 10 anos, devendo ser renovado periodicamente.", answer: false },
+    { text: "O militar inativo, para conservar o porte de arma, deve requerer a renovação da permissão a cada 10 anos.", answer: true },
+    { text: "O porte de arma de fogo pode ser suspenso caso o militar esteja respondendo por crime cuja natureza desaconselhe o porte.", answer: true },
+
+    // Situações Especiais
+    { text: "Agregação é a situação em que o militar da ativa permanece sem número na sua escala hierárquica, mas não abre vaga.", answer: true },
+    { text: "O militar que aguarda transferência 'ex-officio' para a reserva remunerada deve ser agregado.", answer: true },
+    { text: "Reversão é o ato pelo qual o militar agregado retorna ao seu quadro tão logo cesse o motivo da agregação.", answer: true },
+    { text: "Excedente é a situação transitória do militar que é promovido por bravura sem haver vaga.", answer: true },
+    { text: "É considerado ausente o militar que deixar de comparecer à sua OME por mais de 48 horas consecutivas sem comunicar o motivo.", answer: false },
+    { text: "O militar é considerado desertor nos casos previstos exclusivamente no Estatuto dos Militares.", answer: false },
+
+    // Afastamentos e Licenças
+    { text: "As férias são afastamentos anuais e obrigatórios, com duração de 30 dias.", answer: true },
+    { text: "O afastamento por motivo de luto, pelo falecimento de cônjuge, pais ou filhos, é de 8 dias.", answer: true },
+    { text: "A licença especial tem duração de 6 meses a cada decênio de serviço prestado e pode ser parcelada.", answer: true },
+    { text: "A licença para tratar de interesse particular pode ser concedida ao militar com qualquer tempo de serviço.", answer: false },
+    { text: "A licença-maternidade para a servidora gestante na PMPE tem duração de 120 dias.", answer: false },
+    { text: "A licença-paternidade para os militares do estado é de 20 dias consecutivos.", answer: true },
+    { text: "A policial militar gestante pode ser empregada normalmente em serviço operacional remunerado, como o PJES.", answer: false },
+    { text: "A policial militar lactante tem direito a uma redução de sua jornada de trabalho diária.", answer: false },
+
+    // Jornada de Trabalho
+    { text: "A jornada de trabalho regular na PMPE é de 8 horas diárias ou 40 horas semanais.", answer: true },
+    { text: "O Programa de Jornada Extra de Segurança (PJES) permite que militares cumpram jornadas extraordinárias de forma voluntária e remunerada.", answer: true },
+    { text: "O limite máximo de serviços no PJES é de 8 jornadas por mês para cada militar.", answer: false },
+    { text: "A jornada especial extraordinária, não remunerada, pode ser aplicada em situações como Carnaval ou grandes eventos, com folga compensatória posterior.", answer: true },
+    { text: "O militar que tem filho com deficiência comprovada tem direito a um horário especial de trabalho, independentemente de compensação.", answer: true },
+
+    // Mobilização e Relação com o Exército
+    { text: "As Polícias Militares podem ser mobilizadas pela União em caso de guerra, integrando a força terrestre designada.", answer: true },
+    { text: "A Inspetoria-Geral das Polícias Militares (IGPM/BM) é um órgão do Ministério da Justiça que controla as PMs.", answer: false },
+    { text: "Compete à IGPM/BM, do Comando do Exército, registrar dados de efetivo, armamento e material bélico das PMs para fins de emprego em convocação ou mobilização.", answer: true },
+    { text: "O Decreto-Lei nº 667/69, que previa o controle e a coordenação das PMs pelo Exército, foi quase que totalmente revogado pela Lei Orgânica Nacional.", answer: true },
+    { text: "A convocação de uma PM pela União só pode ocorrer em caso de guerra externa, sendo vedada em casos de estado de sítio ou intervenção federal.", answer: false },
+
+    // Disposições Finais
+    { text: "O militar da reserva remunerada pode ser convocado para o serviço ativo, em caráter transitório e mediante aceitação voluntária.", answer: true },
+    { text: "O militar reformado por incapacidade definitiva jamais poderá retornar ao serviço ativo, mesmo que seja julgado apto em nova inspeção de saúde.", answer: false },
+    { text: "A demissão é uma forma de exclusão do serviço ativo aplicada exclusivamente aos Oficiais.", answer: true },
+    { text: "O licenciamento do serviço ativo é uma forma de exclusão aplicada exclusivamente aos Oficiais.", answer: false },
+    { text: "O militar do Estado tem direito à gratuidade no transporte público da Região Metropolitana do Recife mediante apresentação da identidade funcional, não sendo necessário estar fardado.", answer: true }
 ];
         let availableQuestions = [];
 
