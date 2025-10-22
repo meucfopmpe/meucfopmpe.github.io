@@ -196,112 +196,128 @@
         let activeTimeouts = [];
 
         const questions = [
-        // --- MÓDULO 8: SISTEMAS INFORMATIZADOS DE INTEGRAÇÃO NACIONAL ---
-        // INFOSEG
-        { text: "O SINESP INFOSEG é um sistema restrito a órgãos da esfera Federal, não integrando bases de dados Estaduais ou Municipais.", answer: false },
-        { text: "A funcionalidade 'Visualização em Rede' do INFOSEG permite explorar os vínculos entre informações (indivíduos, veículos, armas) por meio de um diagrama de grafo.", answer: true },
-        { text: "A 'Consulta Inteligente' do INFOSEG permite a pesquisa de apenas um parâmetro por vez, como CPF ou placa de veículo.", answer: false },
-        { text: "Dentro do INFOSEG, a consulta à base CNJ-BNMP permite o acesso a mandados de prisão que ainda estão em aberto.", answer: true },
-        { text: "O perfil de 'Inteligência' no INFOSEG não permite acesso a movimentações de veículos captadas por radares em rodovias federais.", answer: false },
-        { text: "A funcionalidade 'Relatório' do INFOSEG gera um arquivo único no formato PDF, consolidando dados de diversas bases consultadas.", answer: true },
-        { text: "O acesso ao SINESP INFOSEG é realizado informando o número da matrícula do servidor, e não o CPF.", answer: false },
-        { text: "As bases de dados do INFOSEG são agrupadas em quatro subgrupos: Indivíduos, Veículos, Empresas e Armas.", answer: true },
-        { text: "A consulta na base Denatran-RENACH dentro do INFOSEG não disponibiliza a foto do condutor, apenas os dados da CNH.", answer: false },
-        { text: "A pesquisa avançada no INFOSEG oferece parâmetros mais específicos de cada base de dados do que a consulta inteligente.", answer: true },
+    // --- UNIDADE I: FUNDAMENTOS E CONCEITOS BÁSICOS ---
+    // Origens e Fundamentos do Estado-Maior
+    { text: "A estrutura de Estado-Maior (EM) tem como principal função apenas a execução de operações, não se envolvendo com planejamento ou coordenação.", answer: false },
+    { text: "Historicamente, o Exército Prussiano, no século XVIII, foi o pioneiro na criação de uma estrutura formal de Estado-Maior.", answer: true },
+    { text: "No Brasil, Duque de Caxias foi um dos grandes impulsionadores da evolução do Estado-Maior em campanha, ao perceber a necessidade de assessores para planejamento, logística e mobilização.", answer: true },
+    { text: "O trabalho de Estado-Maior é considerado uma atividade temporária, acionada apenas em momentos de crise.", answer: false },
+    { text: "Uma das principais atribuições do EM é ser um instrumento de apoio à decisão do Comandante.", answer: true },
+    { text: "A sistematização do trabalho de Estado-Maior evoluiu do 'Estudo dos Fatores da Decisão', de origem francesa.", answer: false },
 
-        // CÓRTEX
-        { text: "O principal objetivo do Córtex é a integração de bases de dados para produzir conhecimento para inteligência, investigação e gerar indicativos de abordagem.", answer: true },
-        { text: "O login no sistema Córtex é realizado obrigatoriamente por meio do sistema gov.br.", answer: true },
-        { text: "O módulo 'Cercamento Eletrônico' do Córtex é focado apenas em ações repressivas, não auxiliando na atuação preventiva.", answer: false },
-        { text: "A consulta de um veículo no Córtex exibe, em um mapa, os últimos locais onde o veículo foi registrado por radares integrados ao sistema.", answer: true },
-        { text: "O monitoramento de caravanas de torcidas organizadas é um exemplo de uso operacional do Córtex para prevenção de vandalismo.", answer: true },
-        { text: "As consultas no Córtex são divididas apenas em 'Veículos', não havendo uma categoria para consulta de 'Pessoas'.", answer: false },
-        { text: "O Córtex não integra sistemas produtores de eventos em tempo real, trabalhando apenas com bases de dados estáticas.", answer: false },
-        { text: "As funcionalidades disponíveis no menu do Córtex são as mesmas para todos os usuários, independentemente do nível de permissão.", answer: false },
-        { text: "A consulta de um veículo no Córtex não informa se ele possui alguma restrição administrativa ou criminal.", answer: false },
-        { text: "Córtex é uma plataforma de uso exclusivo para a Polícia Federal, não sendo utilizada por outras forças de segurança.", answer: false },
+    // Liderança Militar
+    { text: "Liderança é um sinônimo direto de gerência, administração ou chefia, representando o mesmo conceito.", answer: false },
+    { text: "Os quatro fatores sempre presentes no fenômeno da liderança são: o líder, os liderados, a situação e a interação entre eles.", answer: true },
+    { text: "A liderança militar é construída instantaneamente com a assunção de um cargo de comando.", answer: false },
+    { text: "Os três pilares que sustentam a credibilidade do líder militar são: Proficiência Profissional (Saber), Senso Moral (Ser) e Atitude Adequada (Fazer).", answer: true },
+    { text: "O pilar 'SABER' refere-se exclusivamente ao senso moral e ao caráter do líder.", answer: false },
+    { text: "O pilar 'SER' está relacionado à capacidade de executar tarefas e aplicar conhecimentos, ou seja, ao 'FAZER'.", answer: false },
+    { text: "A capacidade de liderança ocorre da junção harmoniosa de valores (o ser) com os conhecimentos necessários a um líder (o saber).", answer: true },
+    { text: "O desenvolvimento da 'capacidade de liderança' garante que o indivíduo se tornará um bom líder em qualquer situação.", answer: false },
+    { text: "Competência, no contexto da liderança, é a capacidade de transformar recursos cognitivos, psicomotores e afetivos em resultados práticos.", answer: true },
 
-        // BNMP 3.0
-        { text: "O Banco Nacional de Medidas Penais e Prisões (BNMP 3.0) é um sistema eletrônico que monitora a realidade do sistema prisional brasileiro.", answer: true },
-        { text: "O BNMP 3.0 é um software que precisa ser instalado em cada computador, não sendo acessível pela internet em nuvem.", answer: false },
-        { text: "O BNMP consolida um banco de dados que inclui apenas mandados de prisão, sem abranger medidas cautelares ou protetivas de urgência.", answer: false },
-        { text: "O BNMP 3.0 é integrado à Plataforma Digital do Poder Judiciário (PDPJ-Br).", answer: true },
-        { text: "Ao consultar um mandado de prisão no BNMP, é possível ter acesso a informações como marcas e sinais distintivos do alvo (tatuagens, cicatrizes).", answer: true },
-        { text: "O BNMP 3.0 substituiu a versão anterior (BNMP 2.0) e é coordenado pelo Departamento de Monitoramento e Fiscalização do Sistema Carcerário (DMF).", answer: true },
-        { text: "A pesquisa no BNMP não permite a busca por número de processo ou alcunha do indivíduo.", answer: false },
-        { text: "Se uma pesquisa no BNMP não encontra mandados pendentes para uma pessoa, o sistema não emite nenhum tipo de certidão ou comprovante.", answer: false },
-        { text: "É desnecessário que o policial verifique a data de validade do mandado de prisão no BNMP, pois todos os mandados ativos são válidos.", answer: false },
-        { text: "O BNMP 3.0 permite identificar todas as pessoas procuradas ou custodiadas em diferentes categorias de prisão, seja civil ou penal.", answer: true },
+    // Doutrina Policial e Inteligências
+    { text: "A doutrina policial é o conjunto de princípios, normas e procedimentos que guiam a atuação dos Policiais Militares.", answer: true },
+    { text: "Na PMPE, a 3ª Seção do EMG é a responsável por formular, revisar e disseminar a doutrina policial militar.", answer: false },
+    { text: "Os princípios do Policiamento Ostensivo incluem a presença visível, a interação com a comunidade e a resolução de problemas.", answer: true },
+    { text: "A teoria das Inteligências Múltiplas foi proposta por Daniel Goleman.", answer: false },
+    { text: "A inteligência Interpessoal está associada à habilidade de se relacionar bem com os outros, interpretando suas motivações e intenções.", answer: true },
+    { text: "A inteligência Intrapessoal refere-se à capacidade de controlar os próprios sentimentos e conhecer a si mesmo.", answer: true },
+    { text: "A Inteligência Emocional está relacionada, principalmente, às inteligências lógico-matemática e musical.", answer: false },
+    { text: "As quatro habilidades fundamentais da Inteligência Emocional são: autoconhecimento, autocontrole, empatia e administração de relacionamentos.", answer: true },
+    { text: "A empatia, uma das habilidades da Inteligência Emocional, é a capacidade de entender e controlar exclusivamente as próprias emoções.", answer: false },
 
-        // SINESP Cidadão
-        { text: "O SINESP Cidadão é um aplicativo exclusivo para agentes de segurança pública, não podendo ser utilizado por cidadãos comuns.", answer: false },
-        { text: "O SINESP Cidadão é uma ferramenta útil para agentes de segurança que não possuem acesso aos sistemas corporativos, como o INFOSEG.", answer: true },
-        { text: "Através do SINESP Cidadão, é possível consultar a situação de roubo ou furto de qualquer veículo do Brasil utilizando a placa.", answer: true },
-        { text: "As bases de dados acessíveis pelo SINESP Cidadão incluem Veículos, Desaparecidos, Mandados de Prisão e Procurados.", answer: true },
-        { text: "A lista de 'Procurados' no SINESP Cidadão foca em criminosos que atuam apenas em um único estado.", answer: false },
-        { text: "A consulta de mandados de prisão no SINESP Cidadão é realizada diretamente no banco de dados do Conselho Nacional de Justiça (BNMP/CNJ).", answer: true },
-        { text: "O SINESP Cidadão não permite a consulta de placas no padrão Mercosul, apenas no formato tradicional.", answer: false },
-        { text: "O projeto 'Participação Cidadã' é um canal de denúncias dentro do SINESP Cidadão que encaminha as informações para a Ouvidoria do Governo Federal.", answer: true },
-        { text: "A consulta de desaparecidos no SINESP Cidadão se baseia em informações de redes sociais, e não em boletins de ocorrência.", answer: false },
-        { text: "O principal objetivo do SINESP Cidadão é permitir que os cidadãos registrem boletins de ocorrência diretamente pelo aplicativo.", answer: false },
+    // --- UNIDADE II: O ESTADO-MAIOR EM AÇÃO ---
+    // Liderança vs. Comando
+    { text: "Comando e Liderança Militar são termos sinônimos, referindo-se ambos ao exercício de um cargo militar.", answer: false },
+    { text: "Comando é o exercício profissional de um cargo, consubstanciando a autoridade legal e a administração.", answer: true },
+    { text: "A Liderança Militar é considerada um elemento formal do comando, assim como a autoridade legal.", answer: false },
+    { text: "A autoridade legal e a administração são ferramentas informais do comando.", answer: false },
+    { text: "A Liderança Militar é a ferramenta que permite ao comandante mover seus subordinados pelo empenho pessoal e qualificação, e não apenas por regulamentos.", answer: true },
 
-        // --- MÓDULO 9: TELECOMUNICAÇÕES ---
-        // Conceitos e Elementos
-        { text: "Os três elementos básicos de um sistema de comunicação são: Transmissor (Tx), Meio de Transmissão e Receptor (Rx).", answer: true },
-        { text: "O Transmissor (Tx) tem a função de decodificar o sinal recebido para resgatar a informação original.", answer: false },
-        { text: "O Meio de Transmissão é o elemento que exerce a maior influência sobre o desempenho de um sistema de comunicação.", answer: true },
-        { text: "O Receptor (Rx) tem a finalidade de transformar a informação em um sinal adequado para ser transportado pelo meio de transmissão.", answer: false },
-        
-        // Meios de Transmissão
-        { text: "Os meios de transmissão são classificados apenas como físicos (guiados), não existindo meios não-físicos.", answer: false },
-        { text: "A Fibra Ótica é um meio de transmissão físico imune a interferências eletromagnéticas e com alta capacidade de transmissão.", answer: true },
-        { text: "O cabo de Par Trançado, apesar do baixo custo, é altamente resistente a interferências eletromagnéticas.", answer: false },
-        { text: "As ondas de rádio são omnidirecionais e penetram facilmente em prédios, sendo amplamente utilizadas para comunicação.", answer: true },
-        { text: "A transmissão por Micro-ondas ocorre em linha reta e atravessa com facilidade obstáculos físicos como paredes e edifícios.", answer: false },
-        { text: "Satélites geoestacionários são aqueles que orbitam em baixa altitude ao redor do planeta Terra.", answer: false },
-        { text: "Ondas de infravermelho, como as de um controle remoto de TV, são adequadas para comunicação de longa distância e atravessam objetos sólidos.", answer: false },
+    // Estilos de Comando
+    { text: "O estilo de comando Autocrático é caracterizado pela centralização total das decisões no comandante.", answer: true },
+    { text: "O uso do estilo Autocrático é sempre inadequado, mesmo em situações de combate que exigem ação imediata.", answer: false },
+    { text: "No estilo de comando Participativo, o comandante abre mão de sua autoridade, deixando a decisão final para o grupo.", answer: false },
+    { text: "O estilo Participativo busca o engajamento de todos e aproveita as ideias do grupo para a tomada de decisão.", answer: true },
+    { text: "O estilo de comando Delegativo é mais indicado para grupos que tratam de assuntos de natureza técnica, onde os assessores possuem conhecimento especializado.", answer: true },
+    { text: "Um bom comandante deve escolher um único estilo de comando e aplicá-lo em todas as situações.", answer: false },
+    { text: "O ponto crítico do estilo Delegativo é a necessidade de o comandante saber delegar sem perder o controle da situação.", answer: true },
 
-        // Canais e Modos de Comunicação
-        { text: "O modo de comunicação Simplex é bidirecional, permitindo que a informação flua em ambos os sentidos, mas não simultaneamente.", answer: false },
-        { text: "O modo Half-Duplex (Semi-Duplex), utilizado nos rádios da PMPE, permite comunicação bidirecional, mas não de forma simultânea.", answer: true },
-        { text: "A comunicação Full-Duplex (Duplex), como na telefonia celular, permite a transmissão e recepção de dados simultaneamente em ambos os sentidos.", answer: true },
-        { text: "Em uma comunicação Half-Duplex, a mesma frequência é utilizada tanto para transmissão (Tx) quanto para recepção (Rx).", answer: true },
-        { text: "Em uma comunicação Full-Duplex, frequências distintas são utilizadas para transmissão (Tx) e recepção (Rx), permitindo a comunicação simultânea.", answer: true },
-        { text: "Transmissões de TV e rádio comercial são exemplos clássicos de comunicação Full-Duplex.", answer: false },
+    // Níveis de Liderança
+    { text: "A liderança direta ocorre quando o líder influencia seus liderados por intermédio de outros líderes, em uma cadeia de comando.", answer: false },
+    { text: "A liderança indireta é exercida quando o líder se comunica diretamente com seus subordinados, fornecendo exemplos pessoais.", answer: false },
+    { text: "Em pequenos escalões, como um pelotão, predomina a liderança direta.", answer: true },
+    { text: "No nível organizacional/tático, o líder utiliza exclusivamente a liderança direta, sem a necessidade de documentos ou ordens formais.", answer: false },
+    { text: "No nível estratégico, a expedição de diretrizes, planos e ordens é uma forma de exercício da liderança indireta.", answer: true },
+    { text: "O nível de comando organizacional/tático corresponde ao comando de pequenos escalões, como grupos e esquadras.", answer: false },
 
-        // Equipamentos e Repetidoras
-        { text: "Rádios portáteis (HT's) são alimentados pela bateria da viatura e possuem uma potência de saída de aproximadamente 30 Watts.", answer: false },
-        { text: "Rádios móveis, instalados nas viaturas, possuem potência de saída superior à dos rádios portáteis.", answer: true },
-        { text: "Repetidoras têm a função de receber, amplificar e reenviar um sinal de rádio, ampliando o alcance da comunicação.", answer: true },
-        { text: "Para se comunicar através de uma repetidora, os rádios operam com uma única frequência, tanto para recepção (Rx) quanto para transmissão (Tx).", answer: false },
-        { text: "Rádios Fixos são alimentados por uma fonte que converte a tensão da rede elétrica (220V AC) para a tensão de operação do rádio (12V DC).", answer: true },
-        
-        // Sistemas Analógico vs. Digital (Trunking)
-        { text: "O sistema de rádio analógico (modulação FM) é considerado altamente seguro e privado, sendo imune a interceptações.", answer: false },
-        { text: "O sistema digital Trunking (troncalizado) otimiza o uso do espectro de radiofrequência através da alocação dinâmica de canais.", answer: true },
-        { text: "No sistema Trunking, se uma repetidora falhar, o controlador do sistema a isola e continua alocando as outras, garantindo a continuidade da comunicação.", answer: true },
-        { text: "O modo 'Failsoft' é ativado quando um sistema Trunking perde seu canal de controle, fazendo com que os rádios operem em um modo repetidor 'convencional'.", answer: true },
-        { text: "A criptografia em sistemas de rádio digital tornou-se fundamental para manter o sigilo das comunicações, dificultando a escuta por 'scanners'.", answer: true },
-        { text: "Em um sistema de rádio convencional (analógico), cada frequência é alocada de maneira exclusiva para um grupo, permanecendo ociosa se não houver comunicação.", answer: true },
-        { text: "A modulação em um sistema digital é avançada, sendo capaz de inserir apenas o sinal de voz na portadora, sem dados de controle ou localização.", answer: false },
-        { text: "No sistema Trunking, a alocação de canais é fixa, ou seja, um grupo de conversa sempre utilizará a mesma frequência.", answer: false },
+    // --- UNIDADE III: ESTRUTURA E PROCESSO DO EM NA PMPE ---
+    // Estrutura do Estado-Maior na PMPE
+    { text: "A Lei de Organização Básica da PMPE (Lei nº 11.328/1996) estrutura a Corporação em órgãos de direção, apoio e execução.", answer: true },
+    { text: "Os órgãos de execução, como os batalhões, são responsáveis pela atividade-meio da Corporação.", answer: false },
+    { text: "Os órgãos de apoio, como as diretorias de logística, realizam a atividade-fim da Corporação.", answer: false },
+    { text: "A 1ª Seção do EMG (PM/1) é encarregada dos assuntos relativos a pessoal e legislação.", answer: true },
+    { text: "A 2ª Seção do EMG (PM/2) é responsável pelo planejamento administrativo e orçamentário.", answer: false },
+    { text: "A 3ª Seção do EMG (PM/3) trata dos assuntos relativos a ensino, instrução e operações.", answer: true },
+    { text: "A 4ª Seção do EMG (PM/4) cuida dos assuntos civis e da comunicação social da Corporação.", answer: false },
+    { text: "A 5ª Seção do EMG (PM/5) é responsável pelo apoio logístico, como suprimento e transporte.", answer: false },
+    { text: "A 6ª Seção do EMG (PM/6) é encarregada do planejamento administrativo e orçamentário.", answer: true },
+    { text: "A 7ª Seção do EMG (PM/7) tem como atribuição a gestão da doutrina institucional.", answer: false },
+    { text: "A 8ª Seção do EMG (PM/8) é responsável pela formulação e disseminação da doutrina, incluindo os POPs (Procedimentos Operacionais Padrão).", answer: true },
+    { text: "O Estado-Maior de uma OME (Organização Militar Estadual) é o órgão de planejamento do mais alto nível estratégico da Corporação.", answer: false },
 
-        // Código Q e Procedimentos
-        { text: "O Código Q tem caráter sigiloso e não pode ser considerado como linguagem clara.", answer: false },
-        { text: "No Código Q, 'QAP' significa 'Ocupado' e 'QRL' significa 'Na escuta'.", answer: false },
-        { text: "A sigla 'QTH' é utilizada para se referir ao local ou endereço de uma estação ou viatura.", answer: true },
-        { text: "'QSL' significa 'Entendido' ou 'Confirmado', e 'TKS' é a abreviação para 'Obrigado'.", answer: true },
-        { text: "A disciplina na rede de rádio não é importante, pois múltiplos postos podem transmitir simultaneamente sem causar interferência.", answer: false },
-        { text: "Um procedimento correto de radiocomunicação é escutar a rede para verificar se está em silêncio antes de iniciar uma transmissão.", answer: true },
-        { text: "O motorista de uma viatura pode operar o rádio normalmente enquanto dirige, pois isso não desvia sua atenção do trânsito.", answer: false },
-        { text: "A tecla PTT (Push To Talk) deve ser mantida pressionada continuamente durante toda a comunicação para garantir a qualidade do sinal.", answer: false },
-        { text: "Para soletrar uma palavra usando o alfabeto fonético, deve-se enunciar 'VOU SOLETRAR' antes de iniciar.", answer: true },
+    // Atribuições e Processo Decisório do EM
+    { text: "As cinco atividades comuns a todos os oficiais de EM são: produzir informações, realizar estudos de situação, apresentar propostas, elaborar planos e ordens, e supervisionar a execução.", answer: true },
+    { text: "Um 'informe' é uma notícia já confirmada e analisada, pronta para ser usada pelo comandante.", answer: false },
+    { text: "Uma 'informação' é o resultado de um informe que passou por um trabalho de análise, tendo maior margem de certeza.", answer: true },
+    { text: "A metodologia para resolução de problemas se inicia com a definição das providências a serem tomadas.", answer: false },
+    { text: "O processo da decisão à execução, segundo a Portaria nº 582/1981, é composto por 8 fases.", answer: true },
+    { text: "A Diretriz de Planejamento é expedida pelo Comandante na 3ª fase do processo decisório para orientar o trabalho de seu Estado-Maior.", answer: true },
+    { text: "Na 4ª fase do processo, a formulação das linhas de ação para missões operacionais compete à 2ª Seção do EM.", answer: false },
+    { text: "O Comandante toma sua decisão final e estabelece o Conceito da Operação na 5ª fase do processo.", answer: true },
+    { text: "A fase de Supervisão da execução dos planos ocorre imediatamente após a coleta de informações.", answer: false },
+    { text: "A fase final do processo decisório é a Avaliação e Revisão, que visa corrigir possíveis desvios do que foi planejado.", answer: true },
+    { text: "Um Estudo de Situação é elaborado para assessorar o comandante na apreciação de todos os fatores que possam influenciar uma missão.", answer: true },
+    { text: "Um Estudo de Estado-Maior é utilizado para apreciar problemas administrativos simples e rotineiros.", answer: false },
+    { text: "A atividade de produzir informações inclui apenas a coleta de dados, sem a necessidade de análise ou interpretação.", answer: false },
 
-        // Princípios de Comunicação
-        { text: "O princípio da 'Brevidade' na comunicação policial significa que as mensagens devem ser longas e detalhadas para não deixar dúvidas.", answer: false },
-        { text: "A 'Clareza' é um princípio que visa evitar mal-entendidos, garantindo que as informações sejam transmitidas de forma compreensível.", answer: true },
-        { text: "Manter a 'Serenidade' durante situações críticas na comunicação por rádio é importante para transmitir calma e confiança.", answer: true },
-        { text: "O princípio da 'Precisão' implica em fornecer mensagens com todos os dados relevantes para eliminar dúvidas.", answer: true }
+    // Documentos de Estado-Maior
+    { text: "Uma 'Ordem' baseia-se em hipóteses, enquanto um 'Plano' baseia-se em fatos concretos.", answer: false },
+    { text: "Um 'Plano' é um documento que dá forma a um trabalho de planejamento, baseando-se em hipóteses para a solução de problemas.", answer: true },
+    { text: "Uma 'Ordem' é um documento pelo qual uma autoridade determina a execução de um serviço, baseando-se em fatos.", answer: true },
+    { text: "Uma 'Diretriz' é um documento que estabelece orientação e normas objetivas para a realização de um trabalho.", answer: true },
+    { text: "A Diretriz de Operações tem como finalidade orientar a elaboração de planos, e não a execução de uma atividade.", answer: false },
+    { text: "A Ordem de Serviço (O Sv) é o documento que regula a realização de um serviço rotineiro, preventivo ou repressivo.", answer: true },
+    { text: "A Nota de Serviço (N Sv) é usada para regular procedimentos em cerimônias, formaturas e outros eventos não operacionais.", answer: true },
+    { text: "A Nota de Instrução (NI) serve para criar, modificar ou ajustar rotinas operacionais ou administrativas na Corporação.", answer: true },
+    { text: "Uma Ordem Fragmentária é um tipo de ordem completa que inicia um novo planejamento do zero.", answer: false },
+    { text: "A ordem de detalhamento de um documento básico é: Anexo, seguido de Adendo e, por fim, Apêndice.", answer: false },
+    { text: "Um Anexo serve para detalhar um documento básico, fornecendo informações de natureza técnica ou de interesse limitado.", answer: true },
+
+    // Plano, Programa e Projeto
+    { text: "Plano, Programa e Projeto são sinônimos e podem ser usados de forma intercambiável para descrever qualquer tipo de planejamento.", answer: false },
+    { text: "O 'Plano' é o documento de nível mais estratégico e abrangente, apresentando diretrizes e políticas gerais.", answer: true },
+    { text: "Um 'Programa' é um conjunto de atividades isoladas sem um objetivo comum.", answer: false },
+    { text: "Um 'Programa' organiza um conjunto de projetos que possuem o mesmo objetivo, ampliando ações de uma política pública.", answer: true },
+    { text: "Um 'Projeto' é um instrumento para ações específicas, com início, meio e fim definidos.", answer: true },
+    { text: "A principal diferença entre eles é o nível de detalhamento e o escopo das operações, sendo o Projeto mais específico que o Programa.", answer: true },
+    { text: "O diagnóstico é uma ferramenta fundamental para a segurança pública, pois permite identificar os problemas e as necessidades de uma comunidade.", answer: true },
+
+    // Questões Gerais e de Integração
+    { text: "O Chefe do Estado-Maior tem, entre suas atribuições, a de supervisionar as operações policiais militares em execução.", answer: true },
+    { text: "O Subchefe do Estado-Maior deve coordenar a elaboração de diretrizes e planos, a fim de estar apto a assumir a Chefia do EM em eventuais impedimentos.", answer: true },
+    { text: "O Comandante deve, preferencialmente, envolver-se em todos os detalhes do planejamento, sem delegar competências aos comandantes subordinados.", answer: false },
+    { text: "A descentralização do planejamento e da execução exige que o comandante seja assessorado por um Estado-Maior.", answer: true },
+    { text: "A produção de informações pelo EM envolve apenas a coleta de dados, sem análise ou interpretação.", answer: false },
+    { text: "A supervisão da execução dos planos libera o comandante do trato de detalhes e fornece informações para o próprio EM.", answer: true },
+    { text: "As decisões de Caxias em campanha não levavam em conta a opinião de seus auxiliares do Estado-Maior.", answer: false },
+    { text: "A Lei de Organização Básica da PMPE (Lei nº 11.328/1996) define que os órgãos de apoio realizam a atividade-fim da corporação.", answer: false },
+    { text: "A Portaria do Comando-Geral nº 582/1981 aprova as Instruções Provisórias de Estado-Maior, que norteiam as atividades de planejamento na PMPE.", answer: true },
+    { text: "No processo decisório, a escolha da solução mais apropriada (decisão) ocorre antes da apresentação das linhas de ação.", answer: false },
+    { text: "A Liderança Militar e o Comando são considerados elementos formais para a ação de comandar.", answer: false },
+    { text: "As competências afetivas interpessoais são aquelas que, para serem externadas, necessitam de interação com outras pessoas.", answer: true },
+    { text: "O princípio da Legalidade na atividade policial significa que a atuação deve ser baseada na lei e nos regulamentos.", answer: true }
 ];
         let availableQuestions = [];
 
