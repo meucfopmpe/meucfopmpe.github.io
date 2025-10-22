@@ -981,8 +981,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
                 // === CONFIGURAÇÃO DE JOGOS DISPONÍVEIS ===
         const games = [
-          { id: 'desafio-cfo', name: 'Desafio CFO - TCEM', path: 'game/desafio-cfo.html', subject: 'TCEM', date: '2025-10-29' },
-          { id: 'LPMO-jogo', name: 'Desafio LPMO', path: 'game/LPMO.html', subject: 'LPMO', date: '2025-10-29' }
+          { id: 'desafio-cfo', name: 'Desafio CFO - TCEM', path: 'game/desafio-cfo.html', subject: 'TCEM', date: '2025-10-30' },
+          { id: 'LPMO-jogo', name: 'Desafio LPMO', path: 'game/LPMO.html', subject: 'LPMO', date: '2025-10-30' }
           // 🔹 você pode adicionar novos jogos aqui conforme as provas da semana
         ];
         
