@@ -991,14 +991,12 @@ document.addEventListener('DOMContentLoaded', () => {
           const container = document.getElementById('games-list');
           container.innerHTML = '';
           games
-            .sort((a, b) => new Date(a.date) - new Date(b.date)) // ordena pela data mais próxima
             .forEach(game => {
               const card = document.createElement('div');
               card.className = 'doc-card';
               card.innerHTML = `
                 <h3>${game.subject}</h3>
                 <p>${game.name}</p>
-                <p><strong>Data:</strong> ${new Date(game.date).toLocaleDateString('pt-BR')}</p>
               `;
               card.onclick = () => window.open(game.path, '_blank');
               container.appendChild(card);
