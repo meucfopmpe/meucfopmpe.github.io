@@ -117,6 +117,32 @@
           box-sizing: border-box;
         }
 
+        /* ADICIONE ESTE BLOCO DE CÓDIGO CSS AQUI */
+        .review-button { background-color: #9b59b6; color: white; }
+
+        #review-content {
+            max-height: 60vh; 
+            overflow-y: auto; 
+            text-align: left;
+            margin: 15px 0; 
+            padding: 10px; 
+            background-color: var(--primary-bg);
+            border-radius: 8px;
+        }
+        .review-item {
+            margin-bottom: 15px; 
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--secondary-bg);
+        }
+        .review-question { font-weight: bold; margin-bottom: 5px; }
+        .review-explanation {
+            background-color: #2c3a47;
+            padding: 8px;
+            border-radius: 5px; 
+            font-size: 0.9em;
+        }
+        .review-explanation strong { color: #2ecc71; }
+
 
     </style>
 </head>
@@ -157,6 +183,7 @@
         <p>Moedas ganhas: <span id="coins-earned">0</span></p>
         <div>
             <button id="restart-button" class="button restart-button">Jogar Novamente</button>
+            <button id="review-mistakes-button" class="button review-button hidden">Revisar Erros</button>
             <button id="go-to-shop-from-over-button" class="button shop-button">Ir para a Loja</button>
         </div>
     </div>
@@ -178,6 +205,8 @@
         const ctx = canvas.getContext('2d');
         const powerBtn = document.getElementById('power-btn');
         const powerIndicator = document.getElementById('power-indicator');
+        const reviewModal = document.getElementById('review-modal'); // <<< ADICIONE AQUI
+        const reviewMistakesBtn = document.getElementById('review-mistakes-button'); // <<< ADICIONE AQUI
         
         // --- CONSTANTES DO JOGO ---
         const playerWidth = 30, playerHeight = 50;
@@ -194,127 +223,113 @@
         let lastTime = 0;
         let playerData = {};
         let activeTimeouts = [];
+        let incorrectlyAnswered = []; // <<< ADICIONE AQUI
+        let currentQuestion = {}; // <<< ADICIONE AQUI
 
         const questions = [
     // --- LEI ORGÂNICA NACIONAL (LEI 14.751/23) ---
     // Fundamentos e Atribuições
-    { text: "A competência para legislar sobre normas gerais das polícias militares é concorrente entre a União e os Estados.", answer: false },
-    { text: "A Lei Orgânica Nacional (Lei 14.751/23) tem eficácia imediata e não revoga automaticamente as leis estaduais, exigindo que os Estados se adequem a ela.", answer: true },
-    { text: "Segundo a Lei Orgânica, os membros das polícias militares são considerados autoridades de polícia administrativa, ostensiva, de preservação da ordem pública e judiciária militar.", answer: true },
-    { text: "A função de polícia judiciária militar restringe-se ao cumprimento de mandados de prisão expedidos pela Justiça Militar.", answer: false },
-    { text: "A Lei Orgânica Nacional veda a participação das polícias militares no planejamento de políticas públicas de segurança.", answer: false },
-    { text: "As funções constitucionais das polícias militares podem ser exercidas por qualquer servidor público, desde que autorizado pelo Governador.", answer: false },
+    { text: "A competência para legislar sobre normas gerais das polícias militares é concorrente entre a União e os Estados.", answer: false, explanation: "Falso. A competência é PRIVATIVA da União, conforme o art. 22, XXI da Constituição Federal. A competência concorrente permitiria aos Estados legislarem na ausência de norma federal, o que não é o caso." },
+    { text: "A Lei Orgânica Nacional (Lei 14.751/23) tem eficácia imediata e não revoga automaticamente as leis estaduais, exigindo que os Estados se adequem a ela.", answer: true, explanation: "Verdadeiro. A lei estabelece normas gerais e tem eficácia imediata. Ela não revoga as leis estaduais, mas cria a necessidade de adequação para manter a simetria com a norma federal." },
+    { text: "Segundo a Lei Orgânica, os membros das polícias militares são considerados autoridades de polícia administrativa, ostensiva, de preservação da ordem pública e judiciária militar.", answer: true, explanation: "Verdadeiro. O §2º do art. 5º da Lei Orgânica define expressamente essas quatro naturezas da autoridade do policial militar." },
+    { text: "A função de polícia judiciária militar restringe-se ao cumprimento de mandados de prisão expedidos pela Justiça Militar.", answer: false, explanation: "Falso. A função é mais ampla e abrange todas as atividades previstas no Código de Processo Penal Militar, como a apuração de crimes militares e suas autorias." },
+    { text: "A Lei Orgânica Nacional veda a participação das polícias militares no planejamento de políticas públicas de segurança.", answer: false, explanation: "Falso. O art. 5º, §1º da lei prevê que as polícias militares podem, mediante convênio, participar do planejamento de políticas públicas." },
+    { text: "As funções constitucionais das polícias militares podem ser exercidas por qualquer servidor público, desde que autorizado pelo Governador.", answer: false, explanation: "Falso. A lei ressalta que essas funções só podem ser exercidas pelos militares que as integram, salvo exceções previstas em lei, como convênios." },
 
     // Estrutura e Hierarquia
-    { text: "O Art. 10 da Lei Orgânica Nacional estabelece uma estrutura básica para as corporações de forma taxativa, não permitindo nenhuma variação.", answer: false },
-    { text: "A estrutura básica das Polícias Militares, segundo a Lei Orgânica, deve conter preferencialmente órgãos de direção, assessoramento, apoio, execução e correição.", answer: true },
-    { text: "Os órgãos de execução destinam-se à realização das atividades-meio da instituição, como logística e recursos humanos.", answer: false },
-    { text: "Os órgãos de correição destinam-se a exercer as funções de corregedoria-geral, com atuação desconcentrada.", answer: true },
-    { text: "A hierarquia de postos e graduações definida no Art. 12 da Lei Orgânica é taxativa, devendo ser seguida por todas as corporações militares estaduais.", answer: true },
-    { text: "Na nova estrutura hierárquica nacional, a graduação de Cabo foi extinta.", answer: false },
-    { text: "Aspirante a Oficial, Cadete e Aluno-Oficial são classificados como 'Praças Especiais' pela Lei Orgânica Nacional.", answer: true },
-    { text: "Posto é o grau hierárquico do oficial, enquanto Graduação é o grau hierárquico da praça.", answer: true },
+    { text: "O Art. 10 da Lei Orgânica Nacional estabelece uma estrutura básica para as corporações de forma taxativa, não permitindo nenhuma variação.", answer: false, explanation: "Falso. O artigo usa a expressão 'preferencialmente', indicando que a estrutura (direção, apoio, execução, etc.) é um modelo recomendado, não taxativo (obrigatório)." },
+    { text: "A estrutura básica das Polícias Militares, segundo a Lei Orgânica, deve conter preferencialmente órgãos de direção, assessoramento, apoio, execução e correição.", answer: true, explanation: "Verdadeiro. Estes são os cinco tipos de órgãos listados como a estrutura básica preferencial no Art. 10 da lei." },
+    { text: "Os órgãos de execução destinam-se à realização das atividades-meio da instituição, como logística e recursos humanos.", answer: false, explanation: "Falso. Os órgãos de execução realizam a atividade-fim (policiamento, combate a incêndio). Os órgãos de apoio realizam a atividade-meio." },
+    { text: "Os órgãos de correição destinam-se a exercer as funções de corregedoria-geral, com atuação desconcentrada.", answer: true, explanation: "Verdadeiro. A função desses órgãos é a prevenção, fiscalização e apuração de desvios de conduta, atuando de forma desconcentrada." },
+    { text: "A hierarquia de postos e graduações definida no Art. 12 da Lei Orgânica é taxativa, devendo ser seguida por todas as corporações militares estaduais.", answer: true, explanation: "Verdadeiro. Diferente da estrutura organizacional, o rol de postos e graduações é taxativo (obrigatório), não permitindo que os estados criem ou suprimam postos/graduações." },
+    { text: "Na nova estrutura hierárquica nacional, a graduação de Cabo foi extinta.", answer: false, explanation: "Falso. A graduação de Cabo está expressamente prevista no Art. 12, III, 'f' da Lei Orgânica Nacional." },
+    { text: "Aspirante a Oficial, Cadete e Aluno-Oficial são classificados como 'Praças Especiais' pela Lei Orgânica Nacional.", answer: true, explanation: "Verdadeiro. O Art. 12, II, define as Praças Especiais, incluindo estas três categorias." },
+    { text: "Posto é o grau hierárquico do oficial, enquanto Graduação é o grau hierárquico da praça.", answer: true, explanation: "Verdadeiro. Esta é a definição clássica e mantida na legislação, diferenciando os círculos de oficiais e praças." },
 
     // Condições de Ingresso
-    { text: "A Lei Orgânica Nacional exige que o candidato para o cargo de Oficial seja brasileiro nato.", answer: false },
-    { text: "Para ingresso na corporação, a lei exige procedimento social e idoneidade moral irrepreensíveis, apurados por meio de investigação.", answer: true },
-    { text: "A exigência de escolaridade de nível superior para ingresso na carreira de Praça tem um prazo de adequação de até 6 anos a contar da publicação da Lei Orgânica.", answer: true },
-    { text: "É permitida a restrição em edital de concurso a pessoas com qualquer tipo de tatuagem, mesmo que não seja visível com o uniforme.", answer: false },
-    { text: "A Lei Orgânica Nacional estabelece que não haverá limite de idade para o concurso público de ingresso no Quadro de Oficiais de Estado-Maior (QOEM).", answer: true },
-    { text: "A simples existência de inquéritos policiais ou processos penais em curso autoriza, como regra geral, a eliminação de candidatos em concursos públicos.", answer: false },
+    { text: "A Lei Orgânica Nacional exige que o candidato para o cargo de Oficial seja brasileiro nato.", answer: false, explanation: "Falso. A lei exige apenas 'ser brasileiro', alinhando-se à Constituição, que não faz essa distinção para militares estaduais, apenas para oficiais das Forças Armadas." },
+    { text: "Para ingresso na corporação, a lei exige procedimento social e idoneidade moral irrepreensíveis, apurados por meio de investigação.", answer: true, explanation: "Verdadeiro. Esta é uma das condições básicas para ingresso, conforme o Art. 13, VI da Lei Orgânica." },
+    { text: "A exigência de escolaridade de nível superior para ingresso na carreira de Praça tem um prazo de adequação de até 6 anos a contar da publicação da Lei Orgânica.", answer: true, explanation: "Verdadeiro. O Art. 39 da lei estabelece este prazo de transição para que os estados se adaptem à nova exigência de escolaridade." },
+    { text: "É permitida a restrição em edital de concurso a pessoas com qualquer tipo de tatuagem, mesmo que não seja visível com o uniforme.", answer: false, explanation: "Falso. A restrição aplica-se apenas a tatuagens visíveis com o uniforme que contenham suásticas, obscenidades, ideologias terroristas, etc., conforme o Art. 13, X." },
+    { text: "A Lei Orgânica Nacional estabelece que não haverá limite de idade para o concurso público de ingresso no Quadro de Oficiais de Estado-Maior (QOEM).", answer: true, explanation: "Verdadeiro. O Art. 15, §2º veda expressamente o limite de idade para o ingresso no QOEM." },
+    { text: "A simples existência de inquéritos policiais ou processos penais em curso autoriza, como regra geral, a eliminação de candidatos em concursos públicos.", answer: false, explanation: "Falso. Conforme tese do STF (Tema 22), a simples existência de inquéritos ou ações penais não autoriza a eliminação, respeitando o princípio da presunção de inocência." },
 
     // --- QUADROS E CARREIRA ---
-    { text: "O Quadro de Oficiais de Estado-Maior (QOEM) exige como requisito de ingresso o bacharelado em Direito.", answer: true },
-    { text: "O Quadro de Oficiais Especialistas (QOE) é integrado por oficiais oriundos do quadro de praças, com promoção admitida até o posto de Major.", answer: false },
-    { text: "O Quadro de Praças (QP) destina-se às atividades da instituição, com progressão prevista até a graduação de Subtenente.", answer: true },
-    { text: "A Lei Orgânica Nacional criou os Quadros de Oficiais da Reserva e Reformados (QORR) e de Praças da Reserva e Reformados (QPRR).", answer: true },
-    { text: "O tempo de atividade militar e os cursos realizados não podem ser contados como título em concursos públicos para a carreira militar.", answer: false },
-    { text: "A Súmula Vinculante nº 43 do STF permite que um servidor seja investido em cargo de outra carreira sem a necessidade de novo concurso público.", answer: false },
-    { text: "A carreira policial-militar é caracterizada como uma atividade de dedicação parcial, permitindo o acúmulo com qualquer outro cargo público.", answer: false },
-    { text: "A Emenda Constitucional nº 101 permitiu aos militares estaduais a acumulação de cargos públicos nas mesmas condições dos servidores civis, com prevalência da atividade militar.", answer: true },
+    { text: "O Quadro de Oficiais de Estado-Maior (QOEM) exige como requisito de ingresso o bacharelado em Direito.", answer: true, explanation: "Verdadeiro. O Art. 15, I da Lei Orgânica estabelece o bacharelado em Direito como requisito para o QOEM das Polícias Militares." },
+    { text: "O Quadro de Oficiais Especialistas (QOE) é integrado por oficiais oriundos do quadro de praças, com promoção admitida até o posto de Major.", answer: false, explanation: "Falso. A promoção para o QOE é admitida até o posto de Tenente-Coronel, conforme o Art. 15, II." },
+    { text: "O Quadro de Praças (QP) destina-se às atividades da instituição, com progressão prevista até a graduação de Subtenente.", answer: true, explanation: "Verdadeiro. O Art. 15, V define que a progressão no Quadro de Praças vai até a graduação de Subtenente." },
+    { text: "A Lei Orgânica Nacional criou os Quadros de Oficiais da Reserva e Reformados (QORR) e de Praças da Reserva e Reformados (QPRR).", answer: true, explanation: "Verdadeiro. Os incisos IV e VI do Art. 15 criam formalmente estes quadros para os militares veteranos." },
+    { text: "O tempo de atividade militar e os cursos realizados não podem ser contados como título em concursos públicos para a carreira militar.", answer: false, explanation: "Falso. O Art. 15, §3º estabelece que o tempo de atividade e os cursos serão contados como título para fins de classificação." },
+    { text: "A Súmula Vinculante nº 43 do STF permite que um servidor seja investido em cargo de outra carreira sem a necessidade de novo concurso público.", answer: false, explanation: "Falso. A Súmula Vinculante nº 43 considera inconstitucional essa prática, reforçando a exigência de concurso público específico para cada carreira." },
+    { text: "A carreira policial-militar é caracterizada como uma atividade de dedicação parcial, permitindo o acúmulo com qualquer outro cargo público.", answer: false, explanation: "Falso. O Estatuto define a carreira como de 'dedicação integral', com a ressalva da acumulação permitida pela Constituição (ex: saúde, magistério), desde que haja compatibilidade e prevalência da atividade militar." },
+    { text: "A Emenda Constitucional nº 101 permitiu aos militares estaduais a acumulação de cargos públicos nas mesmas condições dos servidores civis, com prevalência da atividade militar.", answer: true, explanation: "Verdadeiro. A EC 101/2019 estendeu aos militares o direito à acumulação de cargos de professor ou da área de saúde, com prevalência da função militar." },
 
     // --- PROMOÇÕES ---
-    // Critérios e Tipos
-    { text: "Os critérios ordinários de promoção são: Antiguidade e Merecimento.", answer: true },
-    { text: "A promoção por merecimento deve ser baseada em critérios subjetivos, a critério exclusivo da comissão de promoção.", answer: false },
-    { text: "Além dos critérios ordinários, a Lei admite promoções por Bravura e Post Mortem.", answer: true },
-    { text: "A promoção por Bravura resulta de um ato comum de coragem, dentro dos limites normais do cumprimento do dever.", answer: false },
-    { text: "A promoção Post Mortem ocorre quando o militar falece em serviço ou em consequência dele, sendo um reconhecimento do Estado.", answer: true },
-    { text: "A promoção por Invalidez Permanente ocorre quando o militar é julgado incapaz definitivamente para o serviço ativo.", answer: true },
-    { text: "A promoção decenal em Pernambuco garante a promoção a Cabo após 10 anos, a 3º Sargento após 20 anos e a 2º Sargento após 30 anos de serviço.", answer: true },
-    { text: "A Promoção Requerida é um direito do militar que atinge os requisitos para a reserva, sendo um ato que pode ser revogado a pedido do militar.", answer: false },
-    { text: "A promoção em Ressarcimento de Preterição ocorre quando um militar teve seu direito à promoção negado e, após recurso ou decisão judicial, é promovido retroativamente.", answer: true },
-    { text: "Para a promoção ao posto de Coronel, a proporcionalidade é de uma vaga por merecimento e duas por antiguidade.", answer: false },
-    { text: "A promoção para 3º Sargento e Cabo na PMPE ocorre apenas pelo critério de antiguidade.", answer: true },
-    { text: "O Aspirante a Oficial é promovido a 2º Tenente pelo critério de merecimento, após estágio probatório.", answer: false },
-
-    // Quadro de Acesso
-    { text: "O militar precisa possuir o interstício (tempo mínimo no posto/graduação) exigido para poder ingressar no Quadro de Acesso.", answer: true },
-    { text: "O militar que for réu em processo criminal não pode, em nenhuma hipótese, constar em Quadro de Acesso.", answer: false },
-    { text: "O militar que estiver em gozo de licença para tratar de interesse particular pode constar no Quadro de Acesso.", answer: false },
-    { text: "A promoção por merecimento para oficiais é de competência do Comandante-Geral.", answer: false },
-    { text: "A promoção das praças é de competência do Comandante-Geral da Corporação.", answer: true },
-    { text: "A promoção por antiguidade dos oficiais pode ser realizada pelo Comandante-Geral, por delegação do Governador.", answer: true },
+    { text: "Os critérios ordinários de promoção são: Antiguidade e Merecimento.", answer: true, explanation: "Verdadeiro. O Art. 14 da Lei Orgânica e a Lei de Promoções de PE definem Antiguidade e Merecimento como os critérios regulares." },
+    { text: "A promoção por merecimento deve ser baseada em critérios subjetivos, a critério exclusivo da comissão de promoção.", answer: false, explanation: "Falso. A Lei Orgânica (Art. 14) exige que o critério de merecimento tenha 'parâmetros objetivos'." },
+    { text: "Além dos critérios ordinários, a Lei admite promoções por Bravura e Post Mortem.", answer: true, explanation: "Verdadeiro. O parágrafo único do Art. 14 da Lei Orgânica prevê estas modalidades extraordinárias de promoção." },
+    { text: "A promoção por Bravura resulta de um ato comum de coragem, dentro dos limites normais do cumprimento do dever.", answer: false, explanation: "Falso. A promoção por Bravura exige um 'ato incomum de coragem e audácia que, ultrapassando os limites normais do cumprimento do dever, represente feito de notório mérito'." },
+    { text: "A promoção Post Mortem ocorre quando o militar falece em serviço ou em consequência dele, sendo um reconhecimento do Estado.", answer: true, explanation: "Verdadeiro. É uma promoção que visa homenagear o militar falecido no cumprimento do dever ou em razão dele." },
+    { text: "A promoção por Invalidez Permanente ocorre quando o militar é julgado incapaz definitivamente para o serviço ativo.", answer: true, explanation: "Verdadeiro. É uma promoção extraordinária que antecede o processo de reforma do militar por invalidez decorrente de situações específicas." },
+    { text: "A promoção decenal em Pernambuco garante a promoção a Cabo após 10 anos, a 3º Sargento após 20 anos e a 2º Sargento após 30 anos de serviço.", answer: true, explanation: "Verdadeiro. A Lei de Promoções de PE (LC 470/21) estabelece esses prazos para a promoção decenal das praças." },
+    { text: "A Promoção Requerida é um direito do militar que atinge os requisitos para a reserva, sendo um ato que pode ser revogado a pedido do militar.", answer: false, explanation: "Falso. A Promoção Requerida, uma vez publicada, é irrevogável por ato de vontade do militar." },
+    { text: "A promoção em Ressarcimento de Preterição ocorre quando um militar teve seu direito à promoção negado e, após recurso ou decisão judicial, é promovido retroativamente.", answer: true, explanation: "Verdadeiro. É a forma de corrigir uma injustiça na promoção, reposicionando o militar na escala hierárquica como se tivesse sido promovido na época devida." },
+    { text: "Para a promoção ao posto de Coronel, a proporcionalidade é de uma vaga por merecimento e duas por antiguidade.", answer: false, explanation: "Falso. Para os postos de Coronel e Tenente-Coronel, a proporção é de duas vagas por merecimento para uma por antiguidade." },
+    { text: "A promoção para 3º Sargento e Cabo na PMPE ocorre apenas pelo critério de antiguidade.", answer: true, explanation: "Verdadeiro. Conforme a Lei de Promoções de PE, o acesso a essas graduações se dá exclusivamente por antiguidade." },
+    { text: "O Aspirante a Oficial é promovido a 2º Tenente pelo critério de merecimento, após estágio probatório.", answer: false, explanation: "Falso. A promoção de Aspirante a 2º Tenente ocorre pelo critério de antiguidade, após a conclusão do estágio probatório com aproveitamento." },
+    { text: "O militar precisa possuir o interstício (tempo mínimo no posto/graduação) exigido para poder ingressar no Quadro de Acesso.", answer: true, explanation: "Verdadeiro. O cumprimento do interstício é um dos requisitos fundamentais para que o militar possa ser avaliado para promoção." },
+    { text: "O militar que for réu em processo criminal não pode, em nenhuma hipótese, constar em Quadro de Acesso.", answer: false, explanation: "Falso. A lei prevê uma exceção: o militar pode ser incluído se seu ingresso for aprovado por 2/3 dos membros da comissão de promoção." },
+    { text: "O militar que estiver em gozo de licença para tratar de interesse particular pode constar no Quadro de Acesso.", answer: false, explanation: "Falso. Estar em gozo dessa licença é uma das condições que impede o militar de constar no Quadro de Acesso." },
+    { text: "A promoção por merecimento para oficiais é de competência do Comandante-Geral.", answer: false, explanation: "Falso. A promoção por merecimento dos oficiais é de competência do Chefe do Poder Executivo (Governador)." },
+    { text: "A promoção das praças é de competência do Comandante-Geral da Corporação.", answer: true, explanation: "Verdadeiro. Conforme a Lei de Promoções, o Comandante-Geral é a autoridade competente para promover as praças." },
+    { text: "A promoção por antiguidade dos oficiais pode ser realizada pelo Comandante-Geral, por delegação do Governador.", answer: true, explanation: "Verdadeiro. A lei permite que o Governador delegue ao Comandante-Geral a competência para efetivar as promoções por antiguidade." },
 
     // --- ESTATUTO DOS MILITARES DE PE (LEI 6.783/74) E OUTRAS NORMAS ---
-    // Direitos e Deveres
-    { text: "O Estatuto dos Militares define os militares do estado como uma categoria especial de servidores públicos estaduais, conceito que permanece inalterado.", answer: false },
-    { text: "O termo 'Veterano' substituiu legalmente o termo 'Inativo' para todos os fins de direito, não sendo apenas uma forma de tratamento.", answer: false },
-    { text: "Os deveres policiais-militares emanam de vínculos racionais e morais, e compreendem a dedicação integral ao serviço e o respeito à hierarquia.", answer: true },
-    { text: "Um dos direitos do militar com mais de 30 anos de serviço, ao ser transferido para a inatividade, é a percepção de remuneração correspondente ao grau hierárquico superior.", answer: true },
-    { text: "O direito de recorrer na esfera administrativa prescreve em 15 dias para atos de quota compulsória e em 180 dias nos demais casos.", answer: false },
-    { text: "O militar da ativa que se dirigir ao Poder Judiciário deve participar, antecipadamente, esta iniciativa à autoridade a que estiver subordinado.", answer: true },
-    { text: "O militar com menos de 5 anos de serviço que se candidatar a cargo eletivo será agregado para tratar de interesse particular.", answer: false },
-
-    // Prerrogativas e Garantias
-    { text: "As prerrogativas dos militares são as honras, dignidades e distinções devidas aos graus hierárquicos e cargos.", answer: true },
-    { text: "O militar só pode ser preso por autoridade policial em caso de flagrante delito, devendo ser entregue imediatamente à autoridade militar mais próxima.", answer: true },
-    { text: "O cumprimento de pena de prisão ou detenção, para o militar, deve ocorrer em organização policial-militar.", answer: true },
-    { text: "O porte de arma para praças da PMPE não possui nenhuma restrição imposta pelo Comando Geral.", answer: false },
-    { text: "A INCG nº 612/2024 regula a compra, o porte e a posse de arma de fogo para os militares de Pernambuco.", answer: true },
-    { text: "O Certificado de Registro de Arma de Fogo (CRAF) emitido pela PMPE confere ao proprietário o direito automático ao porte da arma.", answer: false },
-    { text: "O CRAF do policial militar possui validade de 10 anos, devendo ser renovado periodicamente.", answer: false },
-    { text: "O militar inativo, para conservar o porte de arma, deve requerer a renovação da permissão a cada 10 anos.", answer: true },
-    { text: "O porte de arma de fogo pode ser suspenso caso o militar esteja respondendo por crime cuja natureza desaconselhe o porte.", answer: true },
-
-    // Situações Especiais
-    { text: "Agregação é a situação em que o militar da ativa permanece sem número na sua escala hierárquica, mas não abre vaga.", answer: true },
-    { text: "O militar que aguarda transferência 'ex-officio' para a reserva remunerada deve ser agregado.", answer: true },
-    { text: "Reversão é o ato pelo qual o militar agregado retorna ao seu quadro tão logo cesse o motivo da agregação.", answer: true },
-    { text: "Excedente é a situação transitória do militar que é promovido por bravura sem haver vaga.", answer: true },
-    { text: "É considerado ausente o militar que deixar de comparecer à sua OME por mais de 48 horas consecutivas sem comunicar o motivo.", answer: false },
-    { text: "O militar é considerado desertor nos casos previstos exclusivamente no Estatuto dos Militares.", answer: false },
-
-    // Afastamentos e Licenças
-    { text: "As férias são afastamentos anuais e obrigatórios, com duração de 30 dias.", answer: true },
-    { text: "O afastamento por motivo de luto, pelo falecimento de cônjuge, pais ou filhos, é de 8 dias.", answer: true },
-    { text: "A licença especial tem duração de 6 meses a cada decênio de serviço prestado e pode ser parcelada.", answer: true },
-    { text: "A licença para tratar de interesse particular pode ser concedida ao militar com qualquer tempo de serviço.", answer: false },
-    { text: "A licença-maternidade para a servidora gestante na PMPE tem duração de 120 dias.", answer: false },
-    { text: "A licença-paternidade para os militares do estado é de 20 dias consecutivos.", answer: true },
-    { text: "A policial militar gestante pode ser empregada normalmente em serviço operacional remunerado, como o PJES.", answer: false },
-    { text: "A policial militar lactante tem direito a uma redução de sua jornada de trabalho diária.", answer: false },
-
-    // Jornada de Trabalho
-    { text: "A jornada de trabalho regular na PMPE é de 8 horas diárias ou 40 horas semanais.", answer: true },
-    { text: "O Programa de Jornada Extra de Segurança (PJES) permite que militares cumpram jornadas extraordinárias de forma voluntária e remunerada.", answer: true },
-    { text: "O limite máximo de serviços no PJES é de 8 jornadas por mês para cada militar.", answer: false },
-    { text: "A jornada especial extraordinária, não remunerada, pode ser aplicada em situações como Carnaval ou grandes eventos, com folga compensatória posterior.", answer: true },
-    { text: "O militar que tem filho com deficiência comprovada tem direito a um horário especial de trabalho, independentemente de compensação.", answer: true },
-
-    // Mobilização e Relação com o Exército
-    { text: "As Polícias Militares podem ser mobilizadas pela União em caso de guerra, integrando a força terrestre designada.", answer: true },
-    { text: "A Inspetoria-Geral das Polícias Militares (IGPM/BM) é um órgão do Ministério da Justiça que controla as PMs.", answer: false },
-    { text: "Compete à IGPM/BM, do Comando do Exército, registrar dados de efetivo, armamento e material bélico das PMs para fins de emprego em convocação ou mobilização.", answer: true },
-    { text: "O Decreto-Lei nº 667/69, que previa o controle e a coordenação das PMs pelo Exército, foi quase que totalmente revogado pela Lei Orgânica Nacional.", answer: true },
-    { text: "A convocação de uma PM pela União só pode ocorrer em caso de guerra externa, sendo vedada em casos de estado de sítio ou intervenção federal.", answer: false },
-
-    // Disposições Finais
-    { text: "O militar da reserva remunerada pode ser convocado para o serviço ativo, em caráter transitório e mediante aceitação voluntária.", answer: true },
-    { text: "O militar reformado por incapacidade definitiva jamais poderá retornar ao serviço ativo, mesmo que seja julgado apto em nova inspeção de saúde.", answer: false },
-    { text: "A demissão é uma forma de exclusão do serviço ativo aplicada exclusivamente aos Oficiais.", answer: true },
-    { text: "O licenciamento do serviço ativo é uma forma de exclusão aplicada exclusivamente aos Oficiais.", answer: false },
-    { text: "O militar do Estado tem direito à gratuidade no transporte público da Região Metropolitana do Recife mediante apresentação da identidade funcional, não sendo necessário estar fardado.", answer: true }
+    { text: "O Estatuto dos Militares define os militares do estado como uma categoria especial de servidores públicos estaduais, conceito que permanece inalterado.", answer: false, explanation: "Falso. Este conceito está superado. A EC 18/98 separou os militares dos servidores públicos na Constituição, tratando-os em seções distintas." },
+    { text: "O termo 'Veterano' substituiu legalmente o termo 'Inativo' para todos os fins de direito, não sendo apenas uma forma de tratamento.", answer: false, explanation: "Falso. O termo 'Veterano' é uma forma de tratamento deferente, instituída por portaria para uso na comunicação social. Legalmente, a condição jurídica continua sendo 'inativo'." },
+    { text: "Os deveres policiais-militares emanam de vínculos racionais e morais, e compreendem a dedicação integral ao serviço e o respeito à hierarquia.", answer: true, explanation: "Verdadeiro. O Art. 30 do Estatuto elenca estes e outros deveres essenciais da carreira militar." },
+    { text: "Um dos direitos do militar com mais de 30 anos de serviço, ao ser transferido para a inatividade, é a percepção de remuneração correspondente ao grau hierárquico superior.", answer: true, explanation: "Verdadeiro. Este direito, conhecido como 'posto acima', está previsto no Art. 49, II do Estatuto." },
+    { text: "O direito de recorrer na esfera administrativa prescreve em 15 dias para atos de quota compulsória e em 180 dias nos demais casos.", answer: false, explanation: "Falso. O prazo é de 15 dias para quota compulsória, mas de 120 dias para os demais casos." },
+    { text: "O militar da ativa que se dirigir ao Poder Judiciário deve participar, antecipadamente, esta iniciativa à autoridade a que estiver subordinado.", answer: true, explanation: "Verdadeiro. O Art. 50, §3º do Estatuto estabelece essa obrigação de comunicação prévia." },
+    { text: "O militar com menos de 5 anos de serviço que se candidatar a cargo eletivo será agregado para tratar de interesse particular.", answer: false, explanation: "Falso. Ele será excluído do serviço ativo (demissão ou licenciamento ex-officio). A agregação se aplica ao militar com 5 ou mais anos de serviço." },
+    { text: "As prerrogativas dos militares são as honras, dignidades e distinções devidas aos graus hierárquicos e cargos.", answer: true, explanation: "Verdadeiro. Esta é a definição dada pelo Art. 68 do Estatuto." },
+    { text: "O militar só pode ser preso por autoridade policial em caso de flagrante delito, devendo ser entregue imediatamente à autoridade militar mais próxima.", answer: true, explanation: "Verdadeiro. Esta é uma prerrogativa fundamental para proteger o militar, garantindo que ele fique sob custódia militar." },
+    { text: "O cumprimento de pena de prisão ou detenção, para o militar, deve ocorrer em organização policial-militar.", answer: true, explanation: "Verdadeiro. O Art. 68, parágrafo único, 'c' do Estatuto estabelece essa prerrogativa." },
+    { text: "O porte de arma para praças da PMPE não possui nenhuma restrição imposta pelo Comando Geral.", answer: false, explanation: "Falso. O Estatuto (Art. 49, IV, 'm') prevê que o porte de arma para praças ocorre 'com as restrições impostas pelo Comando Geral'." },
+    { text: "A INCG nº 612/2024 regula a compra, o porte e a posse de arma de fogo para os militares de Pernambuco.", answer: true, explanation: "Verdadeiro. Esta Instrução Normativa é o principal diploma que regulamenta o assunto na Corporação." },
+    { text: "O Certificado de Registro de Arma de Fogo (CRAF) emitido pela PMPE confere ao proprietário o direito automático ao porte da arma.", answer: false, explanation: "Falso. O CRAF atesta apenas a PROPRIEDADE da arma. O PORTE é um direito distinto, que consta na identidade militar." },
+    { text: "O CRAF do policial militar possui validade de 10 anos, devendo ser renovado periodicamente.", answer: false, explanation: "Falso. Conforme a INCG 612/24 (Art. 13), o CRAF do policial militar é válido por prazo INDETERMINADO." },
+    { text: "O militar inativo, para conservar o porte de arma, deve requerer a renovação da permissão a cada 10 anos.", answer: true, explanation: "Verdadeiro. A INCG 612/24 (Art. 20) estabelece essa exigência de renovação decenal para os veteranos." },
+    { text: "O porte de arma de fogo pode ser suspenso caso o militar esteja respondendo por crime cuja natureza desaconselhe o porte.", answer: true, explanation: "Verdadeiro. É uma das hipóteses de perda do direito ao porte, conforme o Art. 21 da INCG 612/24." },
+    { text: "Agregação é a situação em que o militar da ativa permanece sem número na sua escala hierárquica, mas não abre vaga.", answer: true, explanation: "Verdadeiro. Esta é a definição de agregação, uma situação transitória que não altera o efetivo do quadro." },
+    { text: "O militar que aguarda transferência 'ex-officio' para a reserva remunerada deve ser agregado.", answer: true, explanation: "Verdadeiro. É uma das situações previstas no Art. 75 do Estatuto para a agregação." },
+    { text: "Reversão é o ato pelo qual o militar agregado retorna ao seu quadro tão logo cesse o motivo da agregação.", answer: true, explanation: "Verdadeiro. A reversão é o ato que encerra a agregação, reintegrando o militar à sua escala hierárquica." },
+    { text: "Excedente é a situação transitória do militar que é promovido por bravura sem haver vaga.", answer: true, explanation: "Verdadeiro. É uma das hipóteses previstas no Art. 80 do Estatuto para a condição de excedente." },
+    { text: "É considerado ausente o militar que deixar de comparecer à sua OME por mais de 48 horas consecutivas sem comunicar o motivo.", answer: false, explanation: "Falso. O prazo para ser considerado ausente é de mais de 24 horas consecutivas." },
+    { text: "O militar é considerado desertor nos casos previstos exclusivamente no Estatuto dos Militares.", answer: false, explanation: "Falso. A deserção é um crime militar, e seus casos são previstos na legislação penal militar (Código Penal Militar)." },
+    { text: "As férias são afastamentos anuais e obrigatórios, com duração de 30 dias.", answer: true, explanation: "Verdadeiro. Este é o conceito de férias anuais para os militares." },
+    { text: "O afastamento por motivo de luto, pelo falecimento de cônjuge, pais ou filhos, é de 8 dias.", answer: true, explanation: "Verdadeiro. Este período de afastamento, conhecido como 'licença nojo', está previsto no Estatuto." },
+    { text: "A licença especial tem duração de 6 meses a cada decênio de serviço prestado e pode ser parcelada.", answer: true, explanation: "Verdadeiro. A licença especial é um direito do militar e pode ser gozada de uma vez ou parcelada em 2 ou 3 meses por ano." },
+    { text: "A licença para tratar de interesse particular pode ser concedida ao militar com qualquer tempo de serviço.", answer: false, explanation: "Falso. Exige-se, no mínimo, 10 anos de efetivo serviço para a concessão desta licença." },
+    { text: "A licença-maternidade para a servidora gestante na PMPE tem duração de 120 dias.", answer: false, explanation: "Falso. A licença-maternidade foi ampliada para 180 dias." },
+    { text: "A licença-paternidade para os militares do estado é de 20 dias consecutivos.", answer: true, explanation: "Verdadeiro. A LC 471/21 ampliou a licença-paternidade para 20 dias." },
+    { text: "A policial militar gestante pode ser empregada normalmente em serviço operacional remunerado, como o PJES.", answer: false, explanation: "Falso. A Portaria do CG nº 175/2014 veda expressamente o emprego da gestante em serviço operacional, remunerado ou não." },
+    { text: "A policial militar lactante tem direito a uma redução de sua jornada de trabalho diária.", answer: false, explanation: "Falso. A Portaria do CG nº 440/2021 estabelece que a lactação não impõe redução de jornada, mas sim o emprego em serviços compatíveis." },
+    { text: "A jornada de trabalho regular na PMPE é de 8 horas diárias ou 40 horas semanais.", answer: true, explanation: "Verdadeiro. Esta jornada foi estabelecida pela Portaria Normativa do CG nº 150/2013, em alinhamento com a legislação estadual." },
+    { text: "O Programa de Jornada Extra de Segurança (PJES) permite que militares cumpram jornadas extraordinárias de forma voluntária e remunerada.", answer: true, explanation: "Verdadeiro. O PJES é o programa que regulamenta o serviço extra remunerado para os militares e outros profissionais de segurança." },
+    { text: "O limite máximo de serviços no PJES é de 8 jornadas por mês para cada militar.", answer: false, explanation: "Falso. O limite máximo é de 12 serviços mensais por militar." },
+    { text: "A jornada especial extraordinária, não remunerada, pode ser aplicada em situações como Carnaval ou grandes eventos, com folga compensatória posterior.", answer: true, explanation: "Verdadeiro. O Decreto nº 44.128/2017 regulamenta essa jornada extra sem remuneração, mas com direito a folga compensatória." },
+    { text: "O militar que tem filho com deficiência comprovada tem direito a um horário especial de trabalho, independentemente de compensação.", answer: true, explanation: "Verdadeiro. A LC 375/2017 estendeu este direito aos militares, permitindo uma jornada reduzida sem prejuízo da remuneração." },
+    { text: "As Polícias Militares podem ser mobilizadas pela União em caso de guerra, integrando a força terrestre designada.", answer: true, explanation: "Verdadeiro. O Art. 25 da Lei Orgânica prevê a mobilização em caso de guerra para integrar a força terrestre." },
+    { text: "A Inspetoria-Geral das Polícias Militares (IGPM/BM) é um órgão do Ministério da Justiça que controla as PMs.", answer: false, explanation: "Falso. A IGPM/BM é um órgão do Comando do Exército, com função de coordenação e assessoria, não de controle direto." },
+    { text: "Compete à IGPM/BM, do Comando do Exército, registrar dados de efetivo, armamento e material bélico das PMs para fins de emprego em convocação ou mobilização.", answer: true, explanation: "Verdadeiro. Esta é uma de suas principais atribuições, visando o papel de força auxiliar." },
+    { text: "O Decreto-Lei nº 667/69, que previa o controle e a coordenação das PMs pelo Exército, foi quase que totalmente revogado pela Lei Orgânica Nacional.", answer: true, explanation: "Verdadeiro. A Lei 14.751/23 revogou a maior parte dos artigos do antigo decreto-lei, atualizando a relação entre as PMs e o Exército." },
+    { text: "A convocação de uma PM pela União só pode ocorrer em caso de guerra externa, sendo vedada em casos de estado de sítio ou intervenção federal.", answer: false, explanation: "Falso. A convocação é permitida justamente em situações extraordinárias como intervenção federal, estado de defesa e estado de sítio." },
+    { text: "O militar da reserva remunerada pode ser convocado para o serviço ativo, em caráter transitório e mediante aceitação voluntária.", answer: true, explanation: "Verdadeiro. O Art. 6º do Estatuto prevê essa possibilidade, com a anuência do militar." },
+    { text: "O militar reformado por incapacidade definitiva jamais poderá retornar ao serviço ativo, mesmo que seja julgado apto em nova inspeção de saúde.", answer: false, explanation: "Falso. O Art. 100 do Estatuto prevê o retorno ao serviço ativo se a aptidão for recuperada e o tempo de reforma não ultrapassar 5 anos." },
+    { text: "A demissão é uma forma de exclusão do serviço ativo aplicada exclusivamente aos Oficiais.", answer: true, explanation: "Verdadeiro. Demissão é o ato de exclusão para oficiais, que pode ser a pedido ou ex-officio." },
+    { text: "O licenciamento do serviço ativo é uma forma de exclusão aplicada exclusivamente aos Oficiais.", answer: false, explanation: "Falso. O licenciamento é aplicado somente às praças." },
+    { text: "O militar do Estado tem direito à gratuidade no transporte público da Região Metropolitana do Recife mediante apresentação da identidade funcional, não sendo necessário estar fardado.", answer: true, explanation: "Verdadeiro. A Portaria nº 093/2008 da antiga EMTU garantiu o livre trânsito mediante apresentação da identidade funcional, independentemente do uniforme." }
 ];
         let availableQuestions = [];
 
@@ -479,6 +494,7 @@
             portals = []; obstacles = []; powerUps = []; answerPopup = null;
             score = 0; lives = 3; difficultyLevel = 0; correctAnswersInARow = 0; powerReady = false; isNextGolden = false;
             isFrozen = false; isAccelerating = false; isPaused = false;
+            incorrectlyAnswered = []; // <<< ADICIONE AQUI
             shuffle(questions); availableQuestions = [...questions];
             updateGameStatus(); updatePowerIndicator(); nextRound();
         }
@@ -495,11 +511,44 @@
             cancelAnimationFrame(gameLoopId);
             activeTimeouts.forEach(id => clearTimeout(id));
             activeTimeouts = [];
-            const coinsEarned = score; playerData.coins += coinsEarned; savePlayerData();
+            
+            const coinsEarned = score; 
+            playerData.coins += coinsEarned; 
+            savePlayerData();
+            
             document.getElementById('final-score').textContent = score;
             document.getElementById('coins-earned').textContent = coinsEarned;
             document.getElementById('game-over-title').textContent = collided ? "Fim de Jogo: Colisão!" : "Fim de Jogo";
+            
+            if (incorrectlyAnswered.length > 0) {
+                reviewMistakesBtn.classList.remove('hidden');
+            } else {
+                reviewMistakesBtn.classList.add('hidden');
+            }
+
             showScreen('game-over-screen');
+        }
+        // ADICIONE ESTA FUNÇÃO COMPLETA
+        function showReviewModal() {
+            const contentDiv = document.getElementById('review-content');
+            contentDiv.innerHTML = '';
+            incorrectlyAnswered.forEach(q => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'review-item';
+                
+                const questionP = document.createElement('p');
+                questionP.className = 'review-question';
+                questionP.textContent = q.text;
+                
+                const explanationP = document.createElement('p');
+                explanationP.className = 'review-explanation';
+                explanationP.innerHTML = `<strong>Resposta: ${q.answer ? 'Verdadeiro' : 'Falso'}.</strong><br>${q.explanation}`;
+                
+                itemDiv.appendChild(questionP);
+                itemDiv.appendChild(explanationP);
+                contentDiv.appendChild(itemDiv);
+            });
+            showScreen('review-modal');
         }
         function nextRound() {
             portals = [];
@@ -633,6 +682,7 @@
                     } else {
                         lives--; correctAnswersInARow = 0;
                         answerPopup = { text: 'ERRADO!', color: 'rgba(231, 76, 60, 0.9)', alpha: 1.0 };
+                        incorrectlyAnswered.push(currentQuestion);
                     }
                     updateGameStatus(); if(lives > 0) nextRound();
                 }
@@ -641,6 +691,7 @@
             if (portals.length > 0 && portals[0].y > canvas.height && lives > 0) {
                 lives--; correctAnswersInARow = 0;
                 answerPopup = { text: 'ERRADO!', color: 'rgba(231, 76, 60, 0.9)', alpha: 1.0 };
+                incorrectlyAnswered.push(currentQuestion); // <<< ADICIONE AQUI
                 updateGameStatus(); if(lives > 0) nextRound();
             }
             
@@ -734,7 +785,16 @@
              showScreen('start-screen');
         };
 
+        reviewMistakesBtn.onclick = showReviewModal;
+        document.getElementById('close-review-button').onclick = () => showScreen('game-over-screen');
+
         window.onload = () => { loadPlayerData(); showScreen('start-screen'); };
     </script>
+
+    <div id="review-modal" class="screen hidden">
+        <h2>Revisão das Questões</h2>
+        <div id="review-content"></div>
+        <button id="close-review-button" class="button back-button">Fechar</button>
+    </div>
 </body>
 </html>
