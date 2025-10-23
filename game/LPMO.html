@@ -73,8 +73,9 @@
         }
         canvas {
             background-color: var(--road-color); display: block;
-            width: 100%; height: auto;
-            flex-grow: 1; /* Permite que o canvas cresça para preencher o espaço */
+            width: 100%;
+            height: auto; /* A altura será automática para manter a proporção */
+            aspect-ratio: 500 / 600; /* <<< ESSA É A MUDANÇA PRINCIPAL */
         }
         #touch-controls { display: flex; justify-content: space-between; width: 100%; margin-top: 15px; flex-wrap: wrap; }
         .touch-button {
@@ -162,7 +163,7 @@
         </div>
     </div>
 
-    <div id="game-over-screen" class="screen">
+    <div id="game-over-screen" class="screen hidden">
         <h2 id="game-over-title">Fim de Jogo</h2>
         <p>Pontuação final: <span id="final-score">0</span></p>
         <p>Moedas ganhas: <span id="coins-earned">0</span></p>
@@ -173,14 +174,14 @@
         </div>
     </div>
     
-    <div id="shop-screen" class="screen">
+    <div id="shop-screen" class="screen hidden">
         <h2>Loja de Skins</h2>
         <p>Suas Moedas: <span id="shop-coins">0</span></p>
         <div id="shop-items"></div>
         <button id="back-to-start-button" class="button back-button" style="margin-top: auto;">Voltar</button>
     </div>
 
-    <div id="review-modal" class="screen">
+    <div id="review-modal" class="screen hidden">
         <h2>Revisão das Questões</h2>
         <div id="review-content"></div>
         <button id="close-review-button" class="button back-button" style="margin-top: auto;">Fechar</button>
@@ -310,7 +311,7 @@
             { text: "O licenciamento do serviço ativo é uma forma de exclusão aplicada exclusivamente aos Oficiais.", answer: false, explanation: "Falso. O licenciamento é aplicado somente às praças." },
             { text: "O militar do Estado tem direito à gratuidade no transporte público da Região Metropolitana do Recife mediante apresentação da identidade funcional, não sendo necessário estar fardado.", answer: true, explanation: "Verdadeiro. A Portaria nº 093/2008 da antiga EMTU garantiu o livre trânsito mediante apresentação da identidade funcional, independentemente do uniforme." }
         ];
-
+        // ... (o restante do código JavaScript permanece o mesmo)
         let availableQuestions = [];
 
         function shuffle(array) {
@@ -449,7 +450,7 @@
                 } else {
                     button.textContent = `🪙 ${skin.price}`;
                     button.classList.add('shop-button-owned');
-                    if (playerData.coins >= skin.price) button.onclick = () => buySkin(skin.id, skin.price);
+                    if (playerData.coins >= price) button.onclick = () => buySkin(skin.id, skin.price);
                     else button.disabled = true;
                 }
                 itemDiv.appendChild(canvasPreview);
