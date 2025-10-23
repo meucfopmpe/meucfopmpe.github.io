@@ -16,7 +16,7 @@
             margin: 0;
             display: flex;
             justify-content: center;
-            align-items: center; /* Centraliza verticalmente e horizontalmente */
+            align-items: center; /* Centraliza vertical e horizontalmente */
             background-color: var(--primary-bg);
             font-family: Arial, sans-serif;
             color: var(--light-text);
@@ -26,7 +26,7 @@
         .screen, #game-wrapper {
             width: 100%;
             max-width: 500px; /* Largura máxima do jogo */
-            max-height: 95vh; /* ALTURA MÁXIMA PARA CABER NA TELA */
+            max-height: 98vh; /* ALTURA MÁXIMA PARA CABER NA TELA SEM CORTAR */
             display: flex;
             flex-direction: column;
             text-align: center;
@@ -66,7 +66,7 @@
         }
         #power-indicator { font-size: 24px; }
         #question-area {
-            width: 100%; height: 90px; padding: 10px;
+            width: 100%; min-height: 90px; padding: 10px;
             background-color: var(--secondary-bg); text-align: center; font-size: 16px;
             display: flex; justify-content: center; align-items: center;
             border-bottom: 2px solid var(--primary-bg);
@@ -74,8 +74,8 @@
         canvas {
             background-color: var(--road-color); display: block;
             width: 100%;
-            height: auto; /* A altura será automática para manter a proporção */
-            aspect-ratio: 500 / 600; /* <<< ESSA É A MUDANÇA PRINCIPAL */
+            height: auto;
+            aspect-ratio: 500 / 600; /* <<< MANTÉM A PROPORÇÃO CORRETA DO JOGO */
         }
         #touch-controls { display: flex; justify-content: space-between; width: 100%; margin-top: 15px; flex-wrap: wrap; }
         .touch-button {
@@ -216,6 +216,7 @@
         let playerData = {};
         let activeTimeouts = [];
         let incorrectlyAnswered = [];
+        let currentQuestion = {};
 
         const questions = [
             // --- LEI ORGÂNICA NACIONAL (LEI 14.751/23) ---
@@ -311,7 +312,7 @@
             { text: "O licenciamento do serviço ativo é uma forma de exclusão aplicada exclusivamente aos Oficiais.", answer: false, explanation: "Falso. O licenciamento é aplicado somente às praças." },
             { text: "O militar do Estado tem direito à gratuidade no transporte público da Região Metropolitana do Recife mediante apresentação da identidade funcional, não sendo necessário estar fardado.", answer: true, explanation: "Verdadeiro. A Portaria nº 093/2008 da antiga EMTU garantiu o livre trânsito mediante apresentação da identidade funcional, independentemente do uniforme." }
         ];
-        // ... (o restante do código JavaScript permanece o mesmo)
+        
         let availableQuestions = [];
 
         function shuffle(array) {
