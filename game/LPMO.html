@@ -194,6 +194,12 @@
         <div id="shop-items"></div>
         <button id="back-to-start-button" class="button back-button">Voltar</button>
     </div>
+    
+    <div id="review-modal" class="screen hidden">
+        <h2>Revisão das Questões</h2>
+        <div id="review-content"></div>
+        <button id="close-review-button" class="button back-button">Fechar</button>
+    </div>
 
     <script>
         // --- ELEMENTOS DO DOM ---
@@ -790,11 +796,5 @@
 
         window.onload = () => { loadPlayerData(); showScreen('start-screen'); };
     </script>
-
-    <div id="review-modal" class="screen hidden">
-        <h2>Revisão das Questões</h2>
-        <div id="review-content"></div>
-        <button id="close-review-button" class="button back-button">Fechar</button>
-    </div>
 </body>
 </html>
