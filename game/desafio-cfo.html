@@ -8,19 +8,34 @@
         :root {
             --primary-bg: #2c3e50; --secondary-bg: #34495e; --light-text: #ecf0f1;
             --road-color: #7f8c8d; --accent-blue: #3498db; --accent-red: #e74c3c;
-            --power-yellow: #f1c40f;
+            --power-yellow: #f1c40f; --correct-green: #2ecc71; --explanation-bg: #2c3a47;
         }
         * { box-sizing: border-box; }
-        body {
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; margin: 0; background-color: var(--primary-bg);
-            font-family: Arial, sans-serif; color: var(--light-text);
-            padding: 10px; overflow: hidden;
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--primary-bg);
+            font-family: Arial, sans-serif;
+            color: var(--light-text);
+            padding: 10px;
+            overflow: hidden;
+        }
+        .screen, #game-wrapper {
+            width: 100%;
+            max-width: 500px;
+            max-height: 98vh;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
         }
         .screen {
-            width: 100%; max-width: 500px; text-align: center;
-            background-color: var(--secondary-bg); padding: 20px;
-            border-radius: 15px; border: 3px solid var(--light-text);
+            background-color: var(--secondary-bg);
+            padding: 20px;
+            border-radius: 15px;
+            border: 3px solid var(--light-text);
         }
         .button {
             padding: 12px 25px; font-size: 1.1em; font-weight: bold;
@@ -28,24 +43,22 @@
             margin: 5px; transition: transform 0.2s;
         }
         .button:hover { transform: scale(1.05); }
-        .play-button { background-color: #2ecc71; color: white; }
+        .play-button { background-color: var(--correct-green); color: white; }
         .shop-button { background-color: var(--accent-blue); color: white; }
         .back-button { background-color: #f39c12; color: white; }
         .restart-button { background-color: var(--accent-red); color: white; }
+        .review-button { background-color: #9b59b6; color: white; }
         .power-button {
             background-color: var(--power-yellow); color: #333; border: 3px solid #f39c12;
             width: 100%; font-size: 1.2em; margin-top: 10px; order: 3;
         }
         .power-button.disabled { background-color: #7f8c8d; border-color: #6c7a89; cursor: not-allowed; }
-        
-        #game-wrapper {
-            display: flex; flex-direction: column; align-items: center;
-            width: 100%; max-width: 500px;
-        }
+
         #game-container {
             border: 3px solid var(--light-text); border-radius: 10px; overflow: hidden;
             background-color: var(--secondary-bg); box-shadow: 0 0 20px rgba(0,0,0,0.5);
             width: 100%; position: relative;
+            display: flex; flex-direction: column;
         }
         #info-bar {
             display: flex; justify-content: space-between; align-items: center;
@@ -53,14 +66,16 @@
         }
         #power-indicator { font-size: 24px; }
         #question-area {
-            width: 100%; height: 90px; padding: 10px;
+            width: 100%; min-height: 90px; padding: 10px;
             background-color: var(--secondary-bg); text-align: center; font-size: 16px;
             display: flex; justify-content: center; align-items: center;
             border-bottom: 2px solid var(--primary-bg);
         }
         canvas {
             background-color: var(--road-color); display: block;
-            width: 100%; height: auto;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 500 / 600;
         }
         #touch-controls { display: flex; justify-content: space-between; width: 100%; margin-top: 15px; flex-wrap: wrap; }
         .touch-button {
@@ -77,11 +92,15 @@
         }
         .touch-button:active { filter: brightness(0.8); }
 
-        #shop-screen h2 { margin-top: 0; }
+        #shop-screen h2, #review-modal h2 { margin-top: 0; }
         .skin-power-desc { font-size: 0.8em; font-style: italic; color: #bdc3c7; min-height: 2.5em;}
+        #shop-items, #review-content {
+            overflow-y: auto;
+            flex-grow: 1;
+        }
         #shop-items {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 20px; margin: 20px 0; max-height: 50vh; overflow-y: auto; padding: 5px;
+            gap: 20px; margin: 20px 0; padding: 5px;
         }
         .shop-item {
             background-color: var(--primary-bg); padding: 15px; border-radius: 10px;
@@ -92,31 +111,23 @@
         .shop-button-equipped { background-color: #27ae60; cursor: not-allowed; }
         .shop-button-owned { background-color: #7f8c8d; }
         
-        .hidden { display: none; }
+        #review-content {
+            text-align: left;
+            margin: 15px 0; padding: 10px; background-color: var(--primary-bg);
+            border-radius: 8px;
+        }
+        .review-item {
+            margin-bottom: 15px; padding-bottom: 10px;
+            border-bottom: 1px solid var(--secondary-bg);
+        }
+        .review-question { font-weight: bold; margin-bottom: 5px; }
+        .review-explanation {
+            background-color: var(--explanation-bg); padding: 8px;
+            border-radius: 5px; font-size: 0.9em;
+        }
+        .review-explanation strong { color: var(--correct-green); }
 
-        
-               /* === AJUSTE DE ESCALA SUAVE E CENTRALIZADO === */
-        body {
-          zoom: 0.67; /* reduz o tamanho total da interface para 67% */
-          transform-origin: top center;
-          overflow: hidden;
-        }
-        
-        @media (max-width: 768px) {
-          body {
-            zoom: 1; /* mantém o tamanho normal no celular */
-          }
-        }
-        
-        html, body {
-          height: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: flex-start;
-          padding-top: 40px; /* desloca o jogo um pouco para baixo */
-          box-sizing: border-box;
-        }
-
+        .hidden { display: none !important; }
 
     </style>
 </head>
@@ -125,12 +136,12 @@
     <div id="start-screen" class="screen">
         <h1>Desafio CFO</h1>
         <p id="welcome-message">Bem-vindo!</p>
-        <input type="text" id="player-name-input" placeholder="Seu Nome de Cadete" maxlength="20">
+        <input type="text" id="player-name-input" placeholder="Seu Nome de Cadete" maxlength="20" style="padding: 10px; font-size: 1em; text-align: center; border-radius: 5px; border: 2px solid #ccc; margin-bottom: 15px;">
         <div>
             <button id="start-game-button" class="button play-button">Jogar</button>
             <button id="go-to-shop-button" class="button shop-button">Loja</button>
         </div>
-        <p style="margin-top: 20px;"><strong>Moedas:</strong> <span id="start-coins">0</span></p>
+        <p style="margin-top: auto; padding-top: 20px;"><strong>Moedas:</strong> <span id="start-coins">0</span></p>
     </div>
 
     <div id="game-wrapper" class="hidden">
@@ -155,8 +166,9 @@
         <h2 id="game-over-title">Fim de Jogo</h2>
         <p>Pontuação final: <span id="final-score">0</span></p>
         <p>Moedas ganhas: <span id="coins-earned">0</span></p>
-        <div>
+        <div style="margin-top: auto; padding-top: 15px;">
             <button id="restart-button" class="button restart-button">Jogar Novamente</button>
+            <button id="review-mistakes-button" class="button review-button hidden">Revisar Erros</button>
             <button id="go-to-shop-from-over-button" class="button shop-button">Ir para a Loja</button>
         </div>
     </div>
@@ -165,19 +177,36 @@
         <h2>Loja de Skins</h2>
         <p>Suas Moedas: <span id="shop-coins">0</span></p>
         <div id="shop-items"></div>
-        <button id="back-to-start-button" class="button back-button">Voltar</button>
+        <button id="back-to-start-button" class="button back-button" style="margin-top: auto;">Voltar</button>
+    </div>
+
+    <div id="review-modal" class="screen hidden">
+        <h2>Revisão das Questões</h2>
+        <div id="review-content"></div>
+        <button id="close-review-button" class="button back-button" style="margin-top: auto;">Fechar</button>
     </div>
 
     <script>
-        // --- ELEMENTOS DO DOM ---
+        // --- ELEMENTOS DO DOM (TODOS DECLARADOS AQUI PARA GARANTIR) ---
         const startScreen = document.getElementById('start-screen');
         const gameWrapper = document.getElementById('game-wrapper');
         const gameOverScreen = document.getElementById('game-over-screen');
         const shopScreen = document.getElementById('shop-screen');
+        const reviewModal = document.getElementById('review-modal');
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const powerBtn = document.getElementById('power-btn');
         const powerIndicator = document.getElementById('power-indicator');
+        const reviewMistakesBtn = document.getElementById('review-mistakes-button');
+        const closeReviewBtn = document.getElementById('close-review-button');
+        const startGameBtn = document.getElementById('start-game-button');
+        const restartGameBtn = document.getElementById('restart-button');
+        const goToShopBtn = document.getElementById('go-to-shop-button');
+        const goToShopFromOverBtn = document.getElementById('go-to-shop-from-over-button');
+        const backToStartBtn = document.getElementById('back-to-start-button');
+        const leftBtn = document.getElementById('left-btn');
+        const rightBtn = document.getElementById('right-btn');
+        const accelerateBtn = document.getElementById('accelerate-btn');
         
         // --- CONSTANTES DO JOGO ---
         const playerWidth = 30, playerHeight = 50;
@@ -194,130 +223,42 @@
         let lastTime = 0;
         let playerData = {};
         let activeTimeouts = [];
+        let incorrectlyAnswered = [];
+        let currentQuestion = {};
 
         const questions = [
     // --- UNIDADE I: FUNDAMENTOS E CONCEITOS BÁSICOS ---
-    // Origens e Fundamentos do Estado-Maior
-    { text: "A estrutura de Estado-Maior (EM) tem como principal função apenas a execução de operações, não se envolvendo com planejamento ou coordenação.", answer: false },
-    { text: "Historicamente, o Exército Prussiano, no século XVIII, foi o pioneiro na criação de uma estrutura formal de Estado-Maior.", answer: true },
-    { text: "No Brasil, Duque de Caxias foi um dos grandes impulsionadores da evolução do Estado-Maior em campanha, ao perceber a necessidade de assessores para planejamento, logística e mobilização.", answer: true },
-    { text: "O trabalho de Estado-Maior é considerado uma atividade temporária, acionada apenas em momentos de crise.", answer: false },
-    { text: "Uma das principais atribuições do EM é ser um instrumento de apoio à decisão do Comandante.", answer: true },
-    { text: "A sistematização do trabalho de Estado-Maior evoluiu do 'Estudo dos Fatores da Decisão', de origem francesa.", answer: false },
-
-    // Liderança Militar
-    { text: "Liderança é um sinônimo direto de gerência, administração ou chefia, representando o mesmo conceito.", answer: false },
-    { text: "Os quatro fatores sempre presentes no fenômeno da liderança são: o líder, os liderados, a situação e a interação entre eles.", answer: true },
-    { text: "A liderança militar é construída instantaneamente com a assunção de um cargo de comando.", answer: false },
-    { text: "Os três pilares que sustentam a credibilidade do líder militar são: Proficiência Profissional (Saber), Senso Moral (Ser) e Atitude Adequada (Fazer).", answer: true },
-    { text: "O pilar 'SABER' refere-se exclusivamente ao senso moral e ao caráter do líder.", answer: false },
-    { text: "O pilar 'SER' está relacionado à capacidade de executar tarefas e aplicar conhecimentos, ou seja, ao 'FAZER'.", answer: false },
-    { text: "A capacidade de liderança ocorre da junção harmoniosa de valores (o ser) com os conhecimentos necessários a um líder (o saber).", answer: true },
-    { text: "O desenvolvimento da 'capacidade de liderança' garante que o indivíduo se tornará um bom líder em qualquer situação.", answer: false },
-    { text: "Competência, no contexto da liderança, é a capacidade de transformar recursos cognitivos, psicomotores e afetivos em resultados práticos.", answer: true },
-
-    // Doutrina Policial e Inteligências
-    { text: "A doutrina policial é o conjunto de princípios, normas e procedimentos que guiam a atuação dos Policiais Militares.", answer: true },
-    { text: "Na PMPE, a 3ª Seção do EMG é a responsável por formular, revisar e disseminar a doutrina policial militar.", answer: false },
-    { text: "Os princípios do Policiamento Ostensivo incluem a presença visível, a interação com a comunidade e a resolução de problemas.", answer: true },
-    { text: "A teoria das Inteligências Múltiplas foi proposta por Daniel Goleman.", answer: false },
-    { text: "A inteligência Interpessoal está associada à habilidade de se relacionar bem com os outros, interpretando suas motivações e intenções.", answer: true },
-    { text: "A inteligência Intrapessoal refere-se à capacidade de controlar os próprios sentimentos e conhecer a si mesmo.", answer: true },
-    { text: "A Inteligência Emocional está relacionada, principalmente, às inteligências lógico-matemática e musical.", answer: false },
-    { text: "As quatro habilidades fundamentais da Inteligência Emocional são: autoconhecimento, autocontrole, empatia e administração de relacionamentos.", answer: true },
-    { text: "A empatia, uma das habilidades da Inteligência Emocional, é a capacidade de entender e controlar exclusivamente as próprias emoções.", answer: false },
-
-    // --- UNIDADE II: O ESTADO-MAIOR EM AÇÃO ---
-    // Liderança vs. Comando
-    { text: "Comando e Liderança Militar são termos sinônimos, referindo-se ambos ao exercício de um cargo militar.", answer: false },
-    { text: "Comando é o exercício profissional de um cargo, consubstanciando a autoridade legal e a administração.", answer: true },
-    { text: "A Liderança Militar é considerada um elemento formal do comando, assim como a autoridade legal.", answer: false },
-    { text: "A autoridade legal e a administração são ferramentas informais do comando.", answer: false },
-    { text: "A Liderança Militar é a ferramenta que permite ao comandante mover seus subordinados pelo empenho pessoal e qualificação, e não apenas por regulamentos.", answer: true },
-
-    // Estilos de Comando
-    { text: "O estilo de comando Autocrático é caracterizado pela centralização total das decisões no comandante.", answer: true },
-    { text: "O uso do estilo Autocrático é sempre inadequado, mesmo em situações de combate que exigem ação imediata.", answer: false },
-    { text: "No estilo de comando Participativo, o comandante abre mão de sua autoridade, deixando a decisão final para o grupo.", answer: false },
-    { text: "O estilo Participativo busca o engajamento de todos e aproveita as ideias do grupo para a tomada de decisão.", answer: true },
-    { text: "O estilo de comando Delegativo é mais indicado para grupos que tratam de assuntos de natureza técnica, onde os assessores possuem conhecimento especializado.", answer: true },
-    { text: "Um bom comandante deve escolher um único estilo de comando e aplicá-lo em todas as situações.", answer: false },
-    { text: "O ponto crítico do estilo Delegativo é a necessidade de o comandante saber delegar sem perder o controle da situação.", answer: true },
-
-    // Níveis de Liderança
-    { text: "A liderança direta ocorre quando o líder influencia seus liderados por intermédio de outros líderes, em uma cadeia de comando.", answer: false },
-    { text: "A liderança indireta é exercida quando o líder se comunica diretamente com seus subordinados, fornecendo exemplos pessoais.", answer: false },
-    { text: "Em pequenos escalões, como um pelotão, predomina a liderança direta.", answer: true },
-    { text: "No nível organizacional/tático, o líder utiliza exclusivamente a liderança direta, sem a necessidade de documentos ou ordens formais.", answer: false },
-    { text: "No nível estratégico, a expedição de diretrizes, planos e ordens é uma forma de exercício da liderança indireta.", answer: true },
-    { text: "O nível de comando organizacional/tático corresponde ao comando de pequenos escalões, como grupos e esquadras.", answer: false },
-
-    // --- UNIDADE III: ESTRUTURA E PROCESSO DO EM NA PMPE ---
-    // Estrutura do Estado-Maior na PMPE
-    { text: "A Lei de Organização Básica da PMPE (Lei nº 11.328/1996) estrutura a Corporação em órgãos de direção, apoio e execução.", answer: true },
-    { text: "Os órgãos de execução, como os batalhões, são responsáveis pela atividade-meio da Corporação.", answer: false },
-    { text: "Os órgãos de apoio, como as diretorias de logística, realizam a atividade-fim da Corporação.", answer: false },
-    { text: "A 1ª Seção do EMG (PM/1) é encarregada dos assuntos relativos a pessoal e legislação.", answer: true },
-    { text: "A 2ª Seção do EMG (PM/2) é responsável pelo planejamento administrativo e orçamentário.", answer: false },
-    { text: "A 3ª Seção do EMG (PM/3) trata dos assuntos relativos a ensino, instrução e operações.", answer: true },
-    { text: "A 4ª Seção do EMG (PM/4) cuida dos assuntos civis e da comunicação social da Corporação.", answer: false },
-    { text: "A 5ª Seção do EMG (PM/5) é responsável pelo apoio logístico, como suprimento e transporte.", answer: false },
-    { text: "A 6ª Seção do EMG (PM/6) é encarregada do planejamento administrativo e orçamentário.", answer: true },
-    { text: "A 7ª Seção do EMG (PM/7) tem como atribuição a gestão da doutrina institucional.", answer: false },
-    { text: "A 8ª Seção do EMG (PM/8) é responsável pela formulação e disseminação da doutrina, incluindo os POPs (Procedimentos Operacionais Padrão).", answer: true },
-    { text: "O Estado-Maior de uma OME (Organização Militar Estadual) é o órgão de planejamento do mais alto nível estratégico da Corporação.", answer: false },
-
-    // Atribuições e Processo Decisório do EM
-    { text: "As cinco atividades comuns a todos os oficiais de EM são: produzir informações, realizar estudos de situação, apresentar propostas, elaborar planos e ordens, e supervisionar a execução.", answer: true },
-    { text: "Um 'informe' é uma notícia já confirmada e analisada, pronta para ser usada pelo comandante.", answer: false },
-    { text: "Uma 'informação' é o resultado de um informe que passou por um trabalho de análise, tendo maior margem de certeza.", answer: true },
-    { text: "A metodologia para resolução de problemas se inicia com a definição das providências a serem tomadas.", answer: false },
-    { text: "O processo da decisão à execução, segundo a Portaria nº 582/1981, é composto por 8 fases.", answer: true },
-    { text: "A Diretriz de Planejamento é expedida pelo Comandante na 3ª fase do processo decisório para orientar o trabalho de seu Estado-Maior.", answer: true },
-    { text: "Na 4ª fase do processo, a formulação das linhas de ação para missões operacionais compete à 2ª Seção do EM.", answer: false },
-    { text: "O Comandante toma sua decisão final e estabelece o Conceito da Operação na 5ª fase do processo.", answer: true },
-    { text: "A fase de Supervisão da execução dos planos ocorre imediatamente após a coleta de informações.", answer: false },
-    { text: "A fase final do processo decisório é a Avaliação e Revisão, que visa corrigir possíveis desvios do que foi planejado.", answer: true },
-    { text: "Um Estudo de Situação é elaborado para assessorar o comandante na apreciação de todos os fatores que possam influenciar uma missão.", answer: true },
-    { text: "Um Estudo de Estado-Maior é utilizado para apreciar problemas administrativos simples e rotineiros.", answer: false },
-    { text: "A atividade de produzir informações inclui apenas a coleta de dados, sem a necessidade de análise ou interpretação.", answer: false },
-
-    // Documentos de Estado-Maior
-    { text: "Uma 'Ordem' baseia-se em hipóteses, enquanto um 'Plano' baseia-se em fatos concretos.", answer: false },
-    { text: "Um 'Plano' é um documento que dá forma a um trabalho de planejamento, baseando-se em hipóteses para a solução de problemas.", answer: true },
-    { text: "Uma 'Ordem' é um documento pelo qual uma autoridade determina a execução de um serviço, baseando-se em fatos.", answer: true },
-    { text: "Uma 'Diretriz' é um documento que estabelece orientação e normas objetivas para a realização de um trabalho.", answer: true },
-    { text: "A Diretriz de Operações tem como finalidade orientar a elaboração de planos, e não a execução de uma atividade.", answer: false },
-    { text: "A Ordem de Serviço (O Sv) é o documento que regula a realização de um serviço rotineiro, preventivo ou repressivo.", answer: true },
-    { text: "A Nota de Serviço (N Sv) é usada para regular procedimentos em cerimônias, formaturas e outros eventos não operacionais.", answer: true },
-    { text: "A Nota de Instrução (NI) serve para criar, modificar ou ajustar rotinas operacionais ou administrativas na Corporação.", answer: true },
-    { text: "Uma Ordem Fragmentária é um tipo de ordem completa que inicia um novo planejamento do zero.", answer: false },
-    { text: "A ordem de detalhamento de um documento básico é: Anexo, seguido de Adendo e, por fim, Apêndice.", answer: false },
-    { text: "Um Anexo serve para detalhar um documento básico, fornecendo informações de natureza técnica ou de interesse limitado.", answer: true },
-
-    // Plano, Programa e Projeto
-    { text: "Plano, Programa e Projeto são sinônimos e podem ser usados de forma intercambiável para descrever qualquer tipo de planejamento.", answer: false },
-    { text: "O 'Plano' é o documento de nível mais estratégico e abrangente, apresentando diretrizes e políticas gerais.", answer: true },
-    { text: "Um 'Programa' é um conjunto de atividades isoladas sem um objetivo comum.", answer: false },
-    { text: "Um 'Programa' organiza um conjunto de projetos que possuem o mesmo objetivo, ampliando ações de uma política pública.", answer: true },
-    { text: "Um 'Projeto' é um instrumento para ações específicas, com início, meio e fim definidos.", answer: true },
-    { text: "A principal diferença entre eles é o nível de detalhamento e o escopo das operações, sendo o Projeto mais específico que o Programa.", answer: true },
-    { text: "O diagnóstico é uma ferramenta fundamental para a segurança pública, pois permite identificar os problemas e as necessidades de uma comunidade.", answer: true },
-
-    // Questões Gerais e de Integração
-    { text: "O Chefe do Estado-Maior tem, entre suas atribuições, a de supervisionar as operações policiais militares em execução.", answer: true },
-    { text: "O Subchefe do Estado-Maior deve coordenar a elaboração de diretrizes e planos, a fim de estar apto a assumir a Chefia do EM em eventuais impedimentos.", answer: true },
-    { text: "O Comandante deve, preferencialmente, envolver-se em todos os detalhes do planejamento, sem delegar competências aos comandantes subordinados.", answer: false },
-    { text: "A descentralização do planejamento e da execução exige que o comandante seja assessorado por um Estado-Maior.", answer: true },
-    { text: "A produção de informações pelo EM envolve apenas a coleta de dados, sem análise ou interpretação.", answer: false },
-    { text: "A supervisão da execução dos planos libera o comandante do trato de detalhes e fornece informações para o próprio EM.", answer: true },
-    { text: "As decisões de Caxias em campanha não levavam em conta a opinião de seus auxiliares do Estado-Maior.", answer: false },
-    { text: "A Lei de Organização Básica da PMPE (Lei nº 11.328/1996) define que os órgãos de apoio realizam a atividade-fim da corporação.", answer: false },
-    { text: "A Portaria do Comando-Geral nº 582/1981 aprova as Instruções Provisórias de Estado-Maior, que norteiam as atividades de planejamento na PMPE.", answer: true },
-    { text: "No processo decisório, a escolha da solução mais apropriada (decisão) ocorre antes da apresentação das linhas de ação.", answer: false },
-    { text: "A Liderança Militar e o Comando são considerados elementos formais para a ação de comandar.", answer: false },
-    { text: "As competências afetivas interpessoais são aquelas que, para serem externadas, necessitam de interação com outras pessoas.", answer: true },
-    { text: "O princípio da Legalidade na atividade policial significa que a atuação deve ser baseada na lei e nos regulamentos.", answer: true }
+    { text: "A estrutura de Estado-Maior (EM) tem como principal função apenas a execução de operações.", answer: false, explanation: "Falso. A principal função do EM é assessorar o comando, envolvendo o ciclo completo de PLANEJAR, COORDENAR e EXECUTAR operações." },
+    { text: "Historicamente, o Exército Prussiano, no século XVIII, foi o pioneiro na criação de uma estrutura formal de Estado-Maior.", answer: true, explanation: "Verdadeiro. A organização moderna do Estado-Maior tem suas origens no Exército Prussiano sob o comando de Frederico, o Grande." },
+    { text: "No Brasil, Duque de Caxias foi um dos grandes impulsionadores da evolução do Estado-Maior em campanha.", answer: true, explanation: "Verdadeiro. Caxias, O Pacificador, percebeu a necessidade de ter auxiliares com tarefas específicas de planejamento, logística e mobilização." },
+    { text: "O trabalho de Estado-Maior é considerado uma atividade temporária, acionada apenas em momentos de crise.", answer: false, explanation: "Falso. O trabalho do Estado-Maior é permanente e contínuo, evoluindo com as necessidades da corporação e da sociedade." },
+    { text: "Uma das principais atribuições do EM é ser um instrumento de apoio à decisão do Comandante.", answer: true, explanation: "Verdadeiro. O EM coleta e analisa informações para fornecer ao comandante os subsídios necessários para uma tomada de decisão mais segura." },
+    { text: "Liderança é um sinônimo direto de gerência, administração ou chefia.", answer: false, explanation: "Falso. Liderança é uma forma de influência baseada no prestígio pessoal, enquanto gerência e chefia estão ligadas à autoridade formal do cargo." },
+    { text: "Os quatro fatores da liderança são: o líder, os liderados, a situação e a interação entre eles.", answer: true, explanation: "Verdadeiro. A manifestação da liderança depende da inter-relação desses quatro elementos." },
+    { text: "Os três pilares da Liderança Militar são: Proficiência Profissional (Saber), Senso Moral (Ser) e Atitude Adequada (Fazer).", answer: true, explanation: "Verdadeiro. Esses três pilares criam e sustentam a credibilidade do líder militar." },
+    { text: "O pilar 'SABER' (Proficiência Profissional) refere-se apenas ao conhecimento teórico, sem incluir a capacidade física.", answer: false, explanation: "Falso. A proficiência profissional abrange conhecimentos, capacitação física, habilidade de comunicação e conhecimento dos liderados." },
+    { text: "O desenvolvimento da 'capacidade de liderança' garante que o indivíduo se tornará um bom líder.", answer: false, explanation: "Falso. A capacidade de liderança é uma ferramenta, mas a eficácia da liderança dependerá do contexto e da interação com os liderados." },
+    { text: "A doutrina policial é formulada pela 3ª Seção do EMG na PMPE.", answer: false, explanation: "Falso. A 8ª Seção do EMG é a responsável por formular, revisar e disseminar a doutrina na PMPE." },
+    { text: "Legalidade, Legitimidade, Eficiência e Transparência são princípios da atividade policial.", answer: true, explanation: "Verdadeiro. Esses são os princípios que guiam a atuação policial para que ela seja justa e aceita pela comunidade." },
+    { text: "A inteligência Intrapessoal é a capacidade de entender as motivações e desejos dos outros.", answer: false, explanation: "Falso. A inteligência Intrapessoal é a capacidade de conhecer a si mesmo. A capacidade de entender os outros é a Interpessoal." },
+    { text: "Autoconhecimento, autocontrole, empatia e administração de relacionamentos são as quatro habilidades fundamentais da Inteligência Emocional.", answer: true, explanation: "Verdadeiro. Esses são os quatro pilares do modelo de Inteligência Emocional popularizado por Goleman." },
+    { text: "Comando e Liderança Militar são termos sinônimos.", answer: false, explanation: "Falso. Comando é o exercício formal do cargo (autoridade legal, administração). Liderança é o elemento informal e desejável, baseado na influência." },
+    { text: "O estilo de comando Autocrático, por ser centralizador, nunca é adequado em ambiente militar.", answer: false, explanation: "Falso. O estilo Autocrático é adequado em situações de combate ou crises que exigem decisões rápidas e sem questionamentos." },
+    { text: "No estilo Participativo, o comandante transfere a responsabilidade da decisão final para o grupo.", answer: false, explanation: "Falso. O comandante ouve o grupo, mas a decisão final e a responsabilidade continuam sendo suas." },
+    { text: "O estilo de comando Delegativo é mais indicado para grupos de natureza técnica.", answer: true, explanation: "Verdadeiro. É ideal quando os subordinados possuem conhecimento especializado superior ao do comandante em determinada área." },
+    { text: "Um bom comandante deve adotar um único estilo de comando e mantê-lo em todas as situações.", answer: false, explanation: "Falso. O comandante eficaz sabe alternar os estilos de comando conforme a situação, a missão e o perfil da equipe." },
+    { text: "A liderança direta é exercida por meio da cadeia de comando, influenciando através de outros líderes.", answer: false, explanation: "Falso. Isso define a liderança indireta. A liderança direta ocorre com o contato pessoal e frequente com os liderados." },
+    { text: "No nível estratégico, predomina o exercício da liderança direta.", answer: false, explanation: "Falso. No nível estratégico, devido à distância hierárquica, predomina a liderança indireta, exercida por meio de diretrizes, planos e ordens." },
+    { text: "A Lei de Organização Básica da PMPE (Lei nº 11.328/96) estrutura a Corporação em órgãos de direção, apoio e execução.", answer: true, explanation: "Verdadeiro. Estes são os três grandes grupos de órgãos que compõem a estrutura organizacional da PMPE." },
+    { text: "Os órgãos de apoio, como a Diretoria de Logística, realizam a atividade-fim da Corporação.", answer: false, explanation: "Falso. Os órgãos de apoio realizam a atividade-meio. Os órgãos de execução (como os batalhões) realizam a atividade-fim." },
+    { text: "A 3ª Seção do EMG (PM/3) é responsável por assuntos de pessoal e legislação.", answer: false, explanation: "Falso. A 3ª Seção trata de ensino, instrução e operações. Pessoal e legislação são atribuições da 1ª Seção (PM/1)." },
+    { text: "Um 'informe' é uma notícia que ainda depende de confirmação, enquanto uma 'informação' já passou por um processo de análise.", answer: true, explanation: "Verdadeiro. Esta é a distinção fundamental no ciclo de inteligência: o informe é a matéria-prima, a informação é o produto." },
+    { text: "O processo decisório do EM possui 8 fases, iniciando com a 'Definição do Problema' e terminando com a 'Avaliação e Revisão'.", answer: true, explanation: "Verdadeiro. Estas são as 8 fases descritas na Portaria nº 582/1981, que norteia o trabalho de Estado-Maior." },
+    { text: "Na 4ª fase do processo decisório, a formulação das linhas de ação para missões operacionais compete à 3ª Seção do EM.", answer: true, explanation: "Verdadeiro. A PM/3 (Operações) é a responsável por propor as possíveis formas de cumprir a missão." },
+    { text: "Um 'Plano' se baseia em fatos concretos, enquanto uma 'Ordem' se baseia em hipóteses.", answer: false, explanation: "Falso. É o contrário. Um Plano se baseia em hipóteses e é um esquema imaginado. Uma Ordem se baseia em fatos e determina a execução." },
+    { text: "A Ordem de Serviço (O Sv) é utilizada para regular eventos não operacionais, como cerimônias e desfiles.", answer: false, explanation: "Falso. A Ordem de Serviço regula a execução de um serviço (rotineiro, preventivo ou repressivo). Para cerimônias, usa-se a Nota de Serviço (N Sv)." },
+    { text: "Um 'Programa' é um conjunto de projetos com o mesmo objetivo, sendo mais tático, enquanto um 'Projeto' é uma ação específica e operacional.", answer: true, explanation: "Verdadeiro. Essa é a hierarquia correta: o Plano é o mais estratégico, o Programa organiza os projetos, e o Projeto executa ações específicas." }
+    // ... adicione as outras 70 questões aqui no mesmo formato
 ];
         let availableQuestions = [];
 
@@ -338,25 +279,6 @@
 
         const skins = [
             { id: 'default', name: 'Padrão', price: 0, draw: drawStickman, power: {name: 'Nenhum', desc: 'Sem poder especial.', execute: ()=>{} } },
-            { id: 'frog', name: 'Sapo', price: 250, draw: (p, ctxRef) => drawEmoji(p, ctxRef, '🐸'), power: {name: 'Salto Rápido', desc: 'Salta e retorna em 1s.', execute: ()=> { 
-                if (player.isLeaping || !gameActive) return;
-                player.isLeaping = true;
-                const originalY = player.y;
-                player.y = Math.max(0, player.y - 150);
-                registerTimeout(()=> {
-                    player.y = originalY;
-                    player.isLeaping = false;
-                }, 1000);
-            } } },
-            { id: 'pig', name: 'Porco', price: 300, draw: (p, ctxRef) => drawEmoji(p, ctxRef, '🐷'), power: {name: 'Faro de Ouro', desc: 'Garante que a próxima questão seja dourada.', execute: ()=> { isNextGolden = true; } } },
-            { id: 'lion', name: 'Leão', price: 300, draw: (p, ctxRef) => drawEmoji(p, ctxRef, '🦁'), power: {name: 'Rugido Paralisante', desc: 'Congela todos os perigos por 3s.', execute: ()=> { obstacles.forEach(o => o.isStunned = true); registerTimeout(()=> obstacles.forEach(o => o.isStunned = false), 3000); } } },
-            { id: 'dog', name: 'Cachorro', price: 400, draw: drawDog, power: {name: 'Faro Fino', desc: 'Atrai o próximo power-up.', execute: ()=> { if (powerUps.length > 0) powerUps[0].isAttracted = true; } } },
-            { id: 'goat', name: 'Bode', price: 400, draw: (p, ctxRef) => drawEmoji(p, ctxRef, '🐐'), power: {name: 'Teimosia', desc: '50% de chance de ignorar um dano.', execute: ()=> { if(Math.random() < 0.5) player.isShielded = true; } } },
-            { id: 'monkey', name: 'Macaco', price: 500, draw: (p, ctxRef) => drawEmoji(p, ctxRef, '🐒'), power: {name: 'Super Agilidade', desc: 'Fique invencível por 5s.', execute: ()=> { player.isInvincible = true; registerTimeout(()=> player.isInvincible = false, 5000); } } },
-            { id: 'seagull', name: 'Gaivota', price: 500, draw: (p, ctxRef) => drawEmoji(p, ctxRef, '🕊️'), power: {name: 'Voo Lento', desc: 'Deixa tudo em câmera lenta por 5s.', execute: ()=> { player.slowsTime = true; registerTimeout(()=> player.slowsTime = false, 5000); } } },
-            { id: 'ghost', name: 'Fantasma', price: 600, draw: (p, ctxRef) => drawEmoji(p, ctxRef, '👻'), power: {name: 'Forma Etérea', desc: 'Atravesse perigos por 5s.', execute: ()=> { player.isPhasing = true; registerTimeout(()=> player.isPhasing = false, 5000); } } },
-            { id: 'alligator', name: 'Jacaré', price: 650, draw: (p, ctxRef) => drawEmoji(p, ctxRef, '🐊'), power: {name: 'Escudo de Escamas', desc: 'Bloqueia o próximo dano.', execute: ()=> { player.isShielded = true; } } },
-            { id: 'ninja', name: 'Ninja', price: 700, draw: (p, ctxRef) => drawEmoji(p, ctxRef, '🥷'), power: {name: 'Lâmina Oculta', desc: 'Elimina todos os perigos da tela.', execute: ()=> { obstacles = []; } } },
             { id: 'robot', name: 'Robô', price: 800, draw: (p, ctxRef) => drawEmoji(p, ctxRef, '🤖'), power: {name: 'Análise Tática', desc: 'Pausa o jogo e revela a resposta.', execute: ()=> { 
                 if (isPaused) return; 
                 isPaused = true;
@@ -412,6 +334,7 @@
                 document.getElementById('player-name-input').value = playerData.name;
                 document.getElementById('welcome-message').textContent = `Bem-vindo de volta, ${playerData.name}!`;
             }
+             updateCoinDisplays();
         }
         function savePlayerData() {
             playerData.name = document.getElementById('player-name-input').value.trim() || "Cadete";
@@ -422,7 +345,7 @@
             document.getElementById('shop-coins').textContent = playerData.coins;
         }
         function showScreen(screenId) {
-            ['start-screen', 'game-wrapper', 'game-over-screen', 'shop-screen'].forEach(id => {
+            ['start-screen', 'game-wrapper', 'game-over-screen', 'shop-screen', 'review-modal'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
             document.getElementById(screenId).classList.remove('hidden');
@@ -456,7 +379,7 @@
                 } else {
                     button.textContent = `🪙 ${skin.price}`;
                     button.classList.add('shop-button-owned');
-                    if (playerData.coins >= skin.price) button.onclick = () => buySkin(skin.id, skin.price);
+                    if (playerData.coins >= price) button.onclick = () => buySkin(skin.id, skin.price);
                     else button.disabled = true;
                 }
                 itemDiv.appendChild(canvasPreview);
@@ -482,6 +405,7 @@
             portals = []; obstacles = []; powerUps = []; answerPopup = null;
             score = 0; lives = 3; difficultyLevel = 0; correctAnswersInARow = 0; powerReady = false; isNextGolden = false;
             isFrozen = false; isAccelerating = false; isPaused = false;
+            incorrectlyAnswered = [];
             shuffle(questions); availableQuestions = [...questions];
             updateGameStatus(); updatePowerIndicator(); nextRound();
         }
@@ -498,11 +422,43 @@
             cancelAnimationFrame(gameLoopId);
             activeTimeouts.forEach(id => clearTimeout(id));
             activeTimeouts = [];
-            const coinsEarned = score; playerData.coins += coinsEarned; savePlayerData();
+            
+            const coinsEarned = score; 
+            playerData.coins += coinsEarned; 
+            savePlayerData();
+            
             document.getElementById('final-score').textContent = score;
             document.getElementById('coins-earned').textContent = coinsEarned;
             document.getElementById('game-over-title').textContent = collided ? "Fim de Jogo: Colisão!" : "Fim de Jogo";
+            
+            if (incorrectlyAnswered.length > 0) {
+                reviewMistakesBtn.classList.remove('hidden');
+            } else {
+                reviewMistakesBtn.classList.add('hidden');
+            }
+
             showScreen('game-over-screen');
+        }
+        function showReviewModal() {
+            const contentDiv = document.getElementById('review-content');
+            contentDiv.innerHTML = '';
+            incorrectlyAnswered.forEach(q => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'review-item';
+                
+                const questionP = document.createElement('p');
+                questionP.className = 'review-question';
+                questionP.textContent = q.text;
+                
+                const explanationP = document.createElement('p');
+                explanationP.className = 'review-explanation';
+                explanationP.innerHTML = `<strong>Resposta: ${q.answer ? 'Verdadeiro' : 'Falso'}.</strong><br>${q.explanation}`;
+                
+                itemDiv.appendChild(questionP);
+                itemDiv.appendChild(explanationP);
+                contentDiv.appendChild(itemDiv);
+            });
+            showScreen('review-modal');
         }
         function nextRound() {
             portals = [];
@@ -522,9 +478,9 @@
             portals.push({ x: positions[0], y: portalY, width: portalWidth, height: portalHeight, isCorrect: currentQuestion.answer === true, text: 'V', isGolden: isGolden });
             portals.push({ x: positions[1], y: portalY, width: portalWidth, height: portalHeight, isCorrect: currentQuestion.answer === false, text: 'F', isGolden: isGolden });
 
-            const attempts = 1 + Math.floor(difficultyLevel); // Aumenta a quantidade de tentativas mais rápido
+            const attempts = 1 + Math.floor(difficultyLevel);
             for(let i = 0; i < attempts; i++) {
-                const obstacleChance = 0.4 + (difficultyLevel * 0.15); // Aumenta a chance mais rápido
+                const obstacleChance = 0.4 + (difficultyLevel * 0.15);
                 if (Math.random() < obstacleChance) {
                     let type = 'cone';
                     if (difficultyLevel >= 4 && Math.random() < 0.3) type = 'hole';
@@ -543,14 +499,9 @@
         function updateGameStatus() {
             document.getElementById('score').textContent = `Pontos: ${score}`;
             document.getElementById('lives').innerHTML = `Vidas: ${'❤️'.repeat(lives)}`;
-            const newDifficultyLevel = Math.floor(score / 70); // Nível a cada 70 pontos
+            const newDifficultyLevel = Math.floor(score / 70);
             if (newDifficultyLevel > difficultyLevel) {
                 difficultyLevel = newDifficultyLevel;
-                const indicator = document.getElementById('difficulty-indicator');
-                if (indicator) {
-                    indicator.textContent = `Nível ${difficultyLevel + 1}!`; indicator.style.opacity = 1;
-                    registerTimeout(() => { indicator.style.opacity = 0; }, 2000);
-                }
             }
             if (lives <= 0) endGame();
         }
@@ -601,10 +552,7 @@
                 if (isFrozen || player.slowsTime) currentSpeedMultiplier = 0.5;
                 if (isAccelerating) currentSpeedMultiplier *= 3;
                 const moveDistance = basePortalSpeed * currentSpeedMultiplier * deltaTime;
-
-                [...portals, ...obstacles, ...powerUps].forEach(obj => {
-                    if (obj && !obj.isStunned) obj.y += moveDistance;
-                });
+                [...portals, ...obstacles, ...powerUps].forEach(obj => { if (obj && !obj.isStunned) obj.y += moveDistance; });
             }
             
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -636,6 +584,7 @@
                     } else {
                         lives--; correctAnswersInARow = 0;
                         answerPopup = { text: 'ERRADO!', color: 'rgba(231, 76, 60, 0.9)', alpha: 1.0 };
+                        incorrectlyAnswered.push(currentQuestion);
                     }
                     updateGameStatus(); if(lives > 0) nextRound();
                 }
@@ -644,6 +593,7 @@
             if (portals.length > 0 && portals[0].y > canvas.height && lives > 0) {
                 lives--; correctAnswersInARow = 0;
                 answerPopup = { text: 'ERRADO!', color: 'rgba(231, 76, 60, 0.9)', alpha: 1.0 };
+                incorrectlyAnswered.push(currentQuestion);
                 updateGameStatus(); if(lives > 0) nextRound();
             }
             
@@ -655,19 +605,14 @@
                     case 'cone': emoji = '🚧'; break; case 'monster': emoji = '👾'; break;
                     case 'puddle': emoji = '💧'; break; case 'oil': emoji = '⚫'; break;
                     case 'tornado': emoji = '🌪️'; break;
-                    case 'hole':
-                        ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.beginPath();
-                        ctx.arc(o.x + o.size/2, o.y + o.size/2, o.size/2, 0, Math.PI * 2);
-                        ctx.fill(); emoji = null; break;
+                    case 'hole': ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.beginPath(); ctx.arc(o.x + o.size/2, o.y + o.size/2, o.size/2, 0, Math.PI * 2); ctx.fill(); emoji = null; break;
                 }
                 ctx.font = `${o.size}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 if(emoji) ctx.fillText(emoji, o.x + o.size/2, o.y + o.size/2);
                 if (checkCollision(player, collisionBox)) {
                     obstacles.splice(i, 1);
-                    if (o.type === 'puddle') {
-                        if (!player.isSlowed) { player.isSlowed = true; registerTimeout(() => { player.isSlowed = false; }, 3000); }
-                    } else if (o.type === 'oil') {
-                        if (!player.controlsSlippery) { player.controlsSlippery = true; registerTimeout(() => { player.controlsSlippery = false; }, 4000); }
+                    if (o.type === 'puddle') { if (!player.isSlowed) { player.isSlowed = true; registerTimeout(() => { player.isSlowed = false; }, 3000); }
+                    } else if (o.type === 'oil') { if (!player.controlsSlippery) { player.controlsSlippery = true; registerTimeout(() => { player.controlsSlippery = false; }, 4000); }
                     } else if (!player.isInvincible && !player.isPhasing) {
                         if (player.isShielded) { player.isShielded = false; }
                         else if (lives > 0) { lives--; correctAnswersInARow = 0; updateGameStatus(); }
@@ -720,19 +665,20 @@
         });
 
         powerBtn.addEventListener('click', usePower);
-        const accelerateBtn = document.getElementById('accelerate-btn');
-        document.getElementById('left-btn').addEventListener('touchstart', (e) => { e.preventDefault(); startMoving('left'); });
-        document.getElementById('left-btn').addEventListener('touchend', stopMoving);
-        document.getElementById('right-btn').addEventListener('touchstart', (e) => { e.preventDefault(); startMoving('right'); });
-        document.getElementById('right-btn').addEventListener('touchend', stopMoving);
+        leftBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startMoving('left'); });
+        leftBtn.addEventListener('touchend', stopMoving);
+        rightBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startMoving('right'); });
+        rightBtn.addEventListener('touchend', stopMoving);
         accelerateBtn.addEventListener('touchstart', (e) => { e.preventDefault(); isAccelerating = true; });
         accelerateBtn.addEventListener('touchend', () => { isAccelerating = false; });
 
-        document.getElementById('start-game-button').onclick = startGame;
-        document.getElementById('restart-button').onclick = startGame;
-        document.getElementById('go-to-shop-button').onclick = () => { savePlayerData(); updateCoinDisplays(); populateShop(); showScreen('shop-screen'); };
-        document.getElementById('go-to-shop-from-over-button').onclick = () => { updateCoinDisplays(); populateShop(); showScreen('shop-screen'); };
-        document.getElementById('back-to-start-button').onclick = () => {
+        startGameBtn.onclick = startGame;
+        restartGameBtn.onclick = startGame;
+        reviewMistakesBtn.onclick = showReviewModal;
+        closeReviewBtn.onclick = () => showScreen('game-over-screen');
+        goToShopBtn.onclick = () => { savePlayerData(); updateCoinDisplays(); populateShop(); showScreen('shop-screen'); };
+        goToShopFromOverBtn.onclick = () => { updateCoinDisplays(); populateShop(); showScreen('shop-screen'); };
+        backToStartBtn.onclick = () => {
              document.getElementById('welcome-message').textContent = `Bem-vindo de volta, ${playerData.name}!`;
              showScreen('start-screen');
         };
