@@ -15,7 +15,9 @@
             display: flex; justify-content: center; align-items: center;
             height: 100vh; margin: 0; background-color: var(--primary-bg);
             font-family: Arial, sans-serif; color: var(--light-text);
-            padding: 10px; overflow: hidden;
+            padding: 10px; overflow: hidden; zoom: 0.67; /* reduz o tamanho total da interface para 67% */
+            transform-origin: top center;
+            overflow: hidden;
         }
         .screen {
             width: 100%; max-width: 500px; text-align: center;
@@ -111,12 +113,34 @@
         }
         .review-explanation strong { color: var(--correct-green); }
 
+         .hidden { display: none; }
+
+        
+                       
+        @media (max-width: 768px) {
+          body {
+            zoom: 1; /* mantém o tamanho normal no celular */
+          }
+        .review-item {
+            margin-bottom: 15px; padding-bottom: 10px;
+            border-bottom: 1px solid var(--secondary-bg);
+        }
+        
+        .review-question { font-weight: bold; margin-bottom: 5px; }
+        .review-explanation {
+            background-color: var(--explanation-bg); padding: 8px;
+            border-radius: 5px; font-size: 0.9em;
+        }
+        .review-explanation strong { color: var(--correct-green); }
+
         .hidden { display: none !important; }
 
         html, body {
           height: 100%;
           display: flex;
           justify-content: center;
+          align-items: flex-start;
+          padding-top: 40px; /* desloca o jogo um pouco para baixo */
           align-items: center;
           padding: 0;
           box-sizing: border-box;
