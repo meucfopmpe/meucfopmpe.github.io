@@ -784,7 +784,10 @@
 
         document.getElementById('start-game-button').onclick = startGame;
         document.getElementById('restart-button').onclick = startGame;
-        document.getElementById('close-review-button').onclick = () => showScreen('game-over-screen');
+        document.getElementById('close-review-button').onclick = () => {
+          document.getElementById('review-card').style.display = 'none';
+          showScreen('game-over-screen');
+        };
         document.getElementById('go-to-shop-button').onclick = () => { savePlayerData(); updateCoinDisplays(); populateShop(); showScreen('shop-screen'); };
         document.getElementById('go-to-shop-from-over-button').onclick = () => { updateCoinDisplays(); populateShop(); showScreen('shop-screen'); };
         document.getElementById('back-to-start-button').onclick = () => {
