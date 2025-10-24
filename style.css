@@ -86,18 +86,6 @@ button:hover { background-color: #fff; box-shadow: 0 0 15px #fff; }
 .admin-info-list li p { font-size: 0.9em; color: var(--sl-text-secondary); }
 .admin-info-list li a { color: var(--sl-primary); text-decoration: none; font-weight: bold; }
 .admin-info-list li a:hover { text-decoration: underline; }
-/* --- CORREÇÃO PARA TEXTO LONGO NOS LEMBRETES --- */
-#dashboard-reminders-list li {
-  white-space: normal !important;
-  word-wrap: break-word !important;
-  overflow-wrap: break-word !important;
-}
-
-#dashboard-reminders-list li span {
-  white-space: normal !important;
-  word-wrap: break-word !important;
-  overflow-wrap: break-word !important;
-}
 
 
 /* --- PÁGINA DE NOTAS --- */
@@ -299,6 +287,22 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
 #clear-completed-quests-button { width: auto; padding: 5px 15px; font-size: 0.8em; background-color: var(--sl-surface); border: 1px solid var(--sl-border); color: var(--sl-text-secondary); }
 #clear-completed-quests-button:hover { background-color: var(--sl-error); border-color: var(--sl-error); color: var(--sl-bg); }
 .edit-link-btn { width: 40px; height: 30px; font-size: 1.2em; background-color: var(--sl-bg); border: 1px solid var(--sl-border); color: var(--sl-primary); }
+#dashboard-reminders-list li {
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  overflow: hidden;
+}
+
+#dashboard-reminders-list li span {
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  display: block;
+  max-width: 100%;
+  color: var(--sl-text-primary);
+  line-height: 1.4;
+}
 
 /* --- ESTILOS PARA O AVATAR --- */
 #profile-pic-container { position: relative; width: 125px; height: 125px; margin: 0 auto 10px auto; }
