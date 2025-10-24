@@ -141,6 +141,17 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
 .ranking-info { flex-grow: 1; }
 .ranking-name { font-weight: 600; }
 .ranking-avg { font-size: 1.2em; font-weight: bold; color: var(--sl-success); }
+/* --- ESTILO PARA DESTACAR O USUÁRIO LOGADO NO RANKING --- */
+.ranking-item.current-user-highlight {
+    background-color: rgba(0, 175, 255, 0.1); /* Um brilho sutil com a cor primária */
+    border: 1px solid var(--sl-primary);
+    box-shadow: 0 0 10px var(--sl-glow);
+}
+
+.ranking-item.current-user-highlight .ranking-name {
+    color: var(--sl-primary);
+    font-weight: 700;
+}
 
 /* --- MODAL DE CONQUISTAS --- */
 #achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 20px; }
@@ -681,3 +692,104 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
   font-weight: bold;
 }
 
+/* --- ESTILIZAÇÃO PARA SELEÇÃO DE RANKING --- */
+
+/* Container para os seletores de batalhão e o botão de salvar */
+.ranking-select-container {
+  display: flex;
+  flex-wrap: wrap; /* Garante que os itens quebrem a linha em telas menores */
+  gap: 10px; /* Espaçamento entre os elementos */
+  align-items: center; /* Alinha os itens verticalmente */
+  margin-bottom: 20px; /* Margem inferior para separar do conteúdo abaixo */
+  padding: 15px; /* Espaçamento interno */
+  background-color: var(--sl-surface); /* Cor de fundo do painel */
+  border: 1px solid var(--sl-border); /* Borda sutil */
+  border-radius: 8px; /* Cantos arredondados */
+}
+
+/* Estilo para o parágrafo dentro do container */
+.ranking-select-container p {
+  margin: 0;
+  font-weight: 600;
+  color: var(--sl-text-secondary);
+}
+
+/* Estiliza os <select> para combinar com os inputs do site */
+.ranking-select-container select {
+  padding: 8px 12px;
+  background-color: var(--sl-bg);
+  border: 1px solid var(--sl-border);
+  border-radius: 4px;
+  color: var(--sl-text-primary);
+  font-family: inherit;
+  font-size: 0.9em;
+  min-width: 150px; /* Largura mínima para evitar que fiquem muito pequenos */
+  transition: all 0.3s ease;
+}
+
+/* Efeito de foco para os seletores */
+.ranking-select-container select:focus {
+  outline: none;
+  border-color: var(--sl-primary);
+  box-shadow: 0 0 15px var(--sl-glow);
+}
+
+/* Estilo para o botão "Salvar" */
+.ranking-select-container button {
+  width: auto;
+  padding: 8px 20px;
+  font-size: 0.9em;
+  background-color: var(--sl-primary); /* Cor de destaque principal */
+  color: var(--sl-bg); /* Texto escuro para contraste */
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.ranking-select-container button:hover {
+  background-color: #fff;
+  box-shadow: 0 0 15px #fff;
+}
+
+/* Mensagem de feedback (salvo com sucesso, etc) */
+#ranking-message {
+    color: var(--sl-success);
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+
+/* --- ESTILIZAÇÃO PARA BOTÕES DE ALTERNÂNCIA (GLOBAL / BATALHÕES) --- */
+
+/* Container para os botões de alternância */
+.ranking-toggle-container {
+  display: flex;
+  gap: 10px; /* Espaçamento entre os botões */
+  margin-bottom: 20px;
+}
+
+/* Estilo base para os botões de alternância */
+.ranking-toggle-container button {
+  width: auto;
+  padding: 10px 20px;
+  font-size: 1em;
+  font-weight: 600;
+  background-color: var(--sl-surface);
+  color: var(--sl-text-secondary);
+  border: 1px solid var(--sl-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Estilo do botão quando ele não está ativo, mas o mouse está sobre ele */
+.ranking-toggle-container button:not(.active):hover {
+  background-color: var(--sl-border);
+  color: var(--sl-text-primary);
+}
+
+/* Estilo para o botão que está ATIVO */
+.ranking-toggle-container button.active {
+  background-color: var(--sl-primary); /* Cor de destaque */
+  color: var(--sl-bg); /* Cor do texto para contraste */
+  border-color: var(--sl-primary);
+  box-shadow: 0 0 15px var(--sl-glow);
+}
