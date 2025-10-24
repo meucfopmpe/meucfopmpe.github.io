@@ -123,6 +123,32 @@ const PLACEHOLDER_AVATAR = 'https://i.imgur.com/xpkhft4.png'; // IMAGEM PADRÃO 
         if (!userState.achievements) userState.achievements = [];
         if (!userState.grades || Object.keys(userState.grades).length === 0) userState.grades = Object.fromEntries(subjectList.map(s => [s, 0]));
         checkAchievements();
+
+                async function loadBattalionSelections() {
+          const { data: { user } } = await sb.auth.getUser();
+          if (!user) return;
+        
+          const { data: profile } = await sb.from('profiles').select('batalhao_1, batalhao_2, batalhao_3').eq('id', user.id).single();
+          if (!profile) return;
+        
+          document.getElementById('battalion-select-1').value = profile.batalhao_1 || "";
+          document.getElementById('battalion-select-2').value = profile.batalhao_2 || "";
+          document.getElementById('battalion-select-3').value = profile.batalhao_3 || "";
+        }
+        
+        document.getElementById('save-battalions-button').addEventListener('click', async () => {
+          const b1 = document.getElementById('battalion-select-1').value;
+          const b2 = document.getElementById('battalion-select-2').value;
+          const b3 = document.getElementById('battalion-select-3').value;
+          const { data: { user } } = await sb.auth.getUser();
+        
+          await sb.from('profiles').update({
+            batalhao_1: b1, batalhao_2: b2, batalhao_3: b3
+          }).eq('id', user.id);
+        
+          alert("Batalhões atualizados com sucesso!");
+        });
+
     }
     async function saveUserData() {
         const { data: { user } } = await sb.auth.getUser();
@@ -695,6 +721,88 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if(stateChanged) saveUserData();
     }
+
+async function renderGlobalRanking() {
+  const rankingList = document.getElementById('ranking-list');
+  const { data, error } = await sb
+    .from('profiles')
+    .select('full_name, grades_average')
+    .eq('show_in_ranking', true)
+    .order('grades_average', { ascending: false })
+    .limit(50);
+
+  if (error) {
+    rankingList.innerHTML = `<p>Erro ao carregar ranking global.</p>`;
+    return;
+  }
+
+  rankingList.innerHTML = `
+    <h3>🌍 Ranking Global (Top 50)</h3>
+    <ul>
+      ${data.map((user, i) => `
+        <li>
+          <span>#${i + 1} - ${user.full_name}</span>
+          <span>${user.grades_average?.toFixed(2) || 'N/A'}</span>
+        </li>`).join('')}
+    </ul>
+  `;
+}
+
+async function renderBattalionRankings() {
+  const rankingList = document.getElementById('ranking-list');
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+
+  const { data: profile } = await sb
+    .from('profiles')
+    .select('batalhao_1, batalhao_2, batalhao_3')
+    .eq('id', user.id)
+    .single();
+
+  const battalions = [profile.batalhao_1, profile.batalhao_2, profile.batalhao_3].filter(Boolean);
+  if (battalions.length === 0) {
+    rankingList.innerHTML = `<p>Selecione seus batalhões acima para ver seus rankings.</p>`;
+    return;
+  }
+
+  rankingList.innerHTML = battalions.map(b => `<h3>🏅 Ranking do ${b}</h3>`).join("");
+
+  for (const b of battalions) {
+    const { data, error } = await sb
+      .from('profiles')
+      .select('grades_average')
+      .eq('batalhao_1', b)
+      .or(`batalhao_2.eq.${b},batalhao_3.eq.${b}`)
+      .eq('show_in_battalion_ranking', true)
+      .order('grades_average', { ascending: false })
+      .limit(50);
+
+    if (error) continue;
+
+    rankingList.innerHTML += `
+      <ul>
+        ${data.map((u, i) => `
+          <li>
+            <span>#${i + 1}</span>
+            <span>${u.grades_average?.toFixed(2) || 'N/A'}</span>
+          </li>`).join('')}
+      </ul>
+    `;
+  }
+}
+
+document.getElementById('show-global-ranking').addEventListener('click', () => {
+  document.getElementById('show-global-ranking').classList.add('active');
+  document.getElementById('show-battalion-ranking').classList.remove('active');
+  renderGlobalRanking();
+});
+
+document.getElementById('show-battalion-ranking').addEventListener('click', () => {
+  document.getElementById('show-battalion-ranking').classList.add('active');
+  document.getElementById('show-global-ranking').classList.remove('active');
+  renderBattalionRankings();
+});
+
     
     function addXp(amount) {
         if (!userState.xp) userState.xp = 0;
