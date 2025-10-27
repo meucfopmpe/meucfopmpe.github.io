@@ -1140,3 +1140,4 @@ document.addEventListener('DOMContentLoaded', () => {
         renderRanking();
     });
 });
+});
