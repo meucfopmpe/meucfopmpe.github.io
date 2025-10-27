@@ -399,6 +399,7 @@ async function fetchCourseProgressData() {
 }
 
 
+
 // Função para renderizar os gráficos de anel
 function renderProgressCharts(stats) {
     // Destrói gráficos antigos se existirem
