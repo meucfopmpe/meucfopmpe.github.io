@@ -390,13 +390,14 @@ async function updateGradesAverage(save = true) {
 
 // Função principal para buscar os dados da sua tabela `disciplines`
 async function fetchCourseProgressData() {
-    const { data, error } = await sb.from('disciplines').select('status, carga_horaria');
+    const { data, error } = await sb.from('subjects').select('name, area, course_load, status');
     if (error) {
-        console.error("Erro ao buscar progresso das disciplinas:", error);
+        console.error("Erro ao buscar progresso das matérias:", error);
         return null;
     }
     return data;
 }
+
 
 // Função para renderizar os gráficos de anel
 function renderProgressCharts(stats) {
