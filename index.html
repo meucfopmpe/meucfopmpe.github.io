@@ -140,6 +140,9 @@
                     <div id="grades-average" class="average-grade"></div>
                  </div>
                  <div id="grades-progress-counter" class="grades-progress"></div>
+                 <div style="text-align: center; margin-top: -10px; margin-bottom: 20px;">
+                    <button id="show-progress-modal-button" class="button-link">Ver Progresso do Curso</button>
+                </div>
                  <div class="chart-container">
                     <canvas id="grades-chart"></canvas>
                  </div>
@@ -291,6 +294,14 @@
             <button id="detail-modal-close" class="modal-close-button">&times;</button>
             <h2 id="detail-modal-title">Detalhes</h2>
             <div id="detail-modal-body"></div>
+        </div>
+    </div>
+    <div id="course-progress-modal" class="modal hidden">
+        <div class="modal-content">
+            <button id="course-progress-modal-close" class="modal-close-button">&times;</button>
+            <h2>Progresso Geral do Curso</h2>
+            <div id="course-progress-body" class="course-progress-body">
+                </div>
         </div>
     </div>
 
