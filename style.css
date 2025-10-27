@@ -793,3 +793,90 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
   border-color: var(--sl-primary);
   box-shadow: 0 0 15px var(--sl-glow);
 }
+
+/* --- ESTILOS PARA O MODAL DE PROGRESSO DO CURSO --- */
+
+/* Botão para abrir o modal */
+.button-link {
+    background: none;
+    border: none;
+    color: var(--sl-primary);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-family: inherit;
+    padding: 5px;
+}
+.button-link:hover {
+    color: var(--sl-text-primary);
+}
+
+/* Corpo do modal */
+.course-progress-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Duas colunas: uma para stats, outra para gráficos */
+    gap: 30px;
+    margin-top: 20px;
+    align-items: center;
+}
+
+/* Container para as estatísticas (texto) */
+.progress-stats-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.stats-card {
+    background-color: var(--sl-bg);
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 4px solid var(--sl-border);
+}
+
+.stats-card .stats-label {
+    font-size: 0.9em;
+    color: var(--sl-text-secondary);
+    display: block;
+    margin-bottom: 5px;
+}
+
+.stats-card .stats-value {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: var(--sl-text-primary);
+}
+
+.stats-card.concluidas { border-color: var(--sl-success); }
+.stats-card.em-andamento { border-color: var(--sl-primary); }
+.stats-card.nao-iniciadas { border-color: var(--sl-error); }
+
+/* Container para os gráficos */
+.progress-charts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.progress-chart-container {
+    width: 100%;
+    max-width: 220px; /* Tamanho máximo para os gráficos */
+    position: relative;
+}
+
+.chart-title {
+    text-align: center;
+    font-size: 0.9em;
+    color: var(--sl-text-secondary);
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+    .course-progress-body {
+        grid-template-columns: 1fr; /* Coluna única em telas pequenas */
+    }
+}
