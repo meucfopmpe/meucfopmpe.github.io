@@ -1050,7 +1050,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // --- Listeners de Componentes (Modais, Sidebar) ---
-    achievementsWidget.addEventListener('click', () => { renderAchievements(); achievementsModal.classList.remove('hidden'); });
+    // --- Listener para abrir o Modal de Conquistas ---
+    const achievementsWidget = document.getElementById('achievements-widget');
+    if (achievementsWidget) {
+        achievementsWidget.addEventListener('click', () => {
+            renderAchievements(); // Função que desenha as conquistas no modal
+            const achievementsModal = document.getElementById('achievements-modal');
+            if (achievementsModal) {
+                achievementsModal.classList.remove('hidden');
+            }
+        });
+    }
     achievementsModalClose.addEventListener('click', () => achievementsModal.classList.add('hidden'));
     achievementsModal.addEventListener('click', (e) => { if (e.target === achievementsModal) achievementsModal.classList.add('hidden'); });
     
