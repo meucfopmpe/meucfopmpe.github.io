@@ -971,6 +971,7 @@ function handlePageNavigation(e) {
     if (targetPageId === 'page-reminders') renderReminders();
     if (targetPageId === 'page-links') renderLinks();
     if (targetPageId === 'page-documents') renderDocuments();
+    if (targetPageId === 'page-missions') renderScheduledMissions();
 
     if (window.innerWidth <= 768) {
         sidebar.classList.remove('open');
