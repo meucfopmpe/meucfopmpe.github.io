@@ -121,6 +121,12 @@ const showBattalionRankingButton = document.getElementById(
 );
 const rankingMessage = document.getElementById("ranking-message");
 
+// Elementos do Módulo de Jogos
+const gamesList = document.getElementById('games-list');
+const gameFrameContainer = document.getElementById('game-frame-container');
+const gameFrame = document.getElementById('game-frame');
+const backToGamesButton = document.getElementById('back-to-games');
+
 // =======================================================
 // 3. DADOS ESTÁTICOS
 // =======================================================
@@ -582,6 +588,52 @@ function updateTimeProgress() {
     1
   )}%</span> do curso concluído`;
   checkAchievements("time_update", { percentage, days_left: daysLeft });
+}
+
+// =======================================================
+// FUNÇÕES DA PÁGINA DE JOGOS
+// =======================================================
+
+// Lista de jogos disponíveis
+const games = [
+    {
+        id: 'desafio-cfo',
+        title: 'Desafio CFO',
+        description: 'Teste os seus conhecimentos sobre o Estatuto e a Lei Orgânica num desafio de velocidade e precisão.',
+        url: 'game/desafio-cfo.html'
+    },
+    {
+        id: 'lpmo',
+        title: 'Quiz LPMO',
+        description: 'Um jogo de perguntas e respostas para treinar os seus conhecimentos sobre a Lei de Promoção de Oficiais.',
+        url: 'game/LPMO.html'
+    }
+];
+
+// Função para desenhar os cartões dos jogos na tela
+// Versão corrigida que abre numa nova aba
+function renderGames() {
+    if (!gamesList) return;
+    gamesList.innerHTML = ''; 
+
+    games.forEach(game => {
+        const card = document.createElement('div');
+        card.className = 'doc-card'; 
+        card.style.cursor = 'pointer';
+        
+        card.innerHTML = `
+            <div class="doc-icon">🎮</div>
+            <div class="doc-title">${game.title}</div>
+            <div class="doc-desc" style="display: block !important;">${game.description}</div>
+        `;
+        
+        // CORREÇÃO: Em vez de chamar openGame, abrimos a URL diretamente
+        card.addEventListener('click', () => {
+            window.open(game.url, '_blank');
+        });
+        
+        gamesList.appendChild(card);
+    });
 }
 
 // --- Renderização de DOCUMENTOS GLOBAIS ---
@@ -1397,6 +1449,7 @@ function handlePageNavigation(e) {
   if (targetPageId === "page-links") renderLinks();
   if (targetPageId === "page-documents") renderDocuments();
   if (targetPageId === 'page-missions') renderScheduledMissions();
+  if (targetPageId === 'page-games') renderGames();
 
   if (window.innerWidth <= 768) {
     sidebar.classList.remove("open");
@@ -1630,7 +1683,6 @@ document.addEventListener("DOMContentLoaded", () => {
         
        if (showProgressModalButton) {
             showProgressModalButton.addEventListener('click', () => {
-                console.log("✅ Botão clicado!");
                 showCourseProgress();
             });
         } else {
