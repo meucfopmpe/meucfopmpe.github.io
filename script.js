@@ -1051,19 +1051,17 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- Listeners de Componentes (Modais, Sidebar) ---
     // --- Listener para abrir o Modal de Conquistas ---
-    const achievementsWidget = document.getElementById('achievements-widget');
-    if (achievementsWidget) {
-        achievementsWidget.addEventListener('click', () => {
-            renderAchievements(); // Função que desenha as conquistas no modal
-            const achievementsModal = document.getElementById('achievements-modal');
-            if (achievementsModal) {
-                achievementsModal.classList.remove('hidden');
-            }
-        });
-    }
-    achievementsModalClose.addEventListener('click', () => achievementsModal.classList.add('hidden'));
-    achievementsModal.addEventListener('click', (e) => { if (e.target === achievementsModal) achievementsModal.classList.add('hidden'); });
-    
+    achievementsWidget.addEventListener("click", () => {
+    renderAchievements();
+    achievementsModal.classList.remove("hidden");
+  });
+  achievementsModalClose.addEventListener("click", () =>
+    achievementsModal.classList.add("hidden")
+  );
+  achievementsModal.addEventListener("click", (e) => {
+    if (e.target === achievementsModal)
+      achievementsModal.classList.add("hidden");
+  });
     hamburgerButton.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.toggle('open'); sidebarOverlay.classList.toggle('hidden'); });
     sidebarOverlay.addEventListener('click', () => { sidebar.classList.remove('open'); sidebarOverlay.classList.add('hidden'); });
 
