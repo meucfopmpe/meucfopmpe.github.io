@@ -992,19 +992,25 @@ document.addEventListener('DOMContentLoaded', () => {
             detailModalBody.textContent = label.getAttribute('title');
             detailModal.classList.remove('hidden');
         }
-                // Adicione estes listeners para o novo modal de progresso
+                        // --- Listeners para o Modal de Progresso do Curso ---
+        const showProgressModalButton = document.getElementById('show-progress-modal-button');
+        const courseProgressModal = document.getElementById('course-progress-modal');
+        const courseProgressModalClose = document.getElementById('course-progress-modal-close');
+        
         if (showProgressModalButton) {
             showProgressModalButton.addEventListener('click', showCourseProgress);
         }
-        if (courseProgressModal) {
+        
+        if (courseProgressModal && courseProgressModalClose) {
             courseProgressModalClose.addEventListener('click', () => courseProgressModal.classList.add('hidden'));
+            
             courseProgressModal.addEventListener('click', (e) => {
+                // Fecha o modal se o clique for na área externa (o fundo)
                 if (e.target === courseProgressModal) {
                     courseProgressModal.classList.add('hidden');
                 }
             });
         }
-    });
 
         // Adicione estes listeners para o novo modal de ranking
     const rankingInfoModal = document.getElementById('ranking-info-modal');
