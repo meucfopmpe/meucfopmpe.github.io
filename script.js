@@ -389,8 +389,9 @@ async function updateGradesAverage(save = true) {
 // =======================================================
 
 // Função principal para buscar os dados da sua tabela `disciplines`
+// Função principal para buscar os dados da sua tabela `subjects`
 async function fetchCourseProgressData() {
-    const { data, error } = await sb.from('subjects').select('name, area, course_load, status');
+    const { data, error } = await sb.from('subjects').select('status, course_load');
     if (error) {
         console.error("Erro ao buscar progresso das matérias:", error);
         return null;
@@ -476,14 +477,14 @@ async function showCourseProgress() {
     courseProgressModal.classList.remove('hidden');
     courseProgressBody.innerHTML = `<p>Carregando dados de progresso...</p>`;
 
-    const disciplines = await fetchCourseProgressData();
+    const subjects = await fetchCourseProgressData();
 
-    if (!disciplines) {
+    if (!subjects) {
         courseProgressBody.innerHTML = `<p style="color: var(--sl-error);">Não foi possível carregar os dados.</p>`;
         return;
     }
 
-    const totalDisciplines = disciplines.length;
+    const totalSubjects = subjects.length;
     let totalWorkload = 0;
 
     const stats = {
@@ -492,17 +493,17 @@ async function showCourseProgress() {
         nao_iniciadas: { count: 0, workload: 0 }
     };
 
-    disciplines.forEach(d => {
-        totalWorkload += d.carga_horaria;
+    subjects.forEach(d => {
+        totalWorkload += d.course_load; // CORREÇÃO AQUI
         if (d.status === 'CONCLUÍDO') {
             stats.concluidas.count++;
-            stats.concluidas.workload += d.carga_horaria;
+            stats.concluidas.workload += d.course_load; // CORREÇÃO AQUI
         } else if (d.status === 'EM ANDAMENTO') {
             stats.em_andamento.count++;
-            stats.em_andamento.workload += d.carga_horaria;
+            stats.em_andamento.workload += d.course_load; // CORREÇÃO AQUI
         } else { // NÃO INICIADO
             stats.nao_iniciadas.count++;
-            stats.nao_iniciadas.workload += d.carga_horaria;
+            stats.nao_iniciadas.workload += d.course_load; // CORREÇÃO AQUI
         }
     });
 
@@ -511,15 +512,15 @@ async function showCourseProgress() {
         <div class="progress-stats-container">
             <div class="stats-card concluidas">
                 <span class="stats-label">Disciplinas Concluídas</span>
-                <span class="stats-value">${stats.concluidas.count} / ${totalDisciplines} (${((stats.concluidas.count / totalDisciplines) * 100).toFixed(1)}%)</span>
+                <span class="stats-value">${stats.concluidas.count} / ${totalSubjects} (${((stats.concluidas.count / totalSubjects) * 100).toFixed(1)}%)</span>
             </div>
              <div class="stats-card em-andamento">
                 <span class="stats-label">Disciplinas em Andamento</span>
-                <span class="stats-value">${stats.em_andamento.count} / ${totalDisciplines} (${((stats.em_andamento.count / totalDisciplines) * 100).toFixed(1)}%)</span>
+                <span class="stats-value">${stats.em_andamento.count} / ${totalSubjects} (${((stats.em_andamento.count / totalSubjects) * 100).toFixed(1)}%)</span>
             </div>
              <div class="stats-card nao-iniciadas">
                 <span class="stats-label">Disciplinas Não Iniciadas</span>
-                <span class="stats-value">${stats.nao_iniciadas.count} / ${totalDisciplines} (${((stats.nao_iniciadas.count / totalDisciplines) * 100).toFixed(1)}%)</span>
+                <span class="stats-value">${stats.nao_iniciadas.count} / ${totalSubjects} (${((stats.nao_iniciadas.count / totalSubjects) * 100).toFixed(1)}%)</span>
             </div>
             <div class="stats-card">
                 <span class="stats-label">Carga Horária Concluída</span>
