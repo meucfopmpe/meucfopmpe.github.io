@@ -38,6 +38,13 @@ const saveGradesButton = document.getElementById('save-grades-button'), gradeSea
 const gradesProgressCounter = document.getElementById('grades-progress-counter');
 const documentsGrid = document.getElementById('documents-grid');
 const documentSearchInput = document.getElementById('document-search-input');
+// Adicione estas linhas na seção de elementos do DOM
+const showProgressModalButton = document.getElementById('show-progress-modal-button');
+const courseProgressModal = document.getElementById('course-progress-modal');
+const courseProgressModalClose = document.getElementById('course-progress-modal-close');
+const courseProgressBody = document.getElementById('course-progress-body');
+let disciplineStatusChart = null; // Para guardar a instância do gráfico
+let workloadStatusChart = null;   // Para guardar a instância do gráfico
 
 // Elementos do Ranking
 const saveBattalionsButton = document.getElementById('save-battalions-button');
@@ -375,6 +382,162 @@ async function updateGradesAverage(save = true) {
         const { data: { user } } = await sb.auth.getUser();
         if(user) await sb.from('profiles').update({ grades_average: average }).eq('id', user.id);
     }
+}
+
+// =======================================================
+// FUNÇÕES PARA O MODAL DE PROGRESSO DO CURSO
+// =======================================================
+
+// Função principal para buscar os dados da sua tabela `disciplines`
+async function fetchCourseProgressData() {
+    const { data, error } = await sb.from('disciplines').select('status, carga_horaria');
+    if (error) {
+        console.error("Erro ao buscar progresso das disciplinas:", error);
+        return null;
+    }
+    return data;
+}
+
+// Função para renderizar os gráficos de anel
+function renderProgressCharts(stats) {
+    // Destrói gráficos antigos se existirem
+    if (disciplineStatusChart) disciplineStatusChart.destroy();
+    if (workloadStatusChart) workloadStatusChart.destroy();
+
+    const chartColors = ['#33FFB5', '#00AFFF', '#FF4D4D']; // Cores para Concluído, Em Andamento, Não Iniciado
+
+    // Gráfico 1: Quantidade de Disciplinas
+    const disciplineCtx = document.getElementById('discipline-status-chart').getContext('2d');
+    disciplineStatusChart = new Chart(disciplineCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Concluídas', 'Em Andamento', 'Não Iniciadas'],
+            datasets: [{
+                data: [stats.concluidas.count, stats.em_andamento.count, stats.nao_iniciadas.count],
+                backgroundColor: chartColors,
+                borderColor: 'var(--sl-surface)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) label += ': ';
+                            label += context.raw + ' disciplinas';
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfico 2: Carga Horária
+    const workloadCtx = document.getElementById('workload-status-chart').getContext('2d');
+    workloadStatusChart = new Chart(workloadCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Concluídas', 'Em Andamento', 'Não Iniciadas'],
+            datasets: [{
+                data: [stats.concluidas.workload, stats.em_andamento.workload, stats.nao_iniciadas.workload],
+                backgroundColor: chartColors,
+                borderColor: 'var(--sl-surface)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                     callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) label += ': ';
+                            label += context.raw + ' horas';
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Função que é chamada quando o botão é clicado
+async function showCourseProgress() {
+    courseProgressModal.classList.remove('hidden');
+    courseProgressBody.innerHTML = `<p>Carregando dados de progresso...</p>`;
+
+    const disciplines = await fetchCourseProgressData();
+
+    if (!disciplines) {
+        courseProgressBody.innerHTML = `<p style="color: var(--sl-error);">Não foi possível carregar os dados.</p>`;
+        return;
+    }
+
+    const totalDisciplines = disciplines.length;
+    let totalWorkload = 0;
+
+    const stats = {
+        concluidas: { count: 0, workload: 0 },
+        em_andamento: { count: 0, workload: 0 },
+        nao_iniciadas: { count: 0, workload: 0 }
+    };
+
+    disciplines.forEach(d => {
+        totalWorkload += d.carga_horaria;
+        if (d.status === 'CONCLUÍDO') {
+            stats.concluidas.count++;
+            stats.concluidas.workload += d.carga_horaria;
+        } else if (d.status === 'EM ANDAMENTO') {
+            stats.em_andamento.count++;
+            stats.em_andamento.workload += d.carga_horaria;
+        } else { // NÃO INICIADO
+            stats.nao_iniciadas.count++;
+            stats.nao_iniciadas.workload += d.carga_horaria;
+        }
+    });
+
+    // Monta o HTML do corpo do modal
+    courseProgressBody.innerHTML = `
+        <div class="progress-stats-container">
+            <div class="stats-card concluidas">
+                <span class="stats-label">Disciplinas Concluídas</span>
+                <span class="stats-value">${stats.concluidas.count} / ${totalDisciplines} (${((stats.concluidas.count / totalDisciplines) * 100).toFixed(1)}%)</span>
+            </div>
+             <div class="stats-card em-andamento">
+                <span class="stats-label">Disciplinas em Andamento</span>
+                <span class="stats-value">${stats.em_andamento.count} / ${totalDisciplines} (${((stats.em_andamento.count / totalDisciplines) * 100).toFixed(1)}%)</span>
+            </div>
+             <div class="stats-card nao-iniciadas">
+                <span class="stats-label">Disciplinas Não Iniciadas</span>
+                <span class="stats-value">${stats.nao_iniciadas.count} / ${totalDisciplines} (${((stats.nao_iniciadas.count / totalDisciplines) * 100).toFixed(1)}%)</span>
+            </div>
+            <div class="stats-card">
+                <span class="stats-label">Carga Horária Concluída</span>
+                <span class="stats-value" style="color: var(--sl-success)">${stats.concluidas.workload} / ${totalWorkload} horas</span>
+            </div>
+        </div>
+        <div class="progress-charts-container">
+            <div class="progress-chart-container">
+                <div class="chart-title">Quantidade de Disciplinas</div>
+                <canvas id="discipline-status-chart"></canvas>
+            </div>
+            <div class="progress-chart-container">
+                <div class="chart-title">Carga Horária</div>
+                <canvas id="workload-status-chart"></canvas>
+            </div>
+        </div>
+    `;
+
+    // Renderiza os gráficos com os dados calculados
+    renderProgressCharts(stats);
 }
 
 function renderGradesChart() {
@@ -828,6 +991,18 @@ document.addEventListener('DOMContentLoaded', () => {
             detailModalTitle.textContent = "Nome da Matéria";
             detailModalBody.textContent = label.getAttribute('title');
             detailModal.classList.remove('hidden');
+        }
+                // Adicione estes listeners para o novo modal de progresso
+        if (showProgressModalButton) {
+            showProgressModalButton.addEventListener('click', showCourseProgress);
+        }
+        if (courseProgressModal) {
+            courseProgressModalClose.addEventListener('click', () => courseProgressModal.classList.add('hidden'));
+            courseProgressModal.addEventListener('click', (e) => {
+                if (e.target === courseProgressModal) {
+                    courseProgressModal.classList.add('hidden');
+                }
+            });
         }
     });
 
