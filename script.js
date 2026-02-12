@@ -203,7 +203,7 @@ const achievementsData = {
     name: "MAPOM",
     icon: "🗺️",
     description: "Concluir o Módulo de Adaptação Policial-Militar.",
-    condition: () => false,
+    condition: () => true,
   },
   ESPADIM: {
     name: "Espadim",
