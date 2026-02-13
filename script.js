@@ -199,7 +199,7 @@ const achievementsData = {
     description: "Fazer parte da turma de Aspirantes de 2026.",
     condition: () => true,
   },
-  MAPOM URBANO: {
+  MAPOM: {
     name: "MAPOM",
     icon: "🗺️",
     description: "Concluir o Módulo de Adaptação Policial-Militar.",
