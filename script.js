@@ -209,7 +209,7 @@ const achievementsData = {
     name: "Espadim",
     icon: "🗡️",
     description: "Receber o Espadim Tiradentes.",
-    condition: () => false,
+    condition: () => true,
   },
   PROGRESS_50: {
     name: "50% do Curso",
