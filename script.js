@@ -179,8 +179,6 @@ const subjectList = [
   "Tiro Policial",
   "Tiro Defensivo (Método Giraldi)",
   "Ações Básicas de Apoio Aéreo",
-  "Manobras Acadêmicas I",
-  "Manobras Acadêmicas II",
   "Metodologia da Pesquisa Científica",
   "Teoria e Prática do Ensino",
   "Trabalho de Conclusão de Curso",
