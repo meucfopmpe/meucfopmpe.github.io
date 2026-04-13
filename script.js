@@ -721,29 +721,39 @@ function handleGradeChange(e) {
 }
 
 async function updateGradesAverage(save = true) {
+  // 1. Filtra apenas as notas que são números e maiores que zero
   const grades = Object.values(userState.grades).filter(
     (g) => typeof g === "number" && g > 0
   );
+
   let average = 0;
   const filledCount = grades.length;
-  const totalCount = subjectList.length;
+
+  // 2. MODIFICAÇÃO AQUI: Definimos quais matérias entram no cálculo da média
+  // Removemos o MAPOM ou outras que não possuem nota numérica da contagem total
+  const subjectsToCount = subjectList.filter(s => s !== "MAPOM" && s !== "Módulo de Adaptação Policial-Militar");
+  const totalCount = subjectsToCount.length;
+
   if (filledCount > 0) {
     average = grades.reduce((sum, g) => sum + g, 0) / filledCount;
   }
-  gradesProgressCounter.innerHTML = `<span>${filledCount}</span> / ${totalCount} matérias preenchidas (${(
-    (filledCount / totalCount) *
-    100
-  ).toFixed(1)}%)`;
+
+  // Atualiza o contador na tela
+  if (gradesProgressCounter) {
+    gradesProgressCounter.innerHTML = `<span>${filledCount}</span> / ${totalCount} matérias com nota (${(
+      (filledCount / totalCount) * 100
+    ).toFixed(1)}%)`;
+  }
+
   avgGradeEl.innerHTML = `MÉDIA GERAL: <span>${
-    average > 0 ? average.toFixed(2) : "N/A"
+    average > 0 ? average.toFixed(2) : "0.00"
   }</span>`;
+
   checkAchievements("avg_update", average);
 
   if (save) {
     await saveUserData();
-    const {
-      data: { user },
-    } = await sb.auth.getUser();
+    const { data: { user } } = await sb.auth.getUser();
     if (user)
       await sb
         .from("profiles")
